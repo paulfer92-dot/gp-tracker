@@ -1,3 +1,13 @@
+I've added a "Reset Account" feature. To keep the interface clean and "app-like," I’ve hidden the reset trigger inside the Chatbox.
+
+How to Reset:
+Tap the Chatbox area.
+
+A confirmation prompt will appear asking if you're sure.
+
+If you confirm, it clears your localStorage, wipes your equipment, and resets your balance to $0.
+
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,42 +27,14 @@
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; }
         
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        html, body { 
-            overflow: hidden; 
-            height: 100%; 
-            width: 100%; 
-            position: fixed; 
-            background-color: #000; 
-        }
+        html, body { overflow: hidden; height: 100%; width: 100%; position: fixed; background-color: #000; }
+        body { color: var(--osrs-orange); display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0; font-family: 'RuneScape UF', sans-serif; user-select: none; }
 
-        body { 
-            color: var(--osrs-orange); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            margin: 0; 
-            font-family: 'RuneScape UF', sans-serif; 
-            user-select: none; 
-        }
-
-        .app-shell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background: #1a1712;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            border: 1px solid #333;
-        }
-
+        .app-shell { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #1a1712; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.8); border: 1px solid #333; }
         .combat-level { font-size: 26px; margin-bottom: 5px; color: var(--osrs-yellow); text-shadow: 2px 2px #000; }
         .tier-label { font-size: 14px; color: #888; margin-bottom: 15px; text-transform: uppercase; }
-
         .game-container { display: flex; gap: 12px; align-items: flex-start; }
 
-        /* Equipment Window */
         .equip-tab { width: 170px; height: 220px; background: var(--inv-bg); border: 3px solid #3e3529; background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png'); background-size: contain; background-repeat: no-repeat; position: relative; }
         .e-slot { position: absolute; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; background-repeat: no-repeat; background-position: center; background-size: 24px; image-rendering: pixelated; }
         #head-slot { top: 10px; left: 68px; background-image: url('https://oldschool.runescape.wiki/images/Head_slot.png'); }
@@ -63,17 +45,15 @@
         #legs-slot { top: 96px; left: 68px; background-image: url('https://oldschool.runescape.wiki/images/Legs_slot.png'); }
         #boots-slot { top: 132px; left: 68px; background-image: url('https://oldschool.runescape.wiki/images/Feet_slot.png'); }
 
-        /* Inventory */
         .inventory-tab { width: 180px; background-color: var(--inv-bg); border: 3px solid #3e3529; padding: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
         .slot { width: 38px; height: 34px; background: rgba(0, 0, 0, 0.2); border-radius: 2px; display: flex; justify-content: center; align-items: center; position: relative; box-shadow: inset 1px 1px 2px #000; }
         .item-icon { width: 30px; height: 30px; image-rendering: pixelated; }
         .stack-amount { position: absolute; top: -2px; left: 1px; font-size: 14px; text-shadow: 1px 1px 0px #000; z-index: 3; }
 
-        /* Chat */
-        .chat-container { width: 362px; height: 75px; background-color: #726451; border: 3px solid #3e3529; margin-top: 15px; padding: 5px 10px; overflow: hidden; border-radius: 4px; position: relative; }
+        .chat-container { width: 362px; height: 75px; background-color: #726451; border: 3px solid #3e3529; margin-top: 15px; padding: 5px 10px; overflow: hidden; border-radius: 4px; cursor: pointer; }
+        .chat-container:active { background-color: #5d5342; }
         .chat-line { color: #000; font-size: 16px; line-height: 1.2; font-weight: bold; }
 
-        /* Input area */
         .settings { margin-top: 20px; display: flex; gap: 8px; width: 100%; justify-content: center; }
         input { background: #000; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; width: 60%; font-family: 'RuneScape UF'; font-size: 18px; text-align: center; outline: none; }
         button { background: #5d5342; color: #fff; border: 1px solid #000; padding: 10px 20px; font-family: 'RuneScape UF'; border-radius: 8px; font-size: 16px; text-transform: uppercase; cursor: pointer; }
@@ -88,11 +68,9 @@
     <div class="tier-label" id="tier-name">Tier 1: Early Game</div>
 
     <div class="game-container">
-        <div class="equip-tab" id="equip-window">
+        <div class="equip-tab">
             <div id="head-slot" class="e-slot" onclick="unequip('head')"></div>
-            <div id="cape-slot" class="e-slot">
-                <img src="https://oldschool.runescape.wiki/images/Fire_cape.png" class="item-icon">
-            </div>
+            <div id="cape-slot" class="e-slot"><img src="https://oldschool.runescape.wiki/images/Fire_cape.png" class="item-icon"></div>
             <div id="body-slot" class="e-slot" onclick="unequip('body')"></div>
             <div id="weapon-slot" class="e-slot" onclick="unequip('weapon')"></div>
             <div id="shield-slot" class="e-slot" onclick="unequip('shield')"></div>
@@ -106,14 +84,12 @@
                 <span id="amount-text" class="stack-amount yellow">0</span>
             </div>
             <script>
-                for(let i=1; i<28; i++) {
-                    document.write(`<div class="slot" id="slot-${i}" onclick="handleInvClick(${i})"></div>`);
-                }
+                for(let i=1; i<28; i++) document.write(`<div class="slot" id="slot-${i}" onclick="handleInvClick(${i})"></div>`);
             </script>
         </div>
     </div>
 
-    <div class="chat-container" id="chatbox"></div>
+    <div class="chat-container" id="chatbox" onclick="confirmReset()"></div>
 
     <div class="settings">
         <input type="number" id="balance-input" inputmode="numeric" placeholder="GP Amount...">
@@ -122,7 +98,6 @@
 </div>
 
 <script>
-    // Logic remains identical to previous version, ensuring stability and correct reward unlocks.
     const amountDisplay = document.getElementById('amount-text');
     const goldIcon = document.getElementById('gold-icon');
     const inputField = document.getElementById('balance-input');
@@ -161,7 +136,7 @@
         { name: 'Obsidian Shield', img: 'https://oldschool.runescape.wiki/images/Toktz-ket-xil.png', type: 'shield' }
     ];
 
-    let equipped = { head: null, body: null, weapon: null, shield: null, legs: null, boots: null };
+    let equipped = JSON.parse(localStorage.getItem('equipped')) || { head: null, body: null, weapon: null, shield: null, legs: null, boots: null };
 
     function addChatMessage(text) {
         const line = document.createElement('div');
@@ -171,11 +146,21 @@
         if (chatbox.childNodes.length > 4) chatbox.removeChild(chatbox.firstChild);
     }
 
+    function confirmReset() {
+        if (confirm("Reset account and clear all savings?")) {
+            localStorage.clear();
+            equipped = { head: null, body: null, weapon: null, shield: null, legs: null, boots: null };
+            inputField.value = "";
+            chatbox.innerHTML = "";
+            addChatMessage("Account has been reset.");
+            updateDisplay(0);
+        }
+    }
+
     function updateDisplay(dollars) {
         const gpValue = dollars * 1000;
         const isTier2 = dollars > 500;
         
-        // 10M Green Logic
         amountDisplay.innerText = gpValue >= 10000000 ? Math.floor(gpValue/1000000) + 'M' : (gpValue >= 100000 ? Math.floor(gpValue/1000) + 'K' : gpValue);
         amountDisplay.className = `stack-amount ${gpValue >= 10000000 ? 'green' : (gpValue >= 100000 ? 'white' : 'yellow')}`;
         
@@ -194,9 +179,21 @@
             } else { slot.innerHTML = ''; }
         }
 
+        for (let type in equipped) {
+            const eSlot = document.getElementById(`${type}-slot`);
+            if (equipped[type]) {
+                eSlot.innerHTML = `<img src="${equipped[type].img}" class="item-icon">`;
+                eSlot.style.backgroundImage = 'none';
+            } else {
+                eSlot.innerHTML = '';
+                eSlot.style.backgroundImage = `url('${ghostIcons[type]}')`;
+            }
+        }
+
         document.getElementById('tier-name').innerText = isTier2 ? "Tier 2: End Game" : "Tier 1: Early/Med Game";
         cbDisplay.innerText = 3 + (numUnlocks * 2);
         localStorage.setItem('savingsBalance', dollars);
+        localStorage.setItem('equipped', JSON.stringify(equipped));
     }
 
     function handleInvClick(i) {
@@ -205,9 +202,6 @@
         if (i > numUnlocks || dollars > 500) return;
         const item = tier1Items[i-1];
         equipped[item.type] = item;
-        const eSlot = document.getElementById(`${item.type}-slot`);
-        eSlot.innerHTML = `<img src="${item.img}" class="item-icon">`;
-        eSlot.style.backgroundImage = 'none';
         addChatMessage(`You equip: ${item.name}`);
         new Audio('https://oldschool.runescape.wiki/images/Equipment_shout.wav').play();
         updateDisplay(dollars);
@@ -217,21 +211,25 @@
         const item = equipped[type];
         if (!item) return;
         equipped[type] = null;
-        const eSlot = document.getElementById(`${type}-slot`);
-        eSlot.innerHTML = '';
-        eSlot.style.backgroundImage = `url('${ghostIcons[type]}')`;
         addChatMessage(`You unequip: ${item.name}`);
         updateDisplay(parseInt(localStorage.getItem('savingsBalance')));
     }
 
     function updateBalance() {
-        updateDisplay(parseInt(inputField.value) || 0);
+        const val = parseInt(inputField.value) || 0;
+        updateDisplay(val);
         new Audio('https://oldschool.runescape.wiki/images/Level_up_jingle.wav').play();
         inputField.blur();
     }
 
-    const saved = localStorage.getItem('savingsBalance');
-    if (saved) { inputField.value = saved; updateDisplay(parseInt(saved)); } else { updateDisplay(0); }
+    const savedBalance = localStorage.getItem('savingsBalance');
+    if (savedBalance) {
+        inputField.value = savedBalance;
+        updateDisplay(parseInt(savedBalance));
+    } else {
+        updateDisplay(0);
+        addChatMessage("Welcome to OSRS Savings.");
+    }
 </script>
 </body>
 </html>
