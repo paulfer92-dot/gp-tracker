@@ -5,45 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --o: #ff981f; --y: #ffff00; }
+        :root { --o: #ff981f; --y: #ffff00; --bg: #1a1712; }
         * { box-sizing: border-box; touch-action: manipulation; }
+        
         body { 
             margin: 0; background: #000; color: #fff; 
             font-family: 'RuneScape UF', sans-serif; 
-            height: 100dvh; overflow: hidden;
+            height: 100dvh; display: flex; overflow: hidden;
         }
-        /* FIXED TOP NAV - Cannot be hidden by Safari */
+
+        /* SIDEBAR NAVIGATION */
         nav { 
-            display: flex; height: 60px; background: #111; 
-            border-bottom: 2px solid var(--o); position: fixed; top: 0; width: 100%; z-index: 999;
+            width: 80px; background: #111; 
+            border-right: 2px solid var(--o);
+            display: flex; flex-direction: column;
+            height: 100%; z-index: 999;
         }
         nav button { 
             flex: 1; background: #3e3529; color: #fff; border: 1px solid #000; 
-            font-family: 'RuneScape UF'; font-size: 18px;
+            font-family: 'RuneScape UF'; font-size: 16px; cursor: pointer;
+            writing-mode: vertical-rl; transform: rotate(180deg); /* Vertical text for style */
+            text-align: center;
         }
-        nav button.active { background: var(--o); color: #000; }
+        nav button.active { background: var(--o); color: #000; font-weight: bold; }
 
-        /* CONTENT AREA */
-        main { margin-top: 65px; height: calc(100dvh - 65px); overflow-y: auto; padding: 10px; }
-        .input-box { display: flex; gap: 5px; margin-bottom: 10px; }
-        input { flex: 1; padding: 12px; background: #1a1712; color: #0f0; border: 1px solid #444; font-size: 16px; }
-        .add-btn { background: #006400; color: #fff; border: none; padding: 0 20px; font-family: 'RuneScape UF'; }
+        /* MAIN CONTENT AREA */
+        main { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; background: var(--bg); }
+        
+        .input-box { display: flex; padding: 10px; gap: 5px; background: #222; border-bottom: 1px solid #444; }
+        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; border-radius: 4px; }
+        .add-btn { background: #006400; color: #fff; border: none; padding: 0 15px; font-family: 'RuneScape UF'; border-radius: 4px; }
+
+        .pane { display: none; padding: 10px; flex: 1; }
+        .pane.active { display: block; }
 
         .inv { 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
-            background: #4e4435; padding: 8px; border: 3px solid #3e3529; max-width: 280px; margin: 0 auto;
+            background: #4e4435; padding: 8px; border: 3px solid #3e3529; 
+            max-width: 260px; margin: 0 auto;
         }
         .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
-        .item { width: 80%; height: 80%; object-fit: contain; }
+        .item { width: 85%; height: 85%; object-fit: contain; }
 
-        .pane { display: none; }
-        .pane.active { display: block; }
-        .chat { background: #726451; padding: 8px; margin-top: 10px; font-size: 14px; border: 2px solid #3e3529; height: 100px; overflow-y: auto; }
+        .chat { background: #726451; padding: 8px; margin-top: 15px; font-size: 14px; border: 2px solid #3e3529; height: 120px; overflow-y: auto; color: #fff; }
+        
+        /* Stats Styling */
+        .stat-row { background: #2a241c; padding: 10px; border: 1px solid var(--o); margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<nav>
+<nav id="sidebar">
     <button class="active" onclick="tab('c', this)">COMBAT</button>
     <button onclick="tab('s', this)">SHOP</button>
     <button onclick="tab('x', this)">STATS</button>
@@ -57,98 +69,20 @@
 
     <div id="c" class="pane active">
         <div class="inv" id="g"></div>
-        <div class="chat" id="l">V50: Full Complete Build.</div>
+        <div class="chat" id="l">V51: Side-Nav Sidebar Active.</div>
     </div>
 
     <div id="s" class="pane">
-        <h2 style="color:var(--y); text-align:center;">SHOP REWARDS</h2>
-        <p>Armor Unlocks: $20 (x4), $40 (x4), then $70</p>
-        <p>Weapon Unlocks: $25 (Constant)</p>
+        <div class="stat-row" style="text-align:center">
+            <h2 style="color:var(--y); margin:0;">AUTO-SHOP</h2>
+            <p>Armor: $20 / $40 / $70</p>
+            <p>Weapons: $25 Flat</p>
+        </div>
     </div>
 
     <div id="x" class="pane">
-        <div style="background:#222; padding:15px; border:1px solid var(--o);">
-            <p>Armor Index: <span id="ai">0</span></p>
-            <p>Weapon Index: <span id="wi">0</span></p>
-            <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET GAME</button>
+        <div class="stat-row">
+            <p>Armor Unlocks: <span id="ai">0</span></p>
+            <p>Weapon Unlocks: <span id="wi">0</span></p>
+            <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; margin-top:10px;">WIPE SAVE</button>
         </div>
-    </div>
-</main>
-
-<script>
-    let state = { a:0, w:0, ai:0, wi:0, i:[] };
-
-    const ARMOR = [
-        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
-        { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
-        { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
-        { n: 'Dragon Platelegs', u: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' }
-    ];
-
-    const WEPS = [
-        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
-        { n: 'Abyssal Whip', u: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' }
-    ];
-
-    function getPrice() {
-        if (state.ai < 4) return 20;
-        if (state.ai < 8) return 40;
-        return 70;
-    }
-
-    function add() {
-        let v = parseInt(document.getElementById('val').value) || 0;
-        if (v <= 0) return;
-        state.a += v; state.w += v;
-
-        let ap = getPrice();
-        while (state.ai < ARMOR.length && state.a >= ap) {
-            state.i.push(ARMOR[state.ai]);
-            log("Unlocked: " + ARMOR[state.ai].n, "yellow");
-            state.a -= ap; state.ai++; ap = getPrice();
-        }
-        while (state.wi < WEPS.length && state.w >= 25) {
-            state.i.push(WEPS[state.wi]);
-            log("Unlocked: " + WEPS[state.wi].n, "#0f0");
-            state.w -= 25; state.wi++;
-        }
-        document.getElementById('val').value = '';
-        save(); draw();
-    }
-
-    function draw() {
-        document.getElementById('ai').innerText = state.ai;
-        document.getElementById('wi').innerText = state.wi;
-        const g = document.getElementById('g'); g.innerHTML = '';
-        for(let j=0; j<28; j++) {
-            const s = document.createElement('div'); s.className = 'slot';
-            if(state.i[j]) s.innerHTML = `<img src="${state.i[j].u}" class="item">`;
-            g.appendChild(s);
-        }
-    }
-
-    function tab(id, btn) {
-        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-    }
-
-    function log(m, c) { 
-        const l = document.getElementById('l'); 
-        l.innerHTML += `<div style="color:${c}">> ${m}</div>`; 
-        l.scrollTop = l.scrollHeight; 
-    }
-
-    function save() { localStorage.setItem('OSRS_V50', JSON.stringify(state)); }
-    function load() { 
-        const s = localStorage.getItem('OSRS_V50'); 
-        if(s) state = JSON.parse(s); 
-    }
-
-    load(); draw();
-</script>
-</body>
-</html>
