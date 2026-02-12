@@ -2,231 +2,152 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSRS V54 - Linear Rehaul</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>OSRS Hub V55</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; }
+        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg: #1a1712; }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; touch-action: manipulation; }
         
         body { 
             margin: 0; background: #000; color: #fff; 
             font-family: 'RuneScape UF', sans-serif; 
-            overflow-x: hidden;
+            height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* FIXED NAV HEADER */
-        .nav-container {
-            position: sticky; top: 0; z-index: 1000;
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            height: 60px; background: #000; border-bottom: 3px solid var(--osrs-orange);
-        }
-        .nav-tab {
-            background: #3e3529; color: #fff; border: 1px solid #111;
-            font-size: 18px; font-family: 'RuneScape UF'; cursor: pointer;
-            pointer-events: auto;
-        }
-        .nav-tab.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
+        /* HEADER & INPUT */
+        header { background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-orange); z-index: 10; }
+        .input-row { display: flex; gap: 8px; }
+        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #666; font-size: 16px; border-radius: 4px; }
+        .add-btn { background: #006400; color: #fff; border: none; padding: 0 15px; border-radius: 4px; font-family: 'RuneScape UF'; }
 
-        /* SCROLLABLE MAIN BODY */
-        .main-content {
-            padding: 15px; max-width: 450px; margin: 0 auto;
-            background: var(--bg-main); min-height: 100vh;
-            padding-bottom: 150px; /* Massive Safari Buffer */
-        }
+        /* GAME AREA */
+        main { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow-y: auto; padding: 10px; }
 
-        .input-card {
-            background: #222; padding: 15px; border-radius: 8px;
-            border: 1px solid #444; margin-bottom: 15px;
+        /* EQUIPMENT SCREEN (Mini) */
+        .equip-area {
+            background: url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center;
+            background-size: contain; height: 180px; width: 100%; position: relative; margin-bottom: 10px;
         }
-        .input-group { display: flex; gap: 10px; }
-        input { flex: 1; padding: 15px; background: #000; color: #0f0; border: 1px solid #666; font-size: 18px; }
-        .add-btn { background: #006400; border: none; color: #fff; padding: 0 20px; font-family: 'RuneScape UF'; font-size: 18px; border-radius: 4px; }
-
-        .stat-banner {
-            display: flex; justify-content: space-between; font-size: 16px;
-            color: var(--osrs-yellow); margin-bottom: 15px; padding: 5px;
+        .equip-slot {
+            position: absolute; width: 34px; height: 34px; background: rgba(0,0,0,0.4);
+            border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center;
         }
 
         /* INVENTORY GRID */
-        .grid-container {
-            background: #4e4435; border: 4px solid #3e3529; padding: 10px;
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-            border-radius: 4px;
-        }
-        .slot {
-            aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 1px solid #3e3529;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .inv-section { background: #4e4435; border: 3px solid #3e3529; padding: 8px; width: 260px; margin: 0 auto; }
+        .inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
         .item-img { width: 85%; height: 85%; object-fit: contain; }
 
-        .pane { display: none; }
-        .pane.active { display: block; }
-
-        .log-box {
-            background: #000; padding: 10px; border: 1px solid #3e3529;
-            height: 120px; overflow-y: auto; font-family: monospace; font-size: 13px; color: #0f0; margin-top: 15px;
-        }
+        .chat-log { background: #000; border: 1px solid #3e3529; height: 80px; margin-top: 10px; overflow-y: auto; padding: 5px; font-size: 13px; color: #0f0; font-family: monospace; }
+        
+        .footer-nav { display: flex; justify-content: space-around; padding: 10px; background: #111; border-top: 1px solid var(--osrs-orange); }
+        .reset-btn { color: red; background: none; border: 1px solid red; padding: 5px 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="nav-container">
-    <button class="nav-tab active" onclick="switchTab('inv', this)">COMBAT</button>
-    <button class="nav-tab" onclick="switchTab('bank', this)">BANK</button>
-    <button class="nav-tab" onclick="switchTab('stats', this)">STATS</button>
-</div>
+<header>
+    <div class="input-row">
+        <input type="number" id="gold-val" placeholder="Deposit $">
+        <button class="add-btn" onclick="deposit()">ADD</button>
+    </div>
+    <div style="font-size:14px; color:var(--osrs-yellow); margin-top:5px; text-align:center;">
+        Next Armor Unlock: $<span id="cost-display">20</span>
+    </div>
+</header>
 
-<div class="main-content">
-    
-    <div class="input-card">
-        <div class="input-group">
-            <input type="number" id="gold-input" placeholder="Deposit $">
-            <button class="add-btn" onclick="handleDeposit()">ADD</button>
-        </div>
-        <div class="stat-banner">
-            <span>Next Arm: $<span id="next-arm-cost">20</span></span>
-            <span>Next Wep: $25</span>
-        </div>
+<main>
+    <div class="equip-area" id="equip-screen">
+        <div class="equip-slot" style="top: 10%; left: 45%;" id="slot-head"></div>
+        <div class="equip-slot" style="top: 32%; left: 45%;" id="slot-body"></div>
+        <div class="equip-slot" style="top: 54%; left: 45%;" id="slot-legs"></div>
+        <div class="equip-slot" style="top: 32%; left: 28%;" id="slot-weapon"></div>
+        <div class="equip-slot" style="top: 32%; left: 62%;" id="slot-shield"></div>
     </div>
 
-    <div id="view-inv" class="pane active">
-        <div class="grid-container" id="inventory-grid"></div>
-        <div class="log-box" id="system-log">System: V54 Rehaul Ready.</div>
+    <div class="inv-section">
+        <div class="inv-grid" id="inv-grid"></div>
     </div>
 
-    <div id="view-bank" class="pane">
-        <h2 style="color:var(--osrs-orange); text-align:center;">Collection Log</h2>
-        <div class="grid-container" id="bank-grid"></div>
-    </div>
+    <div class="chat-log" id="log">System: V55 All-In-One Rebuild Online.</div>
+</main>
 
-    <div id="view-stats" class="pane">
-        <div style="background:#222; padding:20px; border:1px solid var(--osrs-orange);">
-            <p>Total Armor Unlocks: <span id="stat-arm-total">0</span></p>
-            <p>Total Weapon Unlocks: <span id="stat-wep-total">0</span></p>
-            <hr>
-            <button onclick="clearSave()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET PROGRESS</button>
-        </div>
-    </div>
-
-</div>
+<footer class="footer-nav">
+    <button class="reset-btn" onclick="wipe()">RESET ALL</button>
+    <div style="font-size:12px; color:#888;">iPhone Air Compatibility Mode</div>
+</footer>
 
 <script>
-    let state = { armGold: 0, wepGold: 0, armIdx: 0, wepIdx: 0, inv: [], bank: [] };
+    let d = { a:0, w:0, ai:0, wi:0, inv:[] };
 
-    const REWARDS_ARMOR = [
-        { name: 'Rune Helm', url: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
-        { name: 'Rune Platebody', url: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
-        { name: 'Rune Kiteshield', url: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { name: 'Rune Platelegs', url: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
-        { name: 'Dragon Platelegs', url: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' },
-        { name: 'Dragon Platebody', url: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png' },
-        { name: 'Dragon Full Helm', url: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png' },
-        { name: 'Bandos Chestplate', url: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png' }
+    const ARMOR = [
+        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', s: 'head' },
+        { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', s: 'body' },
+        { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', s: 'shield' },
+        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', s: 'legs' }
     ];
 
-    const REWARDS_WEP = [
-        { name: 'Rune Scimitar', url: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { name: 'Dragon Scimitar', url: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
-        { name: 'Abyssal Whip', url: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' },
-        { name: 'Dragon Dagger', url: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png' }
+    const WEPS = [
+        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', s: 'weapon' },
+        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', s: 'weapon' }
     ];
 
-    function calculateArmCost() {
-        if (state.armIdx < 4) return 20;
-        if (state.armIdx < 8) return 40;
-        return 70;
-    }
+    function getCost() { return d.ai < 4 ? 20 : d.ai < 8 ? 40 : 70; }
 
-    function handleDeposit() {
-        const input = document.getElementById('gold-input');
-        const val = parseInt(input.value) || 0;
-        if (val <= 0) return;
+    function deposit() {
+        let v = parseInt(document.getElementById('gold-val').value) || 0;
+        if (v <= 0) return;
+        d.a += v; d.w += v;
 
-        state.armGold += val;
-        state.wepGold += val;
-
-        // Armor Logic
-        let currentCost = calculateArmCost();
-        while (state.armIdx < REWARDS_ARMOR.length && state.armGold >= currentCost) {
-            let item = REWARDS_ARMOR[state.armIdx];
-            addItem(item);
-            logMsg(`UNLOCKED: ${item.name} ($${currentCost})`);
-            state.armGold -= currentCost;
-            state.armIdx++;
-            currentCost = calculateArmCost();
+        let ac = getCost();
+        while (d.ai < ARMOR.length && d.a >= ac) {
+            let item = ARMOR[d.ai];
+            d.inv.push(item);
+            msg(`Unlocked: ${item.n}`);
+            // Auto-equip logic
+            document.getElementById('slot-' + item.s).innerHTML = `<img src="${item.u}" style="width:100%">`;
+            d.a -= ac; d.ai++; ac = getCost();
         }
 
-        // Weapon Logic
-        while (state.wepIdx < REWARDS_WEP.length && state.wepGold >= 25) {
-            let item = REWARDS_WEP[state.wepIdx];
-            addItem(item);
-            logMsg(`UNLOCKED: ${item.name} ($25)`);
-            state.wepGold -= 25;
-            state.wepIdx++;
+        while (d.wi < WEPS.length && d.w >= 25) {
+            let item = WEPS[d.wi];
+            d.inv.push(item);
+            msg(`Unlocked: ${item.n}`);
+            document.getElementById('slot-weapon').innerHTML = `<img src="${item.u}" style="width:100%">`;
+            d.w -= 25; d.wi++;
         }
 
-        input.value = '';
-        updateUI();
-        saveGame();
+        document.getElementById('gold-val').value = '';
+        save(); draw();
     }
 
-    function addItem(item) {
-        if (state.inv.length < 28) {
-            state.inv.push(item);
-        } else {
-            state.bank.push(item);
+    function draw() {
+        document.getElementById('cost-display').innerText = getCost();
+        const g = document.getElementById('inv-grid');
+        g.innerHTML = '';
+        for(let i=0; i<28; i++) {
+            const s = document.createElement('div'); s.className = 'slot';
+            if(d.inv[i]) s.innerHTML = `<img src="${d.inv[i].u}" class="item-img">`;
+            g.appendChild(s);
         }
     }
 
-    function updateUI() {
-        document.getElementById('next-arm-cost').innerText = calculateArmCost();
-        document.getElementById('stat-arm-total').innerText = state.armIdx;
-        document.getElementById('stat-wep-total').innerText = state.wepIdx;
-
-        const invGrid = document.getElementById('inventory-grid');
-        invGrid.innerHTML = '';
-        for (let i = 0; i < 28; i++) {
-            const slot = document.createElement('div');
-            slot.className = 'slot';
-            if (state.inv[i]) {
-                slot.innerHTML = `<img src="${state.inv[i].url}" class="item-img">`;
-            }
-            invGrid.appendChild(slot);
-        }
-
-        const bankGrid = document.getElementById('bank-grid');
-        bankGrid.innerHTML = '';
-        state.bank.forEach(item => {
-            const slot = document.createElement('div');
-            slot.className = 'slot';
-            slot.innerHTML = `<img src="${item.url}" class="item-img">`;
-            bankGrid.appendChild(slot);
-        });
+    function msg(m) {
+        const l = document.getElementById('log');
+        l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
     }
 
-    function switchTab(tabId, el) {
-        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('view-' + tabId).classList.add('active');
-        el.classList.add('active');
+    function save() { localStorage.setItem('OSRS_V55', JSON.stringify(d)); }
+    function load() { 
+        const s = localStorage.getItem('OSRS_V55'); 
+        if(s) d = JSON.parse(s); 
     }
+    function wipe() { localStorage.removeItem('OSRS_V55'); location.reload(); }
 
-    function logMsg(m) {
-        const log = document.getElementById('system-log');
-        log.innerHTML = `<div>> ${m}</div>` + log.innerHTML;
-    }
-
-    function saveGame() { localStorage.setItem('OSRS_AIR_V54', JSON.stringify(state)); }
-    function loadGame() {
-        const data = localStorage.getItem('OSRS_AIR_V54');
-        if (data) state = JSON.parse(data);
-    }
-    function clearSave() { localStorage.removeItem('OSRS_AIR_V54'); location.reload(); }
-
-    loadGame();
-    updateUI();
+    load(); draw();
 </script>
 </body>
 </html>
