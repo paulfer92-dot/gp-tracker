@@ -11,94 +11,46 @@
             margin: 0; background: #000; color: #fff; 
             font-family: 'RuneScape UF', sans-serif; 
             display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+            align-items: center;
         }
 
         /* HEADER */
-        .top-bar { background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; }
-        input { padding: 8px; background: #000; color: #0f0; border: 1px solid #555; width: 80px; }
-        button.add-btn { background: #006400; color: #fff; border: 1px solid #000; padding: 8px 15px; cursor: pointer; }
+        .top-bar { width: 100%; background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; }
+        input { padding: 8px; background: #000; color: #0f0; border: 1px solid #555; width: 80px; font-size: 16px; }
+        button.add-btn { background: #006400; color: #fff; border: 1px solid #000; padding: 8px 15px; cursor: pointer; font-family: 'RuneScape UF'; }
 
-        /* EQUIPMENT SCREEN */
-        .equip-wrapper {
+        /* EQUIPMENT BOX (OSRS EXACT RATIO) */
+        .equip-window {
             background: var(--osrs-panel); border: 3px solid var(--osrs-border);
-            width: 200px; height: 240px; margin: 10px auto;
-            position: relative; display: grid;
-            grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr);
-            padding: 10px; gap: 5px;
+            width: 220px; height: 260px; margin: 15px 0;
+            position: relative; flex-shrink: 0;
         }
 
         /* SLOT STYLING */
         .slot {
-            background: rgba(0,0,0,0.3); border: 1px solid var(--osrs-border);
+            position: absolute; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border);
             display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
         }
-        .slot img { width: 90%; height: 90%; object-fit: contain; z-index: 2; }
+        .slot img { max-width: 90%; max-height: 90%; object-fit: contain; z-index: 5; }
         
-        /* SILHOUETTES (SVGs) */
-        .slot::after {
-            content: ""; position: absolute; width: 60%; height: 60%;
-            opacity: 0.15; background-size: contain; background-repeat: no-repeat; background-position: center;
+        /* SILHOUETTES */
+        .slot::before {
+            content: ""; position: absolute; width: 24px; height: 24px;
+            opacity: 0.2; background-size: contain; background-repeat: no-repeat; background-position: center;
         }
-        #s-head::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2C8.5 2 6 4.5 6 8v2c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.5-2.5-6-6-6z"/></svg>'); }
-        #s-body::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M21 7h-4l-1-2h-8l-1 2H3v10h18V7z"/></svg>'); }
-        #s-weapon::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M19.7 4.3c-.4-.4-1-.4-1.4 0L13 9.6 9.6 6.2c-.4-.4-1-.4-1.4 0L4.3 10.1c-.4.4-.4 1 0 1.4L11 18.2V22h2v-3.8l6.7-6.7c.4-.4.4-1.1 0-1.5z"/></svg>'); }
-        #s-shield::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2L4 5v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V5l-8-3z"/></svg>'); }
-        #s-legs::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6 2v20h4v-7h4v7h4V2H6z"/></svg>'); }
-        #s-boots::after { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M5 17h4l1 3h8v-2h-6l-1-3h-6v2z"/></svg>'); }
 
-        /* POSITIONING SLOTS OSRS STYLE */
-        .head { grid-area: 1 / 2; } .cape { grid-area: 2 / 1; } .neck { grid-area: 2 / 2; } .ammo { grid-area: 2 / 3; }
-        .weapon { grid-area: 3 / 1; } .body { grid-area: 3 / 2; } .shield { grid-area: 3 / 3; } .legs { grid-area: 4 / 2; }
-        .hands { grid-area: 5 / 1; } .boots { grid-area: 5 / 2; } .ring { grid-area: 5 / 3; }
+        /* PIXEL POSITIONING */
+        #s-head   { top: 10px;  left: 90px; }  #s-head::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2C8.5 2 6 4.5 6 8v2c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.5-2.5-6-6-6z"/></svg>'); }
+        #s-cape   { top: 55px;  left: 45px; }
+        #s-neck   { top: 55px;  left: 90px; }
+        #s-ammo   { top: 55px;  left: 135px;}
+        #s-weapon { top: 100px; left: 30px; }  #s-weapon::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M19.7 4.3c-.4-.4-1-.4-1.4 0L13 9.6 9.6 6.2c-.4-.4-1-.4-1.4 0L4.3 10.1c-.4.4-.4 1 0 1.4L11 18.2V22h2v-3.8l6.7-6.7c.4-.4.4-1.1 0-1.5z"/></svg>'); }
+        #s-body   { top: 100px; left: 90px; }  #s-body::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M21 7h-4l-1-2h-8l-1 2H3v10h18V7z"/></svg>'); }
+        #s-shield { top: 100px; left: 150px;}  #s-shield::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2L4 5v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V5l-8-3z"/></svg>'); }
+        #s-legs   { top: 145px; left: 90px; }  #s-legs::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6 2v20h4v-7h4v7h4V2H6z"/></svg>'); }
+        #s-hands  { top: 190px; left: 30px; }
+        #s-boots  { top: 190px; left: 90px; }  #s-boots::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M5 17h4l1 3h8v-2h-6l-1-3h-6v2z"/></svg>'); }
+        #s-ring   { top: 190px; left: 150px;}
 
         /* INVENTORY */
-        .inv-wrapper { background: var(--osrs-panel); border: 3px solid var(--osrs-border); width: 200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding: 5px; gap: 4px; }
-        .i-slot { width: 42px; height: 42px; background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border); cursor: pointer; }
-        .i-slot img { width: 100%; height: 100%; object-fit: contain; }
-
-        .chat { background: #000; height: 60px; margin: 10px; border: 1px solid var(--osrs-border); color: #0f0; padding: 5px; font-size: 12px; overflow-y: auto; }
-    </style>
-</head>
-<body>
-
-<div class="top-bar">
-    <input type="number" id="inp" placeholder="$">
-    <button class="add-btn" onclick="add()">ADD</button>
-    <div style="color:var(--osrs-text); font-size:14px; margin-top:5px;">Next Armor: $<span id="ac">20</span></div>
-</div>
-
-<div class="equip-wrapper">
-    <div class="slot head" id="s-head"></div>
-    <div class="slot cape" id="s-cape"></div>
-    <div class="slot neck" id="s-neck"></div>
-    <div class="slot ammo" id="s-ammo"></div>
-    <div class="slot weapon" id="s-weapon"></div>
-    <div class="slot body" id="s-body"></div>
-    <div class="slot shield" id="s-shield"></div>
-    <div class="slot legs" id="s-legs"></div>
-    <div class="slot hands" id="s-hands"></div>
-    <div class="slot boots" id="s-boots"></div>
-    <div class="slot ring" id="s-ring"></div>
-</div>
-
-<div class="inv-wrapper" id="inv"></div>
-
-<div class="chat" id="log">Welcome to OSRS Tracker V57.</div>
-
-<script>
-    let s = { a:0, w:0, ai:0, wi:0, inv:[], eq:{} };
-
-    const ARM = [
-        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', t: 'head' },
-        { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', t: 'body' },
-        { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', t: 'shield' },
-        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', t: 'legs' },
-        { n: 'Dragon Platelegs', u: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', t: 'legs' },
-        { n: 'Dragon Platebody', u: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', t: 'body' },
-        { n: 'Bandos Chestplate', u: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', t: 'body' },
-        { n: 'Torva Platebody', u: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', t: 'body' }
-    ];
-
-    const WEP = [
-        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', t: 'weapon' },
