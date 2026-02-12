@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Clean Interface</title>
+    <title>OSRS Tracker - Mil Reset</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; }
@@ -12,9 +12,9 @@
         
         .app-shell { width: 98%; max-width: 420px; height: 98vh; background: #1a1712; border: 1px solid #333; padding: 12px; display: flex; flex-direction: column; }
         
-        .stats-header { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #3e3529; padding-bottom: 10px; margin-bottom: 15px; }
-        .tpc-color { color: var(--osrs-yellow); font-size: 20px; }
-        .mil-color { color: #00ff00; text-align: right; font-size: 20px; }
+        .stats-header { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #3e3529; padding-bottom: 10px; margin-bottom: 20px; }
+        .tpc-color { color: var(--osrs-yellow); font-size: 22px; }
+        .mil-color { color: #00ff00; text-align: right; font-size: 22px; }
         
         .view-pane { display: none; flex-grow: 1; overflow: hidden; flex-direction: column; }
         .view-pane.active { display: flex; }
@@ -40,11 +40,14 @@
         .nav-tabs { display: flex; gap: 4px; margin-top: 10px; }
         .nav-btn { flex: 1; padding: 12px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 16px; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
+        
         .chat-container { height: 80px; background: #726451; border: 2px solid var(--slot-border); margin: 10px 0; padding: 8px; overflow-y: auto; font-size: 15px; color: #fff; line-height: 1.4; }
         
         .input-group { margin-top: auto; display: flex; gap: 5px; }
         input { flex: 1; padding: 12px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; font-size: 16px; }
-        .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
+        .dep-btn { background: #006400; color: #fff; padding: 0 20px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
+        
+        .reset-btn { background: #4e1a1a; color: #fff; width: 100%; padding: 8px; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -72,10 +75,14 @@
         </div>
     </div>
 
-    <div id="view-bank" class="view-pane"><div class="grid-container" id="bank-grid"></div></div>
+    <div id="view-bank" class="view-pane">
+        <div class="grid-container" id="bank-grid"></div>
+        <button class="reset-btn" onclick="resetMilData()">RESET MIL PROGRESS & GEAR</button>
+    </div>
+
     <div id="view-shop" class="view-pane"><div class="grid-container" id="shop-grid"></div></div>
 
-    <div class="chat-container" id="chatbox">Welcome back. Deposit $ for Gear resets.</div>
+    <div class="chat-container" id="chatbox">Mil Balance tracks rewards. Shop items are safe from resets.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -84,13 +91,13 @@
     </div>
 
     <div class="input-group">
-        <input type="number" id="mil-input" placeholder="Deposit $ amount...">
+        <input type="number" id="mil-input" placeholder="Deposit $...">
         <button class="dep-btn" onclick="addMil()">Deposit</button>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_CLEAN_PROG_V1';
+    const STORAGE_KEY = 'OSRS_MIL_RESET_V1';
     
     let state = {
         tpc: 0, 
@@ -101,62 +108,74 @@
         equipped: { head:null, body:null, weapon:null, shield:null, amulet:null, ring:null }
     };
 
+    // Progression Source Data
     const armorPool = [
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
-        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
-        { name: 'Dharok Body', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body' },
-        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body' },
-        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' }
+        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', source: 'mil' },
+        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body', source: 'mil' },
+        { name: 'Dharok Body', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body', source: 'mil' },
+        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', source: 'mil' },
+        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', source: 'mil' }
     ];
 
     const weaponPool = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon' },
-        { name: 'Godsword', img: 'https://oldschool.runescape.wiki/images/Armadyl_godsword.png', type: 'weapon' },
-        { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon' },
-        { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon' }
+        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon', source: 'mil' },
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon', source: 'mil' },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon', source: 'mil' },
+        { name: 'Godsword', img: 'https://oldschool.runescape.wiki/images/Armadyl_godsword.png', type: 'weapon', source: 'mil' },
+        { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon', source: 'mil' }
     ];
 
     const shopItems = [
-        { name: 'Glory', cost: 12000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_glory.png', type: 'amulet' },
-        { name: 'B-Ring', cost: 25000, img: 'https://oldschool.runescape.wiki/images/Berserker_ring.png', type: 'ring' },
-        { name: 'Fury', cost: 45000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type: 'amulet' },
-        { name: 'Torture', cost: 150000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_torture.png', type: 'amulet' }
+        { name: 'Fury', cost: 45000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type: 'amulet', source: 'shop' },
+        { name: 'B-Ring', cost: 25000, img: 'https://oldschool.runescape.wiki/images/Berserker_ring.png', type: 'ring', source: 'shop' },
+        { name: 'Torture', cost: 150000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_torture.png', type: 'amulet', source: 'shop' }
     ];
 
     function addMil() {
         const dollars = parseInt(document.getElementById('mil-input').value) || 0;
         if(dollars <= 0) return;
-
         state.totalDeposited += dollars;
         const depositK = dollars * 1000;
         state.armorMil += depositK;
         state.weaponMil += depositK;
 
         while (state.armorMil >= 20000) {
-            let item;
-            if (state.totalDeposited >= 500 && !state.bank.some(i => i.name === 'Infernal Cape')) {
-                item = { name: 'Infernal Cape', img: 'https://oldschool.runescape.wiki/images/Infernal_cape.png', type: 'shield' };
-            } else {
-                item = armorPool[Math.min(state.armorTier, armorPool.length - 1)];
-                state.armorTier++;
-            }
+            let item = armorPool[Math.min(state.armorTier, armorPool.length - 1)];
             state.bank.push({ ...item });
+            state.armorTier++;
             state.armorMil -= 20000;
-            addChatMessage(`🛡️ UNLOCKED: ${item.name}! (Sent to Bank)`, "green");
+            addChatMessage(`🛡️ NEW ARMOR: ${item.name}`, "green");
         }
-
         while (state.weaponMil >= 25000) {
-            const item = weaponPool[Math.min(state.weaponTier, weaponPool.length - 1)];
+            let item = weaponPool[Math.min(state.weaponTier, weaponPool.length - 1)];
             state.bank.push({ ...item });
             state.weaponTier++;
             state.weaponMil -= 25000;
-            addChatMessage(`⚔️ UNLOCKED: ${item.name}! (Sent to Bank)`, "green");
+            addChatMessage(`⚔️ NEW WEAPON: ${item.name}`, "green");
         }
-
         save(); updateUI();
         document.getElementById('mil-input').value = '';
+    }
+
+    function resetMilData() {
+        if(!confirm("Wipe all Mil-earned gear and reset progress to Tier 0? (Shop items & TPC will stay)")) return;
+        
+        // Reset balances and tiers
+        state.armorMil = 0; state.weaponMil = 0;
+        state.armorTier = 0; state.weaponTier = 0;
+        state.totalDeposited = 0;
+
+        // Strip Mil gear from Bank, Inv, and Equipped
+        state.bank = state.bank.filter(i => i.source !== 'mil');
+        state.inventory = state.inventory.filter(i => i.source !== 'mil');
+        for(let slot in state.equipped) {
+            if(state.equipped[slot] && state.equipped[slot].source === 'mil') {
+                state.equipped[slot] = null;
+            }
+        }
+
+        addChatMessage("⚠️ Mil Progression and Gear has been reset!", "red");
+        save(); updateUI(); renderBank();
     }
 
     function updateUI() {
@@ -250,7 +269,7 @@
     }
     function addChatMessage(t, c='') {
         const cb = document.getElementById('chatbox');
-        cb.innerHTML += `<div class="${c}">${t}</div>`;
+        cb.innerHTML += `<div style="color:${c === 'red' ? '#ff4444' : (c === 'green' ? '#00ff00' : '#fff')}">${t}</div>`;
         cb.scrollTop = cb.scrollHeight;
     }
 
