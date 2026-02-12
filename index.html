@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Bank & 28-Slot Inv</title>
+    <title>OSRS Tracker - Full Interface</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -15,22 +15,23 @@
         .view-pane { display: none; flex-grow: 1; overflow-y: auto; flex-direction: column; }
         .view-pane.active { display: flex; }
         
-        /* Fixed 28 Slot Grid */
         .inventory-grid { 
             width: 172px; height: 295px; background: var(--inv-bg); border: 2px solid var(--slot-border); 
             display: grid; grid-template-columns: repeat(4, 38px); grid-template-rows: repeat(7, 38px); 
-            gap: 2px; padding: 4px; align-content: start;
+            gap: 2px; padding: 4px; align-content: start; margin: 0 auto;
         }
-        .slot { width: 38px; height: 38px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; }
-        .item-icon { width: 32px; height: 32px; filter: drop-shadow(1px 1px 1px #000); z-index: 2; }
+        .slot { width: 38px; height: 38px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .item-icon { width: 32px; height: 32px; filter: drop-shadow(1px 1px 1px #000); }
         
         .equip-window { width: 180px; height: 215px; background: var(--inv-bg) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center; background-size: contain; position: relative; border: 2px solid var(--slot-border); }
         .nav-tabs { display: flex; gap: 2px; margin-top: 5px; flex-shrink: 0; }
-        .nav-btn { flex: 1; padding: 10px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; }
+        .nav-btn { flex: 1; padding: 10px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 12px; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
         
         .chat-container { height: 60px; background: #726451; border: 2px solid var(--slot-border); margin: 5px 0; padding: 5px; overflow-y: auto; font-size: 14px; color: #fff; }
-        .bank-container { width: 100%; background: #3e3529; border: 2px solid #000; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; overflow-y: auto; height: 200px; }
+        .bank-container { width: 100%; background: #3e3529; border: 2px solid #000; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; overflow-y: auto; min-height: 150px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .shop-item { background: rgba(0,0,0,0.3); border: 1px solid #5d4d37; padding: 5px; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -61,27 +62,33 @@
     </div>
 
     <div id="view-bank" class="view-pane">
-        <div style="text-align:center; color:var(--osrs-yellow); margin-bottom:5px;">BANK STORAGE</div>
         <div class="bank-container" id="bank-grid"></div>
-        <div style="text-align:center; margin:10px 0 5px 0;">INVENTORY (Click to Deposit)</div>
-        <div class="inventory-grid" id="bank-inv-grid" style="margin: 0 auto;"></div>
+        <div style="text-align:center; margin:10px 0 5px 0; font-size: 12px;">CLICK INVENTORY TO DEPOSIT</div>
+        <div class="inventory-grid" id="bank-inv-grid"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Welcome to OSRS Tracker.</div>
+    <div id="view-shop" class="view-pane">
+        <div class="shop-grid" id="shop-list"></div>
+        <div style="text-align:center; margin-top:10px; font-size: 12px;">YOUR INVENTORY</div>
+        <div class="inventory-grid" id="shop-inv-grid"></div>
+    </div>
+
+    <div class="chat-container" id="chatbox">All tabs restored. Fixed Dharok Helm link.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
         <button class="nav-btn" id="btn-bank" onclick="switchTab('bank')">Bank</button>
+        <button class="nav-btn" id="btn-shop" onclick="switchTab('shop')">Shop</button>
     </div>
 
-    <div class="input-group" style="display:flex; gap:5px; margin-top:auto;">
+    <div class="input-group" style="display:flex; gap:5px; margin-top:auto; padding-top: 5px;">
         <input type="number" id="mil-input" style="flex:1; padding:10px; background:#222; color:#00ff00; border:1px solid #444;" placeholder="Deposit $...">
         <button onclick="addMil()" style="background:#006400; color:#fff; padding:0 15px; border:none; font-family:'RuneScape UF'; cursor:pointer;">Deposit</button>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_BANK_FINAL_V1';
+    const STORAGE_KEY = 'OSRS_STABLE_V24';
     let state = {
         sp: 0, armorMil: 0, weaponMil: 0, rareMil: 0, pieceIndex: 0, weaponIndex: 0,
         inventory: [{ name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon' }], 
@@ -113,6 +120,12 @@
         { name: 'Red Partyhat', img: 'https://oldschool.runescape.wiki/images/Red_partyhat.png', type: 'head' },
         { name: 'Blue Partyhat', img: 'https://oldschool.runescape.wiki/images/Blue_partyhat.png', type: 'head' },
         { name: 'Santa Hat', img: 'https://oldschool.runescape.wiki/images/Santa_hat.png', type: 'head' }
+    ];
+
+    const globalShopItems = [
+        { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png' },
+        { name:'Super Combat', cost:25000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
+        { name:'Fire Cape', cost:75000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' }
     ];
 
     function addMil() {
@@ -151,8 +164,9 @@
         save(); updateUI();
     }
 
-    function renderInv(containerId, isBankMode) {
+    function renderInv(containerId, mode) {
         const grid = document.getElementById(containerId);
+        if(!grid) return;
         grid.innerHTML = '';
         for(let i=0; i<28; i++) {
             const div = document.createElement('div');
@@ -161,9 +175,9 @@
                 const item = state.inventory[i];
                 div.innerHTML = `<img src="${item.img}" class="item-icon">`;
                 div.onclick = () => {
-                    if(isBankMode) {
+                    if(mode === 'bank') {
                         state.bank.push(state.inventory.splice(i, 1)[0]);
-                    } else {
+                    } else if(mode === 'combat') {
                         const old = state.equipped[item.type];
                         state.equipped[item.type] = item;
                         state.inventory.splice(i, 1);
@@ -193,15 +207,35 @@
         });
     }
 
+    function renderShop() {
+        const list = document.getElementById('shop-list');
+        list.innerHTML = '';
+        globalShopItems.forEach(it => {
+            const card = document.createElement('div');
+            card.className = 'shop-item';
+            card.innerHTML = `<img src="${it.img}" class="item-icon"><br><small>${it.cost.toLocaleString()} SP</small>`;
+            card.onclick = () => {
+                if(state.sp >= it.cost && state.inventory.length < 28) {
+                    state.sp -= it.cost;
+                    state.inventory.push({...it});
+                    save(); updateUI();
+                }
+            };
+            list.appendChild(card);
+        });
+    }
+
     function updateUI() {
         document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
         document.getElementById('arm-prog').innerText = state.armorMil;
         document.getElementById('wep-prog').innerText = state.weaponMil;
         document.getElementById('rare-prog').innerText = state.rareMil;
         
-        renderInv('inv-grid', false);
-        renderInv('bank-inv-grid', true);
+        renderInv('inv-grid', 'combat');
+        renderInv('bank-inv-grid', 'bank');
+        renderInv('shop-inv-grid', 'none');
         renderBank();
+        renderShop();
 
         for(let slot in state.equipped) {
             const el = document.getElementById(`${slot}-slot`);
@@ -221,7 +255,6 @@
         document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('view-' + t).classList.add('active');
         document.getElementById('btn-' + t).classList.add('active');
-        updateUI();
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
