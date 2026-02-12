@@ -3,34 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Balanced Economy</title>
+    <title>OSRS Tracker - Adjusted Economy</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: var(--osrs-orange); font-family: 'RuneScape UF', sans-serif; margin: 0; display: flex; justify-content: center; overflow: hidden; }
         .app-shell { width: 98%; max-width: 420px; height: 98vh; background: #1a1712; border: 1px solid #333; padding: 12px; display: flex; flex-direction: column; }
-        .stats-header { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #3e3529; padding-bottom: 10px; margin-bottom: 10px; }
-        .sp-color { color: var(--osrs-yellow); font-size: 20px; }
-        .mil-color { color: #00ff00; text-align: right; font-size: 20px; }
+        .stats-header { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #3e3529; padding-bottom: 10px; margin-bottom: 10px; font-size: 16px; }
+        .sp-color { color: var(--osrs-yellow); }
+        .prog-color { color: #00ff00; text-align: right; font-size: 14px; }
         .view-pane { display: none; flex-grow: 1; overflow-y: auto; flex-direction: column; }
         .view-pane.active { display: flex; }
-        .game-area { display: flex; gap: 8px; justify-content: center; height: 320px; flex-shrink: 0; }
-        .equip-tab { width: 180px; height: 215px; background: var(--inv-bg) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center; background-size: contain; position: relative; border: 2px solid var(--slot-border); }
-        .e-slot { position: absolute; width: 34px; height: 34px; cursor: pointer; display: flex; justify-content: center; align-items: center; background: var(--slot-bg); }
-        #head-slot { top: 12px; left: 73px; } #amulet-slot { top: 48px; left: 73px; } 
-        #body-slot { top: 85px; left: 73px; } #weapon-slot { top: 85px; left: 18px; } 
-        #shield-slot { top: 85px; left: 128px; } #legs-slot { top: 126px; left: 73px; }
-        #feet-slot { top: 168px; left: 73px; } #ring-slot { top: 168px; left: 128px; }
         .inventory-tab { width: 175px; height: 310px; background: var(--inv-bg); border: 2px solid var(--slot-border); display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 4px; }
         .slot { width: 38px; height: 38px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .item-icon { width: 30px; height: 30px; filter: drop-shadow(1px 1px 1px #000); }
-        .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #3e3529; border: 2px solid #000; }
-        .skill-card { background: #4e4435; padding: 8px; border: 1px solid #000; }
-        .nav-tabs { display: flex; gap: 2px; margin-top: 5px; flex-shrink: 0; }
         .nav-btn { flex: 1; padding: 10px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 13px; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
-        .chat-container { height: 60px; background: #726451; border: 2px solid var(--slot-border); margin: 5px 0; padding: 5px; overflow-y: auto; font-size: 14px; color: #fff; flex-shrink: 0; }
+        .chat-container { height: 70px; background: #726451; border: 2px solid var(--slot-border); margin: 5px 0; padding: 5px; overflow-y: auto; font-size: 14px; color: #fff; flex-shrink: 0; }
         .input-group { margin-top: auto; display: flex; gap: 5px; flex-shrink: 0; }
         input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
         .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
@@ -39,202 +29,160 @@
 <body>
 <div class="app-shell">
     <div class="stats-header">
-        <div class="sp-color">SP: <span id="sp-bal">0</span></div>
-        <div class="mil-color">SP Bal: <span id="armor-mil">0</span>k</div>
+        <div class="sp-color">Shop Points: <span id="sp-bal">0</span></div>
+        <div class="prog-color">
+            Armor: $<span id="arm-prog">0</span>/50<br>
+            Wep: $<span id="wep-prog">0</span>/100
+        </div>
     </div>
 
     <div id="view-combat" class="view-pane active">
-        <div class="game-area">
-            <div class="equip-tab">
-                <div id="head-slot" class="e-slot" onclick="unequip('head')"></div>
-                <div id="amulet-slot" class="e-slot" onclick="unequip('amulet')"></div>
-                <div id="body-slot" class="e-slot" onclick="unequip('body')"></div>
-                <div id="weapon-slot" class="e-slot" onclick="unequip('weapon')"></div>
-                <div id="legs-slot" class="e-slot" onclick="unequip('legs')"></div>
-                <div id="shield-slot" class="e-slot" onclick="unequip('shield')"></div>
-                <div id="feet-slot" class="e-slot" onclick="unequip('feet')"></div>
-                <div id="ring-slot" class="e-slot" onclick="unequip('ring')"></div>
+        <div style="display: flex; gap: 8px; justify-content: center; height: 320px;">
+            <div style="width: 180px; height: 215px; background: var(--inv-bg) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center; background-size: contain; position: relative; border: 2px solid var(--slot-border);">
+                <div id="head-slot" style="position: absolute; top: 12px; left: 73px;" class="slot" onclick="unequip('head')"></div>
+                <div id="amulet-slot" style="position: absolute; top: 48px; left: 73px;" class="slot" onclick="unequip('amulet')"></div>
+                <div id="body-slot" style="position: absolute; top: 85px; left: 73px;" class="slot" onclick="unequip('body')"></div>
+                <div id="weapon-slot" style="position: absolute; top: 85px; left: 18px;" class="slot" onclick="unequip('weapon')"></div>
+                <div id="shield-slot" style="position: absolute; top: 85px; left: 128px;" class="slot" onclick="unequip('shield')"></div>
+                <div id="legs-slot" style="position: absolute; top: 126px; left: 73px;" class="slot" onclick="unequip('legs')"></div>
+                <div id="ring-slot" style="position: absolute; top: 168px; left: 128px;" class="slot" onclick="unequip('ring')"></div>
             </div>
             <div class="inventory-tab" id="inv-grid"></div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:10px;">
-            <button class="nav-btn" onclick="train('att')">Attack</button>
-            <button class="nav-btn" onclick="train('def')">Defense</button>
-            <button class="nav-btn" onclick="train('slayer')">Slayer</button>
-            <button class="nav-btn" onclick="train('raid')" style="background:#4e1a1a;">Raid</button>
+            <button class="nav-btn" onclick="train('att')">Train Attack</button>
+            <button class="nav-btn" onclick="train('def')">Train Defense</button>
+            <button class="nav-btn" onclick="train('slayer')">Slayer Task</button>
+            <button class="nav-btn" onclick="train('raid')" style="background:#4e1a1a;">Raids</button>
         </div>
-    </div>
-
-    <div id="view-stats" class="view-pane">
-        <div class="skills-grid" id="skills-display"></div>
-        <button class="nav-btn" style="background:#8b0000; margin-top: 10px;" onclick="confirmReset()">WIPE SAVE</button>
-    </div>
-
-    <div id="view-bank" class="view-pane">
-        <div id="bank-grid" class="inventory-tab" style="width:100%; height:200px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
-        <div style="text-align:center; padding:5px; color:#fff; font-size:12px;">INVENTORY</div>
-        <div id="bank-inv-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 
     <div id="view-shop" class="view-pane">
         <div id="shop-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px;"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Progress: $20/Armor piece | $50/Weapon piece.</div>
+    <div class="chat-container" id="chatbox">Deposit $50 for Armor or $100 for Weapons.</div>
 
-    <div class="nav-tabs">
+    <div class="nav-tabs" style="display:flex; gap:2px; margin-top:5px;">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
-        <button class="nav-btn" id="btn-stats" onclick="switchTab('stats')">Stats</button>
-        <button class="nav-btn" id="btn-bank" onclick="switchTab('bank')">Bank</button>
         <button class="nav-btn" id="btn-shop" onclick="switchTab('shop')">Shop</button>
     </div>
 
     <div class="input-group">
-        <input type="number" id="mil-input" placeholder="Deposit $...">
+        <input type="number" id="mil-input" placeholder="Enter $ amount...">
         <button class="dep-btn" onclick="addMil()">Deposit</button>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_BALANCED_V19';
-    
+    const STORAGE_KEY = 'OSRS_BALANCED_V21';
     let state = {
         sp: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
-        xp: { att: 0, str: 0, def: 0, hp: 1200, slay: 0 },
-        inventory: [{ name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} }], 
-        bank: [],
-        equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
+        inventory: [{ name: 'Bronze Sword', img: 'https://oldschool.runescape.wiki/images/Bronze_sword.png', type: 'weapon' }], 
+        equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, ring:null }
     };
 
     const armorProgression = [
-        { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head', req: {def: 40} },
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', req: {def: 40} },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs', req: {def: 40} },
-        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield', req: {def: 40} },
-        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head', req: {def: 60} },
-        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body', req: {def: 60} },
-        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs', req: {def: 60} },
-        { name: 'Dragon Kiteshield', img: 'https://oldschool.runescape.wiki/images/Dragon_kiteshield.png', type: 'shield', req: {def: 60} },
-        { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head', req: {def: 70} },
-        { name: 'Dharok Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body', req: {def: 70} },
-        { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs', req: {def: 70} },
-        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', req: {def: 65} },
-        { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs', req: {def: 65} },
-        { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head', req: {def: 80} },
-        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', req: {def: 80} },
-        { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs', req: {def: 80} }
+        { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
+        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
+        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
+        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
+        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
+        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
+        { name: 'Dragon Kiteshield', img: 'https://oldschool.runescape.wiki/images/Dragon_kiteshield.png', type: 'shield' }
     ];
 
     const weaponProgression = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon', req: {att: 40} },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon', req: {att: 60} },
-        { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon', req: {att: 70} },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon', req: {att: 70} },
-        { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon', req: {att: 80} }
+        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon' }
     ];
 
-    const globalShopItems = [
+    const shopItems = [
         { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png', type:'food' },
-        { name:'Super Combat', cost:15000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png', type:'potion' },
-        { name:'Suffering', cost:65000, img:'https://oldschool.runescape.wiki/images/Ring_of_suffering.png', type:'ring' },
-        { name:'Anguish', cost:55000, img:'https://oldschool.runescape.wiki/images/Necklace_of_anguish.png', type:'amulet' },
-        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' }
+        { name:'Super Combat', cost:50000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png', type:'potion' },
+        { name:'Suffering', cost:55000, img:'https://oldschool.runescape.wiki/images/Ring_of_suffering.png', type:'ring' },
+        { name:'Anguish', cost:60000, img:'https://oldschool.runescape.wiki/images/Necklace_of_anguish.png', type:'amulet' }
     ];
-
-    function xpToLvl(xp) { return Math.max(1, Math.floor(Math.pow(xp, 0.3))); }
 
     function addMil() {
         const val = parseInt(document.getElementById('mil-input').value) || 0;
         if(val <= 0) return;
         
-        state.armorMil += (val * 1000);
-        state.weaponMil += (val * 1000);
+        state.armorMil += val;
+        state.weaponMil += val;
 
-        // Armor Unlock: $20 (20,000 progress) per piece
-        while(state.armorMil >= 20000 && state.pieceIndex < armorProgression.length) {
-            unlockItem(armorProgression[state.pieceIndex], "Armor");
-            state.pieceIndex++; state.armorMil -= 20000;
+        // $50 per Armor Piece
+        while(state.armorMil >= 50 && state.pieceIndex < armorProgression.length) {
+            state.inventory.push({...armorProgression[state.pieceIndex]});
+            addChatMessage(`Unlocked: ${armorProgression[state.pieceIndex].name}`, "yellow");
+            state.pieceIndex++; state.armorMil -= 50;
         }
 
-        // Weapon Unlock: $50 (50,000 progress) per piece
-        while(state.weaponMil >= 50000 && state.weaponIndex < weaponProgression.length) {
-            unlockItem(weaponProgression[state.weaponIndex], "Weapon");
-            state.weaponIndex++; state.weaponMil -= 50000;
+        // $100 per Weapon Piece
+        while(state.weaponMil >= 100 && state.weaponIndex < weaponProgression.length) {
+            state.inventory.push({...weaponProgression[state.weaponIndex]});
+            addChatMessage(`Unlocked: ${weaponProgression[state.weaponIndex].name}`, "#00ffff");
+            state.weaponIndex++; state.weaponMil -= 100;
         }
         
         save(); updateUI();
         document.getElementById('mil-input').value = '';
     }
 
-    function unlockItem(itemData, category) {
-        let item = {...itemData};
-        if(state.inventory.length < 28) {
-            state.inventory.push(item);
-            addChatMessage(`Unlocked ${category}: ${item.name}`, category === "Armor" ? "yellow" : "#00ffff");
-        } else {
-            state.bank.push(item);
-            addChatMessage(`Inventory Full! ${item.name} sent to Bank.`, "orange");
-        }
-    }
-
     function train(mode) {
-        if(mode === 'att') { state.xp.att += 600; state.xp.hp += 200; state.sp += 400; }
-        if(mode === 'def') { state.xp.def += 600; state.xp.hp += 200; state.sp += 400; }
-        if(mode === 'slayer') { state.xp.att += 500; state.xp.def += 500; state.xp.slay += 1000; state.sp += 1500; }
-        if(mode === 'raid') { state.xp.att += 5000; state.xp.def += 5000; state.sp += 6000; }
+        let gain = mode === 'raid' ? 5000 : 500;
+        state.sp += gain;
+        addChatMessage(`+${gain} Shop Points`, "green");
         save(); updateUI();
     }
 
     function renderShop() {
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
-        globalShopItems.forEach(it => {
+        shopItems.forEach(it => {
             const card = document.createElement('div');
             card.style = "background:rgba(0,0,0,0.3); border:1px solid #5d4d37; padding:5px; text-align:center; cursor:pointer;";
-            const canAfford = state.sp >= it.cost;
-            card.innerHTML = `<img src="${it.img}" class="item-icon"><div style="font-size:10px;">${it.name}</div><div style="color:${canAfford ? '#00ff00' : '#ff0000'}">${it.cost.toLocaleString()} SP</div>`;
+            card.innerHTML = `<img src="${it.img}" class="item-icon"><br><small>${it.cost.toLocaleString()} SP</small>`;
             card.onclick = () => {
                 if(state.sp >= it.cost && state.inventory.length < 28) {
                     state.sp -= it.cost; state.inventory.push({...it});
                     save(); updateUI(); renderShop();
-                } else { addChatMessage("Insufficient SP or Inv Full!", "red"); }
+                }
             };
             list.appendChild(card);
         });
     }
 
-    function switchTab(t) {
-        document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + t).classList.add('active');
-        document.getElementById('btn-' + t).classList.add('active');
-        if(t === 'shop') renderShop();
-        if(t === 'bank') renderBank();
-        updateUI();
-    }
-
     function updateUI() {
         document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
-        document.getElementById('armor-mil').innerText = (state.armorMil / 1000).toFixed(0);
-        const a=xpToLvl(state.xp.att), d=xpToLvl(state.xp.def), h=xpToLvl(state.xp.hp), l=xpToLvl(state.xp.slay);
-        document.getElementById('skills-display').innerHTML = `<div class="skill-card">Att: ${a}</div><div class="skill-card">Def: ${d}</div><div class="skill-card">HP: ${h}</div><div class="skill-card">Slay: ${l}</div>`;
-        renderInv(); renderEquip();
-    }
+        document.getElementById('arm-prog').innerText = state.armorMil;
+        document.getElementById('wep-prog').innerText = state.weaponMil;
+        
+        const grid = document.getElementById('inv-grid'); grid.innerHTML = '';
+        state.inventory.forEach((it, i) => {
+            const div = document.createElement('div'); div.className = 'slot';
+            div.innerHTML = `<img src="${it.img}" class="item-icon">`;
+            div.onclick = () => {
+                if(it.type === 'food' || it.type === 'potion') {
+                    state.inventory.splice(i, 1);
+                    addChatMessage(`Used ${it.name}`, "white");
+                } else {
+                    const old = state.equipped[it.type];
+                    state.equipped[it.type] = it;
+                    state.inventory.splice(i, 1);
+                    if(old) state.inventory.push(old);
+                }
+                save(); updateUI();
+            };
+            grid.appendChild(div);
+        });
 
-    function equip(idx) {
-        const it = state.inventory[idx];
-        if(!it) return;
-        if(it.type === 'food' || it.type === 'potion') {
-            state.xp.hp += 3000; state.inventory.splice(idx, 1);
-            addChatMessage(`Used ${it.name}`, "#00ff00");
-        } else {
-            if(it.req?.def && xpToLvl(state.xp.def) < it.req.def) return addChatMessage(`Need ${it.req.def} Def!`, "red");
-            if(it.req?.att && xpToLvl(state.xp.att) < it.req.att) return addChatMessage(`Need ${it.req.att} Att!`, "red");
-            const old = state.equipped[it.type];
-            state.equipped[it.type] = it;
-            state.inventory.splice(idx, 1);
-            if(old) state.inventory.push(old);
+        for(let slot in state.equipped) {
+            const el = document.getElementById(`${slot}-slot`);
+            if(el) el.innerHTML = state.equipped[slot] ? `<img src="${state.equipped[slot].img}" class="item-icon">` : '';
         }
-        save(); updateUI();
     }
 
     function unequip(type) {
@@ -245,54 +193,25 @@
         }
     }
 
-    function renderInv() {
-        const grid = document.getElementById('inv-grid'); grid.innerHTML = '';
-        state.inventory.forEach((it, i) => {
-            const div = document.createElement('div'); div.className = 'slot';
-            div.innerHTML = `<img src="${it.img}" class="item-icon">`;
-            div.onclick = () => equip(i);
-            grid.appendChild(div);
-        });
-        for(let i=state.inventory.length; i<28; i++) grid.appendChild(document.createElement('div')).className = 'slot';
+    function switchTab(t) {
+        document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-' + t).classList.add('active');
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'shop') renderShop();
     }
 
-    function renderBank() {
-        const bGrid = document.getElementById('bank-grid'); const iGrid = document.getElementById('bank-inv-grid');
-        bGrid.innerHTML = ''; iGrid.innerHTML = '';
-        state.bank.forEach((it, i) => {
-            const div = document.createElement('div'); div.className = 'slot';
-            div.innerHTML = `<img src="${it.img}" class="item-icon">`;
-            div.onclick = () => { if(state.inventory.length < 28) { state.inventory.push(state.bank.splice(i, 1)[0]); save(); updateUI(); renderBank(); } };
-            bGrid.appendChild(div);
-        });
-        state.inventory.forEach((it, i) => {
-            const div = document.createElement('div'); div.className = 'slot';
-            div.innerHTML = `<img src="${it.img}" class="item-icon">`;
-            div.onclick = () => { state.bank.push(state.inventory.splice(i, 1)[0]); save(); updateUI(); renderBank(); };
-            iGrid.appendChild(div);
-        });
-    }
-
-    function renderEquip() {
-        for(let slot in state.equipped) {
-            const el = document.getElementById(`${slot}-slot`);
-            if(el) el.innerHTML = state.equipped[slot] ? `<img src="${state.equipped[slot].img}" class="item-icon">` : '';
-        }
-    }
-
-    function confirmReset() { if(confirm("RESTART EVERYTHING?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function load() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if(saved) state = Object.assign(state, JSON.parse(saved));
     }
-    function addChatMessage(t, c='white') {
+    function addChatMessage(t, c) {
         const cb = document.getElementById('chatbox');
         cb.innerHTML += `<div style="color:${c}">${t}</div>`;
         cb.scrollTop = cb.scrollHeight;
     }
 
-    load(); updateUI(); renderShop();
+    load(); updateUI();
 </script>
 </body>
 </html>
