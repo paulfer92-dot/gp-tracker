@@ -1,153 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSRS Tracker V49</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg: #1a1712; }
-        
-        /* iPhone Air Safari Reset */
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100dvh;
-            background: #000; overflow: hidden; touch-action: manipulation;
-            font-family: 'RuneScape UF', sans-serif;
+        :root { --o: #ff981f; --y: #ffff00; }
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { 
+            margin: 0; background: #000; color: #fff; 
+            font-family: 'RuneScape UF', sans-serif; 
+            height: 100dvh; overflow: hidden;
         }
+        /* FIXED TOP NAV - Cannot be hidden by Safari */
+        nav { 
+            display: flex; height: 60px; background: #111; 
+            border-bottom: 2px solid var(--o); position: fixed; top: 0; width: 100%; z-index: 999;
+        }
+        nav button { 
+            flex: 1; background: #3e3529; color: #fff; border: 1px solid #000; 
+            font-family: 'RuneScape UF'; font-size: 18px;
+        }
+        nav button.active { background: var(--o); color: #000; }
 
-        .container {
-            display: flex; flex-direction: column;
-            height: 100%; max-width: 500px; margin: 0 auto;
-            background: var(--bg);
-        }
-
-        /* Top-Loaded Navigation to avoid Safari Bottom Bar */
-        .nav {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            height: 60px; border-bottom: 2px solid var(--osrs-orange);
-            background: #000; z-index: 100;
-        }
-        .tab {
-            background: #3e3529; color: #fff; border: 1px solid #111;
-            font-size: 18px; cursor: pointer; font-family: 'RuneScape UF';
-        }
-        .tab.active { background: var(--osrs-orange); color: #000; }
-
-        .input-box {
-            display: flex; padding: 10px; gap: 8px; background: #222;
-            border-bottom: 1px solid #444;
-        }
-        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #555; font-size: 16px; border-radius: 4px; }
-        .btn { background: #006400; color: #fff; border: none; padding: 0 15px; border-radius: 4px; font-family: 'RuneScape UF'; }
-
-        .view { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
-        .pane { display: none; }
-        .pane.active { display: block; }
+        /* CONTENT AREA */
+        main { margin-top: 65px; height: calc(100dvh - 65px); overflow-y: auto; padding: 10px; }
+        .input-box { display: flex; gap: 5px; margin-bottom: 10px; }
+        input { flex: 1; padding: 12px; background: #1a1712; color: #0f0; border: 1px solid #444; font-size: 16px; }
+        .add-btn { background: #006400; color: #fff; border: none; padding: 0 20px; font-family: 'RuneScape UF'; }
 
         .inv { 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; 
-            background: #4e4435; padding: 10px; border: 3px solid #3e3529; 
-            width: 260px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
+            background: #4e4435; padding: 8px; border: 3px solid #3e3529; max-width: 280px; margin: 0 auto;
         }
         .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
-        .item { width: 85%; height: 85%; object-fit: contain; }
+        .item { width: 80%; height: 80%; object-fit: contain; }
 
-        .log { background: #726451; padding: 8px; font-size: 15px; border: 2px solid #3e3529; margin-top: 15px; min-height: 60px; color: #fff; }
+        .pane { display: none; }
+        .pane.active { display: block; }
+        .chat { background: #726451; padding: 8px; margin-top: 10px; font-size: 14px; border: 2px solid #3e3529; height: 100px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="nav">
-        <button class="tab active" onclick="setTab('c', this)">COMBAT</button>
-        <button class="tab" onclick="setTab('s', this)">SHOP</button>
-        <button class="tab" onclick="setTab('x', this)">STATS</button>
-    </div>
+<nav>
+    <button class="active" onclick="tab('c', this)">COMBAT</button>
+    <button onclick="tab('s', this)">SHOP</button>
+    <button onclick="tab('x', this)">STATS</button>
+</nav>
 
+<main>
     <div class="input-box">
-        <input type="number" id="v" placeholder="Deposit $">
-        <button class="btn" onclick="add()">ADD</button>
+        <input type="number" id="val" placeholder="Deposit $">
+        <button class="add-btn" onclick="add()">ADD</button>
     </div>
 
-    <div class="view">
-        <div id="p-c" class="pane active">
-            <div class="inv" id="g"></div>
-            <div class="log" id="l">System: V49 Air-Safe Ready.</div>
-        </div>
+    <div id="c" class="pane active">
+        <div class="inv" id="g"></div>
+        <div class="chat" id="l">V50: Full Complete Build.</div>
+    </div>
 
-        <div id="p-s" class="pane" style="color:var(--osrs-yellow); text-align:center;">
-            Rewards Auto-Unlock!<br><br>
-            Next Armor: $<span id="next-a">20</span><br>
-            Next Weapon: $25
-        </div>
+    <div id="s" class="pane">
+        <h2 style="color:var(--y); text-align:center;">SHOP REWARDS</h2>
+        <p>Armor Unlocks: $20 (x4), $40 (x4), then $70</p>
+        <p>Weapon Unlocks: $25 (Constant)</p>
+    </div>
 
-        <div id="p-x" class="pane">
-            <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
-                <p>Arm Unlocks: <span id="c-a">0</span></p>
-                <p>Wep Unlocks: <span id="c-w">0</span></p>
-                <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:8px;">RESET</button>
-            </div>
+    <div id="x" class="pane">
+        <div style="background:#222; padding:15px; border:1px solid var(--o);">
+            <p>Armor Index: <span id="ai">0</span></p>
+            <p>Weapon Index: <span id="wi">0</span></p>
+            <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET GAME</button>
         </div>
     </div>
-</div>
+</main>
 
 <script>
-    let d = { a:0, w:0, ai:0, wi:0, i:[] };
-    const AR = [
+    let state = { a:0, w:0, ai:0, wi:0, i:[] };
+
+    const ARMOR = [
         { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
         { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
         { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
-    ];
-    const WP = [
-        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' }
+        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
+        { n: 'Dragon Platelegs', u: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' }
     ];
 
-    function getA() { return d.ai < 4 ? 20 : d.ai < 8 ? 40 : 70; }
+    const WEPS = [
+        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
+        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
+        { n: 'Abyssal Whip', u: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' }
+    ];
+
+    function getPrice() {
+        if (state.ai < 4) return 20;
+        if (state.ai < 8) return 40;
+        return 70;
+    }
 
     function add() {
-        let val = parseInt(document.getElementById('v').value) || 0;
-        if (val <= 0) return;
-        d.a += val; d.w += val;
+        let v = parseInt(document.getElementById('val').value) || 0;
+        if (v <= 0) return;
+        state.a += v; state.w += v;
 
-        let cost = getA();
-        while (d.ai < AR.length && d.a >= cost) {
-            d.i.push(AR[d.ai]);
-            msg("Got: " + AR[d.ai].n, "yellow");
-            d.a -= cost; d.ai++; cost = getA();
+        let ap = getPrice();
+        while (state.ai < ARMOR.length && state.a >= ap) {
+            state.i.push(ARMOR[state.ai]);
+            log("Unlocked: " + ARMOR[state.ai].n, "yellow");
+            state.a -= ap; state.ai++; ap = getPrice();
         }
-        while (d.wi < WP.length && d.w >= 25) {
-            d.i.push(WP[d.wi]);
-            msg("Got: " + WP[d.wi].n, "#0f0");
-            d.w -= 25; d.wi++;
+        while (state.wi < WEPS.length && state.w >= 25) {
+            state.i.push(WEPS[state.wi]);
+            log("Unlocked: " + WEPS[state.wi].n, "#0f0");
+            state.w -= 25; state.wi++;
         }
-        document.getElementById('v').value = '';
+        document.getElementById('val').value = '';
         save(); draw();
     }
 
     function draw() {
-        document.getElementById('c-a').innerText = d.ai;
-        document.getElementById('c-w').innerText = d.wi;
-        document.getElementById('next-a').innerText = getA();
+        document.getElementById('ai').innerText = state.ai;
+        document.getElementById('wi').innerText = state.wi;
         const g = document.getElementById('g'); g.innerHTML = '';
         for(let j=0; j<28; j++) {
             const s = document.createElement('div'); s.className = 'slot';
-            if(d.i[j]) s.innerHTML = `<img src="${d.i[j].u}" class="item">`;
+            if(state.i[j]) s.innerHTML = `<img src="${state.i[j].u}" class="item">`;
             g.appendChild(s);
         }
     }
 
-    function setTab(p, b) {
-        document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-        document.getElementById('p-'+p).classList.add('active');
-        b.classList.add('active');
+    function tab(id, btn) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
     }
 
-    function msg(m, c) { const l = document.getElementById('l'); l.innerHTML += `<div style="color:${c}">> ${m}</div>`; l.scrollTop = l.scrollHeight; }
-    function save() { localStorage.setItem('OSRS_V49', JSON.stringify(d)); }
-    function load() { const saved = localStorage.getItem('OSRS_V49'); if(saved) d = JSON.parse(saved); }
+    function log(m, c) { 
+        const l = document.getElementById('l'); 
+        l.innerHTML += `<div style="color:${c}">> ${m}</div>`; 
+        l.scrollTop = l.scrollHeight; 
+    }
+
+    function save() { localStorage.setItem('OSRS_V50', JSON.stringify(state)); }
+    function load() { 
+        const s = localStorage.getItem('OSRS_V50'); 
+        if(s) state = JSON.parse(s); 
+    }
 
     load(); draw();
 </script>
