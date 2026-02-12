@@ -3,33 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V44 Fix</title>
+    <title>OSRS Tracker - V45 Mobile Fix</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
-        * { box-sizing: border-box; }
-        body { margin: 0; background: #000; font-family: 'RuneScape UF', sans-serif; color: #fff; }
-        .top-nav { position: sticky; top: 0; width: 100%; height: 60px; background: #000; border-bottom: 2px solid var(--osrs-orange); display: grid; grid-template-columns: repeat(3, 1fr); z-index: 10; }
-        .nav-btn { background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; font-size: 16px; cursor: pointer; }
+        
+        /* THE FIX: Prevents Safari from eating the bottom of the app */
+        html, body { 
+            margin: 0; padding: 0; 
+            height: 100%; width: 100%; 
+            background: #000; overflow: hidden;
+            font-family: 'RuneScape UF', sans-serif;
+        }
+
+        .top-nav { 
+            height: 60px; background: #000; 
+            border-bottom: 2px solid var(--osrs-orange); 
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            position: relative; z-index: 100;
+        }
+
+        .nav-btn { 
+            background: #3e3529; color: #fff; border: 1px solid #000; 
+            font-family: 'RuneScape UF'; font-size: 18px; 
+            cursor: pointer; -webkit-appearance: none;
+        }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
-        .app-shell { max-width: 500px; margin: 0 auto; background: var(--bg-main); min-height: 100vh; padding: 10px; }
-        .header-stats { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); font-size: 20px; }
-        .view-pane { display: none; }
+
+        .app-shell { 
+            height: calc(100dvh - 60px); /* Uses Dynamic Viewport Height */
+            max-width: 500px; margin: 0 auto; 
+            background: var(--bg-main); 
+            display: flex; flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom); /* iOS Safe Area Fix */
+        }
+
+        .header-stats { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); }
+
+        .view-pane { flex: 1; display: none; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .view-pane.active { display: block; }
-        .slot { width: 50px; height: 50px; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .item-icon { width: 40px; height: 40px; }
-        .inv-grid { display: grid; grid-template-columns: repeat(4, 50px); gap: 5px; background: var(--bg-inv); padding: 10px; border: 3px solid #3e3529; width: fit-content; margin: 10px auto; }
-        .chatbox { background: #726451; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 10px 0; height: 100px; overflow-y: auto; }
-        .input-bar { display: flex; gap: 10px; margin-top: 10px; }
-        input { flex: 1; padding: 10px; background: #000; color: #0f0; border: 1px solid #444; }
+
+        .inv-grid { 
+            display: grid; grid-template-columns: repeat(4, 55px); gap: 8px; 
+            background: var(--bg-inv); padding: 12px; border: 3px solid #3e3529; 
+            width: fit-content; margin: 0 auto; pointer-events: auto;
+        }
+
+        .slot { 
+            width: 55px; height: 55px; background: rgba(0,0,0,0.5); 
+            border: 1px solid #3e3529; display: flex; 
+            justify-content: center; align-items: center; 
+            position: relative; z-index: 50; cursor: pointer;
+        }
+        .item-icon { width: 45px; height: 45px; pointer-events: none; }
+
+        .chatbox { 
+            background: #726451; padding: 10px; font-size: 16px; 
+            border: 2px solid #3e3529; margin: 10px; height: 80px; overflow-y: auto; 
+        }
+
+        .input-bar { display: flex; padding: 10px; background: #222; gap: 10px; margin-bottom: 10px; }
+        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="top-nav">
-    <button class="nav-btn active" onclick="setTab('combat')">COMBAT</button>
-    <button class="nav-btn" onclick="setTab('shop')">SHOP</button>
-    <button class="nav-btn" onclick="setTab('stats')">STATS</button>
+    <button class="nav-btn active" id="btn-combat" onclick="setTab('combat')">COMBAT</button>
+    <button class="nav-btn" id="btn-shop" onclick="setTab('shop')">SHOP</button>
+    <button class="nav-btn" id="btn-stats" onclick="setTab('stats')">STATS</button>
 </div>
 
 <div class="app-shell">
@@ -42,42 +84,94 @@
         <div class="inv-grid" id="main-inv"></div>
     </div>
 
+    <div id="pane-shop" class="view-pane">
+        <div id="shop-items"></div>
+    </div>
+
     <div id="pane-stats" class="view-pane">
         <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
-            <p>Next Armor: <span id="stat-arm-cost" style="color:#0f0">$20</span> (Unlocks: <span id="stat-arm-count">0</span>)</p>
-            <p>Next Weapon: <span style="color:#0f0">$25</span> (Unlocks: <span id="stat-wep-count">0</span>)</p>
-            <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; cursor:pointer;">FULL RESET</button>
+            <p>Next Armor: <span id="stat-arm-cost" style="color:#0f0">$20</span></p>
+            <p>Next Weapon: <span style="color:#0f0">$25</span></p>
+            <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET ALL</button>
         </div>
     </div>
 
-    <div id="pane-shop" class="view-pane">
-        <div id="shop-items" style="max-height: 300px; overflow-y: auto;"></div>
-    </div>
-
-    <div class="chatbox" id="chat">Logic V44: Added Rune Platebody & $25 Weapon Tiers.</div>
+    <div class="chatbox" id="chat">V45: iPhone Air Layout Fix Applied.</div>
 
     <div class="input-bar">
-        <input type="number" id="cash-in" placeholder="Deposit cash...">
-        <button onclick="deposit()" style="background:#006400; color:white; padding:0 20px;">DEPOSIT</button>
+        <input type="number" id="cash-in" placeholder="Deposit...">
+        <button onclick="deposit()" style="background:#006400; color:white; padding:0 15px;">ADD</button>
     </div>
 </div>
 
 <script>
-    const KEY = 'OSRS_V44_FINAL';
-    let s = { arm:0, wep:0, aI:0, wI:0, inv: [], bank: [] };
+    const KEY = 'OSRS_V45_MOBILE';
+    let s = { arm:0, wep:0, aI:0, wI:0, inv: [] };
 
     const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
         { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
         { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
-        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' },
-        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png' },
-        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png' },
-        { name: 'Slayer Helmet', img: 'https://oldschool.runescape.wiki/images/Slayer_helmet.png' },
-        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png' }
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
     ];
 
     const WEAPON_POOL = [
         { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png'
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' }
+    ];
+
+    function getArmCost() {
+        if (s.aI < 4) return 20;
+        if (s.aI < 8) return 40;
+        return 70;
+    }
+
+    function deposit() {
+        let val = parseInt(document.getElementById('cash-in').value) || 0;
+        if (val <= 0) return;
+        s.arm += val; s.wep += val;
+
+        let aPrice = getArmCost();
+        while (s.aI < ARMOR_POOL.length && s.arm >= aPrice) {
+            s.inv.push(ARMOR_POOL[s.aI]);
+            log("Unlocked: " + ARMOR_POOL[s.aI].name, "yellow");
+            s.arm -= aPrice; s.aI++; aPrice = getArmCost();
+        }
+        while (s.wI < WEAPON_POOL.length && s.wep >= 25) {
+            s.inv.push(WEAPON_POOL[s.wI]);
+            log("Unlocked: " + WEAPON_POOL[s.wI].name, "#00ff00");
+            s.wep -= 25; s.wI++;
+        }
+        document.getElementById('cash-in').value = '';
+        save(); refresh();
+    }
+
+    function setTab(t) {
+        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('pane-'+t).classList.add('active');
+        document.getElementById('btn-'+t).classList.add('active');
+    }
+
+    function refresh() {
+        document.getElementById('arm-bank').innerText = s.arm;
+        document.getElementById('wep-bank').innerText = s.wep;
+        document.getElementById('stat-arm-cost').innerText = "$" + getArmCost();
+        const grid = document.getElementById('main-inv');
+        grid.innerHTML = '';
+        for(let i=0; i<28; i++) {
+            const div = document.createElement('div'); div.className = 'slot';
+            if(s.inv[i]) div.innerHTML = `<img src="${s.inv[i].img}" class="item-icon">`;
+            grid.appendChild(div);
+        }
+    }
+
+    function log(m, c) { const b = document.getElementById('chat'); b.innerHTML += `<div style="color:${c}">${m}</div>`; b.scrollTop = b.scrollHeight; }
+    function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
+    function load() { const d = localStorage.getItem(KEY); if(d) s = JSON.parse(d); }
+    function wipeData() { localStorage.removeItem(KEY); location.reload(); }
+
+    load(); refresh();
+</script>
+</body>
+</html>
