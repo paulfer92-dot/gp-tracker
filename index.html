@@ -5,58 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --osrs-border: #3e3529; --osrs-panel: #4e4435; --osrs-text: #ff981f; }
+        :root { --osrs-border: #3e3529; --osrs-panel: #4e4435; --osrs-orange: #ff981f; }
         
+        * { box-sizing: border-box; }
         body { 
-            margin: 0; background: #000; color: #fff; 
+            margin: 0; background: #111; color: #fff; 
             font-family: 'RuneScape UF', sans-serif; 
-            display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
             align-items: center;
         }
 
         /* HEADER */
-        .top-bar { width: 100%; background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; z-index: 100; }
-        .input-row { display: flex; justify-content: center; gap: 8px; }
-        input { padding: 10px; background: #000; color: #0f0; border: 1px solid #555; width: 100px; font-size: 16px; border-radius: 4px; }
-        button.add-btn { background: #006400; color: #fff; border: 1px solid #000; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-family: 'RuneScape UF'; }
+        .header { width: 100%; background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; }
+        input { padding: 10px; background: #000; color: #0f0; border: 1px solid #666; width: 80px; font-size: 16px; border-radius: 4px; }
+        .btn { background: #006400; color: #fff; border: 1px solid #000; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-family: 'RuneScape UF'; }
 
-        /* EQUIPMENT SCREEN */
-        .equip-window {
+        /* EQUIPMENT BOX */
+        .equip-grid {
             background: var(--osrs-panel); border: 3px solid var(--osrs-border);
-            width: 220px; height: 260px; margin: 15px 0;
+            width: 240px; height: 260px; margin: 10px 0;
             position: relative; flex-shrink: 0;
         }
-        .slot {
-            position: absolute; width: 40px; height: 40px;
+        .e-slot {
+            position: absolute; width: 42px; height: 42px;
             background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border);
             display: flex; align-items: center; justify-content: center;
         }
-        .slot img { max-width: 90%; max-height: 90%; object-fit: contain; z-index: 5; }
+        .e-slot img { max-width: 90%; max-height: 90%; }
         
-        /* SILHOUETTES */
-        .slot::before { content: ""; position: absolute; width: 24px; height: 24px; opacity: 0.15; background-size: contain; background-repeat: no-repeat; background-position: center; }
-        #s-head::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2C8.5 2 6 4.5 6 8v2c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.5-2.5-6-6-6z"/></svg>'); }
-        #s-body::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M21 7h-4l-1-2h-8l-1 2H3v10h18V7z"/></svg>'); }
-        #s-weapon::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M19.7 4.3c-.4-.4-1-.4-1.4 0L13 9.6 9.6 6.2c-.4-.4-1-.4-1.4 0L4.3 10.1c-.4.4-.4 1 0 1.4L11 18.2V22h2v-3.8l6.7-6.7c.4-.4.4-1.1 0-1.5z"/></svg>'); }
-        #s-shield::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2L4 5v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V5l-8-3z"/></svg>'); }
-        #s-legs::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6 2v20h4v-7h4v7h4V2H6z"/></svg>'); }
-        #s-boots::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M5 17h4l1 3h8v-2h-6l-1-3h-6v2z"/></svg>'); }
-
-        /* COORDINATE MAP */
-        #s-head   { top: 10px;  left: 90px; }
-        #s-neck   { top: 55px;  left: 90px; }
-        #s-weapon { top: 100px; left: 30px; }
-        #s-body   { top: 100px; left: 90px; }
-        #s-shield { top: 100px; left: 150px;}
-        #s-legs   { top: 145px; left: 90px; }
-        #s-boots  { top: 190px; left: 90px; }
+        /* COORDINATES */
+        #head { top: 10px; left: 99px; }
+        #body { top: 100px; left: 99px; }
+        #legs { top: 145px; left: 99px; }
+        #weapon { top: 100px; left: 45px; }
+        #shield { top: 100px; left: 153px; }
+        #boots { top: 190px; left: 99px; }
 
         /* INVENTORY */
-        .inv-wrapper { 
+        .inv { 
             background: var(--osrs-panel); border: 3px solid var(--osrs-border); 
             width: 240px; padding: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
         }
-        .i-slot { width: 48px; height: 48px; background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border); display: flex; align-items: center; justify-content: center; }
-        .i-slot img { width: 85%; height: 85%; object-fit: contain; }
+        .i-slot { width: 50px; height: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--osrs-border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .i-slot img { width: 80%; height: 80%; object-fit: contain; }
 
-        .chat { background: #000; width: 95%; height: 70px; margin-top: 1
+        .chat { background: #000; width: 95%; height: 70px; margin-top: 10px; border: 1px solid var(--osrs-border); color: #0f0; padding: 8px; font-size: 14px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <input type="number" id="cash" placeholder="$">
+    <button class="btn" onclick="add()">ADD CASH</button>
+    <div style="color:var(--osrs-orange); font-size:14px; margin-top:5px;">Next Reward Cost: $<span id="cost">20</span></div>
+</div>
+
+<div class="equip-grid">
+    <div class="e-slot" id="head" title="head"></div>
+    <div class="e-slot" id="weapon" title="weapon"></div>
+    <div class="e-slot" id="body" title="body"></div>
+    <div class="e-slot" id="shield" title="shield"></div>
+    <div class="e-slot" id="legs" title="legs"></div>
+    <div class="e-slot" id="boots" title="boots"></div>
+</div>
+
+<div class="inv" id="inv-grid"></div>
+
+<div class="chat" id="log">OSRS Tracker V60 Loaded.</div>
+
+<script>
+    // State management
+    let state = { bank: 0, items: [], gear: {}, count: 0 };
+
+    const REWARDS = [
+        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', t: 'head', c: 20 },
+        { n: 'Rune Platebody', u: '
