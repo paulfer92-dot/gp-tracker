@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V39 Slayer Update</title>
+    <title>OSRS Tracker - V40 God-Tier Armor</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
@@ -92,7 +92,7 @@
         </div>
     </div>
 
-    <div class="chatbox" id="chat">Dharok Helm replaced with Slayer Helmet in rewards.</div>
+    <div class="chatbox" id="chat">Dharok Helm removed. Justiciar & Inquisitor sets added!</div>
 
     <div class="input-bar">
         <input type="number" id="cash-in" placeholder="Deposit $...">
@@ -101,26 +101,34 @@
 </div>
 
 <script>
-    const KEY = 'OSRS_V39_SLAYER';
+    const KEY = 'OSRS_V40_RARE';
     let s = {
         sp:0, arm:0, wep:0, holi:0, aI:0, wI:0, hI:0, xp:0,
         inv: [{name:'Bronze Scim', img:'https://oldschool.runescape.wiki/images/Bronze_scimitar.png', type:'weapon'}],
         bank: [], equip: {head:null, body:null, weapon:null, legs:null, shield:null}
     };
 
-    // Dharok Helm Removed, Slayer Helmet Added
     const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
         { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
         { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
         { name: 'Dragon Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
         { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
-        { name: 'Slayer Helmet', img: 'https://oldschool.runescape.wiki/images/Slayer_helmet.png', type: 'head' }, // REPLACED DHAROK
+        { name: 'Slayer Helmet', img: 'https://oldschool.runescape.wiki/images/Slayer_helmet.png', type: 'head' },
         { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
         { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png', type: 'shield' },
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body' },
         { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs' },
+        // --- INQUISITOR ---
+        { name: 'Inquisitor\'s Great Helm', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_great_helm.png', type: 'head' },
+        { name: 'Inquisitor\'s Hauberk', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_hauberk.png', type: 'body' },
+        { name: 'Inquisitor\'s Plateskirt', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_plateskirt.png', type: 'legs' },
+        // --- JUSTICIAR ---
+        { name: 'Justiciar Faceguard', img: 'https://oldschool.runescape.wiki/images/Justiciar_faceguard.png', type: 'head' },
+        { name: 'Justiciar Chestguard', img: 'https://oldschool.runescape.wiki/images/Justiciar_chestguard.png', type: 'body' },
+        { name: 'Justiciar Legguards', img: 'https://oldschool.runescape.wiki/images/Justiciar_legguards.png', type: 'legs' },
+        // --- END GAME ---
         { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head' },
         { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' },
         { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs' },
@@ -143,7 +151,7 @@
 
     const SHOP_ITEMS = [
         { name:'Anglerfish', cost:3000, img:'https://oldschool.runescape.wiki/images/Anglerfish.png' },
-        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' },
+        { name:'Super Combat', cost:12000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
         { name:'Twisted Bow', cost:1000000, img:'https://oldschool.runescape.wiki/images/Twisted_bow.png', type:'weapon' },
         { name:'Scythe of Vitur', cost:950000, img:'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type:'weapon' }
     ];
