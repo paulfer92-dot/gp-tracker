@@ -1,3 +1,6 @@
+Here is the full, corrected code. I’ve updated the CSS to use the correct Feet_slot.png and adjusted the JavaScript unequip logic so the "ghost" icons return perfectly for every slot, including the boots.
+
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +43,6 @@
             justify-content: center;
         }
 
-        /* Equipment Screen with Ghost Icons */
         .equip-tab {
             width: 190px; height: 250px;
             background: var(--inv-bg);
@@ -62,14 +64,14 @@
             image-rendering: pixelated;
         }
 
-        /* Ghost Backgrounds */
+        /* Ghost Backgrounds - Using official Wiki assets */
         #head-slot { top: 12px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Head_slot.png'); }
         #cape-slot { top: 52px; left: 36px; background-image: url('https://oldschool.runescape.wiki/images/Cape_slot.png'); }
         #body-slot { top: 52px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Body_slot.png'); }
         #weapon-slot { top: 92px; left: 20px; background-image: url('https://oldschool.runescape.wiki/images/Weapon_slot.png'); }
         #shield-slot { top: 92px; left: 134px; background-image: url('https://oldschool.runescape.wiki/images/Shield_slot.png'); }
         #legs-slot { top: 108px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Legs_slot.png'); }
-        #boots-slot { top: 147px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Boots_slot.png'); }
+        #boots-slot { top: 147px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Feet_slot.png'); }
 
         .inventory-tab {
             width: 200px;
@@ -94,7 +96,7 @@
 
         .hold-ring {
             position: absolute; width: 34px; height: 34px; border-radius: 50%;
-            pointer-events: none; opacity: 0;
+            pointer-events: none; opacity: 0; z-index: 10;
         }
 
         .hold-ring-fill {
@@ -113,7 +115,7 @@
         }
 
         .chat-container {
-            width: 410px; height: 80px;
+            width: 410px; height: 85px;
             background-color: #726451; border: 3px solid #3e3529;
             margin-top: 10px; padding: 5px 10px; box-sizing: border-box;
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
@@ -211,11 +213,21 @@
             { name: 'Dragon Claws', img: 'https://oldschool.runescape.wiki/images/Dragon_claws.png', type: 'weapon', ex: 'Viciously sharp claws.' },
             { name: 'Primordial Boots', img: 'https://oldschool.runescape.wiki/images/Primordial_boots.png', type: 'boots', ex: 'Powered by the soul of Cerberus.' },
             { name: 'Masori Body', img: 'https://oldschool.runescape.wiki/images/Masori_body_%28f%29.png', type: 'body', ex: 'Fortified armor of the desert raiders.' },
+            { name: 'Masori Chaps', img: 'https://oldschool.runescape.wiki/images/Masori_chaps_%28f%29.png', type: 'legs', ex: 'Masterfully crafted desert leg protection.' },
             { name: 'Neitiznot Faceguard', img: 'https://oldschool.runescape.wiki/images/Neitiznot_faceguard.png', type: 'head', ex: 'The ultimate protection for a warrior.' },
             { name: 'Avernic Defender', img: 'https://oldschool.runescape.wiki/images/Avernic_defender.png', type: 'shield', ex: 'A hilt from the Theatre of Blood.' },
             { name: 'Infernal Cape', img: 'https://oldschool.runescape.wiki/images/Infernal_cape.png', type: 'cape', ex: 'The ultimate symbol of strength.' },
-            { name: 'Soulreaper Axe', img: 'https://oldschool.runescape.wiki/images/Soulreaper_axe.png', type: 'weapon', ex: 'A heavy axe that feasts on souls.' }
-            // ... Add more unique items here up to 25 to avoid any chance of filler.
+            { name: 'Soulreaper Axe', img: 'https://oldschool.runescape.wiki/images/Soulreaper_axe.png', type: 'weapon', ex: 'A heavy axe that feasts on souls.' },
+            { name: 'Zaryte Vambraces', img: 'https://oldschool.runescape.wiki/images/Zaryte_vambraces.png', type: 'shield', ex: 'Ancient vambraces from the Nihil.' },
+            { name: 'Kodai Wand', img: 'https://oldschool.runescape.wiki/images/Kodai_wand.png', type: 'weapon', ex: 'A wand of immense magical power.' },
+            { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon', ex: 'A needle-sharp blade.' },
+            { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', ex: 'Armor forged for the God Wars.' },
+            { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs', ex: 'Strong, heavy leg protection.' },
+            { name: 'Serpentine Helm', img: 'https://oldschool.runescape.wiki/images/Serpentine_helm.png', type: 'head', ex: 'It drips with lethal venom.' },
+            { name: 'Voidwaker', img: 'https://oldschool.runescape.wiki/images/Voidwaker.png', type: 'weapon', ex: 'A blade from the depths of the Wilderness.' },
+            { name: 'Osmumten\'s Fang', img: 'https://oldschool.runescape.wiki/images/Osmumten%27s_fang.png', type: 'weapon', ex: 'A versatile desert weapon.' },
+            { name: 'Eldritch Orb', img: 'https://oldschool.runescape.wiki/images/Eldritch_nightmare_staff.png', type: 'weapon', ex: 'It vibrates with nightmare energy.' },
+            { name: 'Zaryte Crossbow', img: 'https://oldschool.runescape.wiki/images/Zaryte_crossbow.png', type: 'weapon', ex: 'A masterwork of ancient engineering.' }
         ];
 
         function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -224,7 +236,7 @@
         const goals = Array.from({ length: 27 }, (_, i) => {
             const amount = (i + 1) * 100;
             if (i === 0) return { threshold: 100, name: 'Fire Cape', img: 'https://oldschool.runescape.wiki/images/Fire_cape.png', type: 'cape', ex: 'A cape of lava earned in the Fight Caves.' };
-            if (i === 26) return { threshold: 2700, name: 'Max Cape', img: 'https://oldschool.runescape.wiki/images/Max_cape.png', type: 'cape', ex: 'A cape worn by those who have achieved the very best.' };
+            if (i === 26) return { threshold: 2700, name: 'Max Cape', img: 'https://oldschool.runescape.wiki/images/Max_cape.png', type: 'cape', ex: 'The ultimate achievement.' };
             const item = shuffledLoot[i - 1] || { name: 'Dragon Dagger', img: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png', type: 'weapon', ex: 'A sharp classic.' };
             return { threshold: amount, ...item };
         });
@@ -259,7 +271,7 @@
             addChatMessage(goal.ex);
             const slot = document.getElementById(goal.type + '-slot');
             slot.innerHTML = `<img src="${goal.img}" class="item-icon">`;
-            slot.style.backgroundImage = "none"; // Hide ghost icon
+            slot.style.backgroundImage = "none"; 
             equipSound.play();
             if (navigator.vibrate) navigator.vibrate(50);
         }
@@ -267,8 +279,7 @@
         function unequip(type) { 
             const slot = document.getElementById(type + '-slot');
             slot.innerHTML = ''; 
-            // Restore ghost icon
-            const icons = { head: 'Head', cape: 'Cape', body: 'Body', weapon: 'Weapon', shield: 'Shield', legs: 'Legs', boots: 'Boots' };
+            const icons = { head: 'Head', cape: 'Cape', body: 'Body', weapon: 'Weapon', shield: 'Shield', legs: 'Legs', boots: 'Feet' };
             slot.style.backgroundImage = `url('https://oldschool.runescape.wiki/images/${icons[type]}_slot.png')`;
         }
 
@@ -278,7 +289,6 @@
             let icon = 'https://oldschool.runescape.wiki/images/Coins_1.png';
             let displayVal = gpValue >= 1000000 ? Math.floor(gpValue/1000000) + 'M' : (gpValue >= 100000 ? Math.floor(gpValue/1000) + 'K' : gpValue);
             if (gpValue >= 1000000) color = 'green'; else if (gpValue >= 100000) color = 'white';
-
             amountDisplay.innerText = displayVal;
             amountDisplay.className = `stack-amount ${color}`;
             
@@ -296,8 +306,8 @@
             });
 
             cbDisplay.innerText = 3 + Math.floor((unlocked / 27) * 123);
-            const next = goals.find(g => dollars < g.threshold) || {threshold: 2700};
             document.getElementById('xp-bar-fill').style.width = Math.min((dollars/2700)*100, 100) + "%";
+            const next = goals.find(g => dollars < g.threshold) || {threshold: 2700};
             document.getElementById('next-unlock-name').innerText = unlocked >= 27 ? "MAXED!" : `Next: ??? ($${next.threshold})`;
             
             localStorage.setItem('savingsBalance', dollars);
