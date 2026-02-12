@@ -13,55 +13,82 @@
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --osrs-blue: #32a1ff; }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         html, body { overflow: hidden; height: 100%; width: 100%; position: fixed; background-color: #000; margin: 0; }
-        body { color: var(--osrs-orange); display: flex; flex-direction: column; align-items: center; font-family: 'RuneScape UF', sans-serif; user-select: none; padding-top: 20px; }
+        body { color: var(--osrs-orange); display: flex; flex-direction: column; align-items: center; font-family: 'RuneScape UF', sans-serif; user-select: none; padding-top: 10px; }
         
-        .app-shell { display: flex; flex-direction: column; align-items: center; padding: 15px; background: #1a1712; border-radius: 15px; border: 1px solid #333; max-width: 400px; width: 95%; }
+        .app-shell { display: flex; flex-direction: column; align-items: center; padding: 15px; background: #1a1712; border-radius: 15px; border: 1px solid #333; max-width: 400px; width: 95%; position: relative; }
         
-        /* Combat Styles & Stats */
-        .stats-header { width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 20px; color: var(--osrs-yellow); }
+        /* Stats & HP */
+        .stats-header { width: 100%; display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 18px; color: var(--osrs-yellow); }
+        .hp-wrapper { width: 100%; margin-bottom: 8px; }
+        .hp-label { font-size: 14px; display: flex; justify-content: space-between; margin-bottom: 2px; color: #fff; }
+        .hp-bar-bg { width: 100%; height: 10px; background: #333; border: 1px solid #000; border-radius: 2px; overflow: hidden; }
+        .hp-bar-fill { height: 100%; transition: width 0.3s ease; }
+        .player-hp-color { background: #00ff00; }
+        .boss-hp-color { background: #ff0000; }
+
+        /* Combat Styles */
         .combat-styles { display: flex; gap: 5px; width: 100%; margin-bottom: 10px; }
-        .style-btn { flex: 1; background: #3e3529; border: 1px solid #000; color: #fff; font-size: 12px; padding: 5px; cursor: pointer; }
+        .style-btn { flex: 1; background: #3e3529; border: 1px solid #000; color: #fff; font-size: 12px; padding: 5px; cursor: pointer; font-family: 'RuneScape UF'; }
         .style-btn.active { border-color: var(--osrs-yellow); color: var(--osrs-yellow); background: #5d5342; }
 
-        /* Game Containers */
-        .game-view { display: none; gap: 10px; flex-direction: column; align-items: center; }
+        /* Game Views */
+        .game-view { display: none; gap: 10px; flex-direction: column; align-items: center; width: 100%; }
         .game-view.active { display: flex; }
         
         .equip-inv-container { display: flex; gap: 8px; }
         .equip-tab { width: 170px; height: 210px; background: var(--inv-bg); border: 3px solid #3e3529; background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png'); background-size: contain; background-repeat: no-repeat; position: relative; }
         .e-slot { position: absolute; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; background-size: 24px; image-rendering: pixelated; }
         
-        /* Slot Positions */
         #head-slot { top: 10px; left: 68px; } #body-slot { top: 46px; left: 68px; } 
         #weapon-slot { top: 82px; left: 18px; } #shield-slot { top: 82px; left: 118px; }
         #legs-slot { top: 96px; left: 68px; } #boots-slot { top: 132px; left: 68px; }
-        #amulet-slot { top: 28px; left: 118px; background-image: url('https://oldschool.runescape.wiki/images/Neck_slot.png'); }
-        #ring-slot { top: 132px; left: 118px; background-image: url('https://oldschool.runescape.wiki/images/Ring_slot.png'); }
+        #amulet-slot { top: 28px; left: 118px; } #ring-slot { top: 132px; left: 118px; }
 
         .inventory-tab { width: 180px; background: var(--inv-bg); border: 3px solid #3e3529; padding: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
         .slot { width: 38px; height: 38px; background: rgba(0, 0, 0, 0.2); border-radius: 2px; display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; }
         .item-icon { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
         
-        /* Bank View */
-        .bank-container { width: 350px; height: 250px; background: #5d5342; border: 3px solid #3e3529; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+        /* Bank */
+        .bank-container { width: 100%; height: 220px; background: #5d5342; border: 3px solid #3e3529; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+
+        /* Death Overlay */
+        #death-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
+        .reclaim-btn { background: #5d5342; border: 2px solid var(--osrs-yellow); color: var(--osrs-yellow); padding: 10px 20px; cursor: pointer; font-family: 'RuneScape UF'; margin-top: 15px; }
 
         /* Navigation */
-        .nav-tabs { display: flex; gap: 5px; margin-top: 15px; width: 100%; }
-        .nav-btn { flex: 1; padding: 10px; background: #3e3529; border: 1px solid #000; color: #fff; cursor: pointer; font-family: 'RuneScape UF'; }
+        .nav-tabs { display: flex; gap: 5px; margin-top: 10px; width: 100%; }
+        .nav-btn { flex: 1; padding: 8px; background: #3e3529; border: 1px solid #000; color: #fff; cursor: pointer; font-family: 'RuneScape UF'; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
 
-        .chat-container { width: 100%; height: 80px; background: #726451; border: 3px solid #3e3529; margin-top: 10px; padding: 5px; overflow: hidden; font-size: 15px; }
-        .chat-line { color: #000; font-weight: bold; margin-bottom: 2px; }
+        .chat-container { width: 100%; height: 70px; background: #726451; border: 3px solid #3e3529; margin-top: 8px; padding: 5px; overflow-y: hidden; font-size: 14px; }
+        .chat-line { color: #000; font-weight: bold; }
         .yellow { color: var(--osrs-yellow); } .green { color: #00ff00; } .purple { color: #d000ff; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
+    <div id="death-overlay">
+        <img src="https://oldschool.runescape.wiki/images/Gravestone.png" style="width:70px;">
+        <h2 style="color:red;">Oh dear, you are dead!</h2>
+        <p id="reclaim-msg" class="yellow">Fee: 10% of TPC</p>
+        <button class="reclaim-btn" onclick="reclaimItems()">Reclaim Items</button>
+    </div>
+
     <div class="stats-header">
         <div>CB: <span id="cb-lvl">3</span></div>
         <div>TPC: <span id="tpc-bal" class="yellow">0</span></div>
         <div>Slayer: <span id="slayer-lvl">1</span></div>
+    </div>
+
+    <div id="boss-hp-ui" class="hp-wrapper" style="display:none;">
+        <div class="hp-label"><span id="boss-name">Boss</span> <span id="boss-hp-text">100/100</span></div>
+        <div class="hp-bar-bg"><div id="boss-hp-fill" class="hp-bar-fill boss-hp-color" style="width: 100%;"></div></div>
+    </div>
+
+    <div class="hp-wrapper">
+        <div class="hp-label">Hitpoints <span id="player-hp-text">10/10</span></div>
+        <div class="hp-bar-bg"><div id="player-hp-fill" class="hp-bar-fill player-hp-color" style="width: 100%;"></div></div>
     </div>
 
     <div class="combat-styles">
@@ -82,18 +109,17 @@
                 <div id="ring-slot" class="e-slot" onclick="unequip('ring')"></div>
                 <div id="boots-slot" class="e-slot" onclick="unequip('boots')"></div>
             </div>
-            <div class="inventory-tab" id="inv-grid">
-                </div>
+            <div class="inventory-tab" id="inv-grid"></div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:5px;">
-            <button onclick="startRaid()" style="background:#4a0000; border-color:red;">Start Raid</button>
-            <button onclick="getSlayerTask()">Slayer Task</button>
+        <div style="margin-top:10px; display:flex; gap:5px; width:100%;">
+            <button onclick="startRaid()" style="flex:1; background:#4a0000; color:white; font-family:'RuneScape UF';">Raid</button>
+            <button onclick="getSlayerTask()" style="flex:1; font-family:'RuneScape UF';">Slayer</button>
         </div>
     </div>
 
     <div id="view-bank" class="game-view">
         <div class="bank-container" id="bank-grid"></div>
-        <button onclick="depositAll()" style="margin-top:5px; width:100%;">Deposit All</button>
+        <button onclick="depositAll()" style="width:100%; font-family:'RuneScape UF'; margin-top:5px;">Deposit All</button>
     </div>
 
     <div class="chat-container" id="chatbox"></div>
@@ -104,38 +130,35 @@
         <button class="nav-btn" onclick="openShop()">Shop</button>
     </div>
 
-    <div style="margin-top:15px; display:flex; gap:5px; width:100%;">
+    <div style="margin-top:10px; display:flex; gap:5px; width:100%;">
         <input type="number" id="bal-input" placeholder="$ Savings..." style="flex:1; padding:8px; font-family:'RuneScape UF';">
-        <button onclick="manualDeposit()">Deposit</button>
+        <button onclick="manualDeposit()" style="font-family:'RuneScape UF';">Deposit</button>
     </div>
 </div>
 
 <script>
-    // --- DATA ---
     let state = {
-        tpc: 0, dollars: 0, slayerXP: 0, slayerLvl: 1, slayerStreak: 0,
-        inventory: [], 
-        bank: [],
+        tpc: 0, dollars: 0, slayerXP: 0, slayerLvl: 1,
+        inventory: [], bank: [],
         equipped: { head:null, body:null, weapon:null, shield:null, legs:null, boots:null, amulet:null, ring:null },
-        currentStyle: 'accurate',
-        activeTask: null
+        currentStyle: 'accurate', activeTask: null
     };
 
+    let playerMaxHp = 10, playerHp = 10, bossMaxHp = 0, bossHp = 0, combatInterval = null;
+
     const tier1Items = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon', cost: 0 },
-        { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head', cost: 0 },
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', cost: 0 },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs', cost: 0 }
+        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
+        { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
+        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' }
     ];
 
-    const jewelryStore = [
-        { name: 'Amulet of Torture', img: 'https://oldschool.runescape.wiki/images/Amulet_of_torture.png', type: 'amulet', cost: 60000 },
+    const shopItems = [
+        { name: 'Shark', img: 'https://oldschool.runescape.wiki/images/Shark.png', type: 'food', cost: 500 },
         { name: 'Blood Fury', img: 'https://oldschool.runescape.wiki/images/Amulet_of_blood_fury.png', type: 'amulet', cost: 85000 },
-        { name: 'Ultor Ring', img: 'https://oldschool.runescape.wiki/images/Ultor_ring.png', type: 'ring', cost: 120000 },
-        { name: 'Lightbearer', img: 'https://oldschool.runescape.wiki/images/Lightbearer.png', type: 'ring', cost: 40000 }
+        { name: 'Ultor Ring', img: 'https://oldschool.runescape.wiki/images/Ultor_ring.png', type: 'ring', cost: 120000 }
     ];
 
-    // --- CORE LOGIC ---
     function switchView(viewId, btn) {
         document.querySelectorAll('.game-view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -144,9 +167,9 @@
         if(viewId === 'bank') renderBank();
     }
 
-    function addChatMessage(text, colorClass = '') {
+    function addChatMessage(text, color = '') {
         const div = document.createElement('div');
-        div.className = `chat-line ${colorClass}`;
+        div.className = `chat-line ${color}`;
         div.innerText = text;
         const cb = document.getElementById('chatbox');
         cb.appendChild(div);
@@ -159,54 +182,76 @@
         if(val <= 0) return;
         state.dollars += val;
         state.tpc += (val * 1000);
-        addChatMessage(`Deposited $${val}. Gained ${val*1000} TPC!`, 'green');
-        new Audio('https://oldschool.runescape.wiki/images/Level_up_jingle.wav').play();
         checkUnlocks();
         updateUI();
+        document.getElementById('bal-input').value = '';
+        addChatMessage(`Saved $${val}! +${val*1000} TPC.`, 'green');
     }
 
     function checkUnlocks() {
-        const unlockIdx = Math.floor(state.dollars / 20);
-        if(unlockIdx > 0 && unlockIdx <= tier1Items.length) {
-            const item = tier1Items[unlockIdx - 1];
-            if(!state.inventory.find(i => i.name === item.name) && !state.bank.find(i => i.name === item.name)) {
+        const idx = Math.floor(state.dollars / 20);
+        if(idx > 0 && idx <= tier1Items.length) {
+            const item = tier1Items[idx-1];
+            if(!state.inventory.find(i=>i.name===item.name) && !state.bank.find(i=>i.name===item.name)) {
                 state.inventory.push(item);
-                addChatMessage(`Unlocked: ${item.name}!`, 'yellow');
+                addChatMessage(`Unlocked: ${item.name}`, 'yellow');
             }
         }
     }
 
-    // --- COMBAT & RAID ---
-    function setStyle(s) {
-        state.currentStyle = s;
-        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('style-' + s.substring(0,3)).classList.add('active');
-    }
-
     function startRaid() {
-        addChatMessage("Entering Raid... 1/1000 chance for Purple!", "purple");
-        // Simulated Raid Gauntlet
-        setTimeout(() => {
-            const purple = Math.floor(Math.random() * 1000) === 1;
-            state.tpc += 25000;
-            if(purple) {
-                const loot = jewelryStore[2]; // Ultor Ring
-                state.bank.push(loot);
-                addChatMessage("✨ RAID PURPLE: " + loot.name, "purple");
-            } else {
-                addChatMessage("Raid Complete. Gained 25,000 TPC.");
-            }
+        if(combatInterval) return;
+        bossMaxHp = 1000; bossHp = 1000;
+        document.getElementById('boss-name').innerText = "Great Olm";
+        document.getElementById('boss-hp-ui').style.display = 'block';
+        
+        combatInterval = setInterval(() => {
+            // Player Hit
+            let hit = Math.floor(Math.random() * (5 + state.slayerLvl));
+            if(state.currentStyle === 'aggressive') hit += 3;
+            bossHp -= hit;
+
+            // Boss Hit
+            let bHit = Math.floor(Math.random() * 8);
+            if(state.currentStyle === 'defensive') bHit = Math.floor(bHit * 0.5);
+            playerHp -= bHit;
+
+            if(playerHp <= 0) { playerHp = 0; endCombat(false); handleDeath(); }
+            else if(bossHp <= 0) { bossHp = 0; endCombat(true); }
             updateUI();
-        }, 1500);
+        }, 1200);
     }
 
-    function getSlayerTask() {
-        const monsters = ["Gargoyles", "Abyssal Demons", "Nechryael"];
-        state.activeTask = { name: monsters[Math.floor(Math.random()*3)], count: 10 + Math.floor(Math.random()*10) };
-        addChatMessage(`New Task: ${state.activeTask.count}x ${state.activeTask.name}`);
+    function endCombat(won) {
+        clearInterval(combatInterval);
+        combatInterval = null;
+        document.getElementById('boss-hp-ui').style.display = 'none';
+        if(won) {
+            state.tpc += 20000;
+            if(Math.floor(Math.random()*1000) === 1) {
+                state.bank.push(shopItems[2]);
+                addChatMessage("✨ 1/1000 RAID PURPLE!", "purple");
+            }
+            addChatMessage("Victory! +20,000 TPC.");
+        }
     }
 
-    // --- BANKING ---
+    function handleDeath() {
+        document.getElementById('death-overlay').style.display = 'flex';
+        const fee = Math.max(500, Math.floor(state.tpc * 0.10));
+        document.getElementById('reclaim-msg').innerText = `Fee: ${fee.toLocaleString()} TPC (10%)`;
+    }
+
+    function reclaimItems() {
+        const fee = Math.max(500, Math.floor(state.tpc * 0.10));
+        if(state.tpc >= fee) {
+            state.tpc -= fee;
+            playerHp = playerMaxHp;
+            document.getElementById('death-overlay').style.display = 'none';
+            updateUI();
+        } else { alert("Not enough TPC!"); }
+    }
+
     function renderInv() {
         const grid = document.getElementById('inv-grid');
         grid.innerHTML = '';
@@ -219,10 +264,12 @@
                 div.onclick = () => {
                     if(document.getElementById('view-bank').classList.contains('active')) {
                         state.bank.push(state.inventory.splice(i, 1)[0]);
-                        renderInv(); renderBank();
-                    } else {
-                        equipItem(i);
-                    }
+                        updateUI();
+                    } else if(item.type === 'food') {
+                        playerHp = Math.min(playerMaxHp, playerHp + 20);
+                        state.inventory.splice(i, 1);
+                        updateUI();
+                    } else { equipItem(i); }
                 };
             }
             grid.appendChild(div);
@@ -239,79 +286,70 @@
             div.onclick = () => {
                 if(state.inventory.length < 12) {
                     state.inventory.push(state.bank.splice(i, 1)[0]);
-                    renderInv(); renderBank();
+                    updateUI();
                 }
             };
             grid.appendChild(div);
         });
     }
 
-    function depositAll() {
-        state.bank = [...state.bank, ...state.inventory];
-        state.inventory = [];
-        renderInv(); renderBank();
-    }
+    function depositAll() { state.bank = [...state.bank, ...state.inventory]; state.inventory = []; updateUI(); }
 
-    // --- EQUIPMENT ---
-    function equipItem(index) {
-        const item = state.inventory[index];
-        const oldItem = state.equipped[item.type];
+    function equipItem(idx) {
+        const item = state.inventory[idx];
+        const old = state.equipped[item.type];
         state.equipped[item.type] = item;
-        state.inventory.splice(index, 1);
-        if(oldItem) state.inventory.push(oldItem);
-        addChatMessage(`Equipped ${item.name}`);
+        state.inventory.splice(idx, 1);
+        if(old) state.inventory.push(old);
         updateUI();
     }
 
     function unequip(type) {
-        if(!state.equipped[type] || state.inventory.length >= 12) return;
-        state.inventory.push(state.equipped[type]);
-        state.equipped[type] = null;
-        updateUI();
+        if(state.equipped[type] && state.inventory.length < 12) {
+            state.inventory.push(state.equipped[type]);
+            state.equipped[type] = null;
+            updateUI();
+        }
     }
 
     function openShop() {
-        let choice = prompt("Jewelry Shop:\n1. Blood Fury (85k)\n2. Ultor Ring (120k)\n3. Amulet of Torture (60k)\nEnter Number:");
-        let item = null;
-        if(choice == "1") item = jewelryStore[1];
-        if(choice == "2") item = jewelryStore[2];
-        if(choice == "3") item = jewelryStore[0];
-        
-        if(item && state.tpc >= item.cost) {
-            state.tpc -= item.cost;
-            state.bank.push(item);
-            addChatMessage(`Bought ${item.name}! Sent to bank.`, 'green');
-            updateUI();
-        } else if (item) {
-            alert("Not enough TPC!");
+        let msg = "Shop:\n";
+        shopItems.forEach((item, i) => msg += `${i+1}. ${item.name} (${item.cost} TPC)\n`);
+        let choice = prompt(msg);
+        if(choice && shopItems[choice-1]) {
+            let item = shopItems[choice-1];
+            if(state.tpc >= item.cost) {
+                state.tpc -= item.cost;
+                state.bank.push(item);
+                updateUI();
+            } else { alert("No TPC!"); }
         }
     }
 
     function updateUI() {
+        playerMaxHp = 10 + Math.floor(state.dollars / 5);
         document.getElementById('tpc-bal').innerText = state.tpc.toLocaleString();
-        document.getElementById('cb-lvl').innerText = 3 + (Math.floor(state.dollars / 10));
+        document.getElementById('cb-lvl').innerText = 3 + Math.floor(state.dollars / 10);
+        document.getElementById('player-hp-text').innerText = `${playerHp}/${playerMaxHp}`;
+        document.getElementById('player-hp-fill').style.width = (playerHp/playerMaxHp)*100 + "%";
         
-        // Render Equipped
+        if(bossMaxHp > 0) {
+            document.getElementById('boss-hp-text').innerText = `${bossHp}/${bossMaxHp}`;
+            document.getElementById('boss-hp-fill').style.width = (bossHp/bossMaxHp)*100 + "%";
+        }
+
         for(let slot in state.equipped) {
             const el = document.getElementById(`${slot}-slot`);
-            if(state.equipped[slot]) {
-                el.innerHTML = `<img src="${state.equipped[slot].img}" class="item-icon">`;
-                el.style.backgroundImage = 'none';
-            } else {
-                el.innerHTML = '';
-                el.style.backgroundImage = ''; // Resets to CSS ghost icon
-            }
+            el.innerHTML = state.equipped[slot] ? `<img src="${state.equipped[slot].img}" class="item-icon">` : '';
         }
         renderInv();
-        localStorage.setItem('osrs_save_state', JSON.stringify(state));
+        localStorage.setItem('osrs_save_v2', JSON.stringify(state));
     }
 
-    // Boot
-    const saved = localStorage.getItem('osrs_save_state');
+    const saved = localStorage.getItem('osrs_save_v2');
     if(saved) state = JSON.parse(saved);
+    playerHp = 10 + Math.floor(state.dollars / 5);
     updateUI();
-    addChatMessage("Welcome back, adventurer.");
 </script>
-
 </body>
 </html>
