@@ -3,181 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSRS V48 - Safari Fix</title>
+    <title>OSRS Tracker V49</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg: #1a1712; }
         
-        /* THE CRITICAL FIX: Stops Safari from bouncing/blocking clicks */
+        /* iPhone Air Safari Reset */
         html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%;
+            margin: 0; padding: 0; width: 100%; height: 100dvh;
             background: #000; overflow: hidden; touch-action: manipulation;
             font-family: 'RuneScape UF', sans-serif;
         }
 
         .container {
             display: flex; flex-direction: column;
-            height: 100dvh; max-width: 500px; margin: 0 auto;
-            background: var(--bg); position: relative;
+            height: 100%; max-width: 500px; margin: 0 auto;
+            background: var(--bg);
         }
 
-        /* 1. STICKY TOP NAV (Highest Z-Index) */
-        .top-bar {
+        /* Top-Loaded Navigation to avoid Safari Bottom Bar */
+        .nav {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            height: 70px; z-index: 999; border-bottom: 3px solid var(--osrs-orange);
-            background: #000;
+            height: 60px; border-bottom: 2px solid var(--osrs-orange);
+            background: #000; z-index: 100;
         }
-        .tab-btn {
+        .tab {
             background: #3e3529; color: #fff; border: 1px solid #111;
-            font-size: 18px; cursor: pointer !important; font-family: 'RuneScape UF';
-            -webkit-tap-highlight-color: transparent;
+            font-size: 18px; cursor: pointer; font-family: 'RuneScape UF';
         }
-        .tab-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
+        .tab.active { background: var(--osrs-orange); color: #000; }
 
-        /* 2. STATS & INPUT AREA */
-        .stats-strip { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); font-size: 14px; }
-        .input-row { display: flex; padding: 10px; gap: 10px; background: #222; }
+        .input-box {
+            display: flex; padding: 10px; gap: 8px; background: #222;
+            border-bottom: 1px solid #444;
+        }
         input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #555; font-size: 16px; border-radius: 4px; }
-        .add-btn { background: #006400; color: #fff; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer !important; }
+        .btn { background: #006400; color: #fff; border: none; padding: 0 15px; border-radius: 4px; font-family: 'RuneScape UF'; }
 
-        /* 3. CONTENT (Centered & Visible) */
-        .content { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
+        .view { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
         .pane { display: none; }
         .pane.active { display: block; }
 
-        /* INVENTORY GRID */
-        .inv-grid { 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; 
+        .inv { 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; 
             background: #4e4435; padding: 10px; border: 3px solid #3e3529; 
             width: 260px; margin: 0 auto;
         }
         .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
-        .item-img { width: 80%; height: 80%; object-fit: contain; }
+        .item { width: 85%; height: 85%; object-fit: contain; }
 
-        .chat { background: #726451; padding: 8px; font-size: 15px; border: 2px solid #3e3529; margin-top: 15px; min-height: 60px; color: #fff; }
+        .log { background: #726451; padding: 8px; font-size: 15px; border: 2px solid #3e3529; margin-top: 15px; min-height: 60px; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-bar">
-        <button class="tab-btn active" onclick="setTab('combat')">COMBAT</button>
-        <button class="tab-btn" onclick="setTab('shop')">SHOP</button>
-        <button class="tab-btn" onclick="setTab('stats')">STATS</button>
+    <div class="nav">
+        <button class="tab active" onclick="setTab('c', this)">COMBAT</button>
+        <button class="tab" onclick="setTab('s', this)">SHOP</button>
+        <button class="tab" onclick="setTab('x', this)">STATS</button>
     </div>
 
-    <div class="stats-strip">
-        <div>Armor Bank: $<span id="arm-val">0</span></div>
-        <div>Wep Bank: $<span id="wep-val">0</span></div>
+    <div class="input-box">
+        <input type="number" id="v" placeholder="Deposit $">
+        <button class="btn" onclick="add()">ADD</button>
     </div>
 
-    <div class="input-row">
-        <input type="number" id="cash" placeholder="Enter $ amount">
-        <button class="add-btn" onclick="deposit()">DEPOSIT</button>
-    </div>
-
-    <div class="content">
-        <div id="p-combat" class="pane active">
-            <div class="inv-grid" id="grid"></div>
-            <div class="chat" id="chat">System: V48 Loaded. Rune Platebody fix active.</div>
+    <div class="view">
+        <div id="p-c" class="pane active">
+            <div class="inv" id="g"></div>
+            <div class="log" id="l">System: V49 Air-Safe Ready.</div>
         </div>
 
-        <div id="p-shop" class="pane">
-            <div style="color:var(--osrs-yellow); text-align:center; padding-top:20px;">
-                Items unlock automatically!<br><br>
-                Next Armor Step: $<span id="next-arm-text">20</span><br>
-                Next Weapon Step: $25
-            </div>
+        <div id="p-s" class="pane" style="color:var(--osrs-yellow); text-align:center;">
+            Rewards Auto-Unlock!<br><br>
+            Next Armor: $<span id="next-a">20</span><br>
+            Next Weapon: $25
         </div>
 
-        <div id="p-stats" class="pane">
+        <div id="p-x" class="pane">
             <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
-                <p>Armor Unlocks: <span id="arm-count">0</span></p>
-                <p>Weapon Unlocks: <span id="wep-count">0</span></p>
-                <button onclick="wipe()" style="color:red; background:none; border:1px solid red; width:100%; padding:8px;">WIPE ALL DATA</button>
+                <p>Arm Unlocks: <span id="c-a">0</span></p>
+                <p>Wep Unlocks: <span id="c-w">0</span></p>
+                <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:8px;">RESET</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const KEY = 'OSRS_V48_SAFE';
-    let s = { arm:0, wep:0, aI:0, wI:0, inv: [] };
-
-    const ARMOR = [
-        { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
-        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
+    let d = { a:0, w:0, ai:0, wi:0, i:[] };
+    const AR = [
+        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
+        { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
+        { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
+        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
+    ];
+    const WP = [
+        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
+        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' }
     ];
 
-    const WEAPONS = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' }
-    ];
+    function getA() { return d.ai < 4 ? 20 : d.ai < 8 ? 40 : 70; }
 
-    function getArmCost() {
-        if (s.aI < 4) return 20;
-        if (s.aI < 8) return 40;
-        return 70;
-    }
-
-    function deposit() {
-        let val = parseInt(document.getElementById('cash').value) || 0;
+    function add() {
+        let val = parseInt(document.getElementById('v').value) || 0;
         if (val <= 0) return;
-        s.arm += val; s.wep += val;
+        d.a += val; d.w += val;
 
-        let aCost = getArmCost();
-        while (s.aI < ARMOR.length && s.arm >= aCost) {
-            s.inv.push(ARMOR[s.aI]);
-            log("Unlocked Armor: " + ARMOR[s.aI].name, "yellow");
-            s.arm -= aCost; s.aI++; aCost = getArmCost();
+        let cost = getA();
+        while (d.ai < AR.length && d.a >= cost) {
+            d.i.push(AR[d.ai]);
+            msg("Got: " + AR[d.ai].n, "yellow");
+            d.a -= cost; d.ai++; cost = getA();
         }
-
-        while (s.wI < WEAPONS.length && s.wep >= 25) {
-            s.inv.push(WEAPONS[s.wI]);
-            log("Unlocked Weapon: " + WEAPONS[s.wI].name, "#00ff00");
-            s.wep -= 25; s.wI++;
+        while (d.wi < WP.length && d.w >= 25) {
+            d.i.push(WP[d.wi]);
+            msg("Got: " + WP[d.wi].n, "#0f0");
+            d.w -= 25; d.wi++;
         }
-        document.getElementById('cash').value = '';
-        save(); refresh();
+        document.getElementById('v').value = '';
+        save(); draw();
     }
 
-    function refresh() {
-        document.getElementById('arm-val').innerText = s.arm;
-        document.getElementById('wep-val').innerText = s.wep;
-        document.getElementById('arm-count').innerText = s.aI;
-        document.getElementById('wep-count').innerText = s.wI;
-        document.getElementById('next-arm-text').innerText = getArmCost();
-
-        const g = document.getElementById('grid');
-        g.innerHTML = '';
-        for(let i=0; i<28; i++) {
-            const d = document.createElement('div'); d.className = 'slot';
-            if(s.inv[i]) d.innerHTML = `<img src="${s.inv[i].img}" class="item-img">`;
-            g.appendChild(d);
+    function draw() {
+        document.getElementById('c-a').innerText = d.ai;
+        document.getElementById('c-w').innerText = d.wi;
+        document.getElementById('next-a').innerText = getA();
+        const g = document.getElementById('g'); g.innerHTML = '';
+        for(let j=0; j<28; j++) {
+            const s = document.createElement('div'); s.className = 'slot';
+            if(d.i[j]) s.innerHTML = `<img src="${d.i[j].u}" class="item">`;
+            g.appendChild(s);
         }
     }
 
-    function setTab(name) {
-        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('p-'+name).classList.add('active');
-        event.currentTarget.classList.add('active');
+    function setTab(p, b) {
+        document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.getElementById('p-'+p).classList.add('active');
+        b.classList.add('active');
     }
 
-    function log(m, c) { 
-        const b = document.getElementById('chat'); 
-        b.innerHTML += `<div style="color:${c}">* ${m}</div>`; 
-        b.scrollTop = b.scrollHeight; 
-    }
+    function msg(m, c) { const l = document.getElementById('l'); l.innerHTML += `<div style="color:${c}">> ${m}</div>`; l.scrollTop = l.scrollHeight; }
+    function save() { localStorage.setItem('OSRS_V49', JSON.stringify(d)); }
+    function load() { const saved = localStorage.getItem('OSRS_V49'); if(saved) d = JSON.parse(saved); }
 
-    function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
-    function load() { const d = localStorage.getItem(KEY); if(d) s = JSON.parse(d); }
-    function wipe() { localStorage.removeItem(KEY); location.reload(); }
-
-    load(); refresh();
+    load(); draw();
 </script>
 </body>
 </html>
