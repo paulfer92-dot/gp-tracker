@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Global Shop</title>
+    <title>OSRS Tracker - Shop Points Edition</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -11,7 +11,7 @@
         body { background: #000; color: var(--osrs-orange); font-family: 'RuneScape UF', sans-serif; margin: 0; display: flex; justify-content: center; overflow: hidden; }
         .app-shell { width: 98%; max-width: 420px; height: 98vh; background: #1a1712; border: 1px solid #333; padding: 12px; display: flex; flex-direction: column; }
         .stats-header { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid #3e3529; padding-bottom: 10px; margin-bottom: 10px; }
-        .tpc-color { color: var(--osrs-yellow); font-size: 20px; }
+        .sp-color { color: var(--osrs-yellow); font-size: 20px; }
         .mil-color { color: #00ff00; text-align: right; font-size: 20px; }
         .view-pane { display: none; flex-grow: 1; overflow-y: auto; flex-direction: column; }
         .view-pane.active { display: flex; }
@@ -28,21 +28,20 @@
         .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; background: #3e3529; border: 2px solid #000; }
         .skill-card { background: #4e4435; padding: 8px; border: 1px solid #000; }
         .nav-tabs { display: flex; gap: 2px; margin-top: 5px; flex-shrink: 0; }
-        .nav-btn { flex: 1; padding: 10px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 14px; }
+        .nav-btn { flex: 1; padding: 10px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 13px; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
         .chat-container { height: 60px; background: #726451; border: 2px solid var(--slot-border); margin: 5px 0; padding: 5px; overflow-y: auto; font-size: 14px; color: #fff; flex-shrink: 0; }
         .input-group { margin-top: auto; display: flex; gap: 5px; flex-shrink: 0; }
         input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
         .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
         .shop-grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
-        .shop-item-card { background: rgba(0,0,0,0.3); border: 1px solid #5d4d37; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; min-height: 85px; cursor: pointer; text-align: center; }
-        .price-tag { font-size: 12px; margin-top: 4px; font-weight: bold; }
+        .shop-item-card { background: rgba(0,0,0,0.3); border: 1px solid #5d4d37; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; min-height: 90px; cursor: pointer; text-align: center; }
     </style>
 </head>
 <body>
 <div class="app-shell">
     <div class="stats-header">
-        <div class="tpc-color">TPC: <span id="tpc-bal">0</span></div>
+        <div class="sp-color">SP: <span id="sp-bal">0</span></div>
         <div class="mil-color">Mil: <span id="armor-mil">0</span>k</div>
     </div>
 
@@ -61,10 +60,10 @@
             <div class="inventory-tab" id="inv-grid"></div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:10px;">
-            <button class="nav-btn" onclick="train('att')">Train Attack</button>
-            <button class="nav-btn" onclick="train('def')">Train Defense</button>
-            <button class="nav-btn" onclick="train('slayer')">Slayer Task</button>
-            <button class="nav-btn" onclick="train('raid')" style="background:#4e1a1a;">Start Raid</button>
+            <button class="nav-btn" onclick="train('att')">Attack</button>
+            <button class="nav-btn" onclick="train('def')">Defense</button>
+            <button class="nav-btn" onclick="train('slayer')">Slayer</button>
+            <button class="nav-btn" onclick="train('raid')" style="background:#4e1a1a;">Raid</button>
         </div>
     </div>
 
@@ -80,11 +79,10 @@
     </div>
 
     <div id="view-shop" class="view-pane">
-        <div style="text-align:center; margin-bottom:5px; color:#fff;">- ALL SHOP ITEMS -</div>
         <div id="shop-list" class="shop-grid-container"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Shop updated: Items always visible!</div>
+    <div class="chat-container" id="chatbox">Currency renamed to Shop Points (SP). Shop expanded!</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -100,11 +98,11 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_SHOP_V14';
+    const STORAGE_KEY = 'OSRS_SHOP_POINTS_V16';
     const STARTER_WEAPON = { name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} };
 
     let state = {
-        tpc: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
+        sp: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
         xp: { att: 0, str: 0, def: 0, hp: 1200, slay: 0 },
         inventory: [Object.assign({}, STARTER_WEAPON)], bank: [],
         equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
@@ -114,9 +112,7 @@
         { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', req: {def: 40} },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body', req: {def: 60} },
         { name: 'Dharok Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body', req: {def: 70} },
-        { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs', req: {def: 70} },
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', req: {def: 65} },
-        { name: 'Justiciar Chestguard', img: 'https://oldschool.runescape.wiki/images/Justiciar_chestguard.png', type: 'body', req: {def: 75} },
         { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', req: {def: 80} }
     ];
 
@@ -124,21 +120,22 @@
         { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon', req: {att: 40} },
         { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon', req: {att: 60} },
         { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon', req: {att: 70} },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon', req: {att: 70} },
-        { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon', req: {att: 80} },
         { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon', req: {att: 80} }
     ];
 
     const globalShopItems = [
-        { name:'Glory', cost:5000, img:'https://oldschool.runescape.wiki/images/Amulet_of_glory.png', type:'amulet' },
-        { name:'Wealth', cost:5000, img:'https://oldschool.runescape.wiki/images/Ring_of_wealth.png', type:'ring' },
         { name:'Shark', cost:500, img:'https://oldschool.runescape.wiki/images/Shark.png', type:'food' },
-        { name:'Fury', cost:45000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' },
-        { name:'Berserker Ring', cost:15000, img:'https://oldschool.runescape.wiki/images/Berserker_ring.png', type:'ring' },
-        { name:'Dragon Boots', cost:25000, img:'https://oldschool.runescape.wiki/images/Dragon_boots.png', type:'feet' },
-        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' },
-        { name:'Torture', cost:100000, img:'https://oldschool.runescape.wiki/images/Amulet_of_torture.png', type:'amulet' },
-        { name:'B-Gloves', cost:25000, img:'https://oldschool.runescape.wiki/images/Barrows_gloves.png', type:'shield' }
+        { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png', type:'food' },
+        { name:'Super Combat', cost:15000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png', type:'potion' },
+        { name:'Archers Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Archers_ring.png', type:'ring' },
+        { name:'Seers Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Seers_ring.png', type:'ring' },
+        { name:'Warrior Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Warrior_ring.png', type:'ring' },
+        { name:'Suffering', cost:65000, img:'https://oldschool.runescape.wiki/images/Ring_of_suffering.png', type:'ring' },
+        { name:'Occult', cost:48000, img:'https://oldschool.runescape.wiki/images/Occult_necklace.png', type:'amulet' },
+        { name:'Anguish', cost:55000, img:'https://oldschool.runescape.wiki/images/Necklace_of_anguish.png', type:'amulet' },
+        { name:'Tormented', cost:52000, img:'https://oldschool.runescape.wiki/images/Tormented_bracelet.png', type:'shield' },
+        { name:'Amulet Fury', cost:30000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' },
+        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' }
     ];
 
     function xpToLvl(xp) { return Math.max(1, Math.floor(Math.pow(xp, 0.3))); }
@@ -148,15 +145,17 @@
         if(val <= 0) return;
         state.armorMil += (val * 1000);
         state.weaponMil += (val * 1000);
-        
+
         while(state.armorMil >= 20000 && state.pieceIndex < armorProgression.length) {
-            state.bank.push({...armorProgression[state.pieceIndex]});
-            addChatMessage(`Bank Unlock: ${armorProgression[state.pieceIndex].name}`, "yellow");
+            let item = {...armorProgression[state.pieceIndex]};
+            if(state.inventory.length < 28) { state.inventory.push(item); addChatMessage(`Unlocked: ${item.name}`, "yellow"); }
+            else { state.bank.push(item); addChatMessage(`Unlocked: ${item.name} (Bank)`, "orange"); }
             state.pieceIndex++; state.armorMil -= 20000;
         }
         while(state.weaponMil >= 25000 && state.weaponIndex < weaponProgression.length) {
-            state.bank.push({...weaponProgression[state.weaponIndex]});
-            addChatMessage(`Bank Unlock: ${weaponProgression[state.weaponIndex].name}`, "#00ffff");
+            let item = {...weaponProgression[state.weaponIndex]};
+            if(state.inventory.length < 28) { state.inventory.push(item); addChatMessage(`Unlocked: ${item.name}`, "#00ffff"); }
+            else { state.bank.push(item); addChatMessage(`Unlocked: ${item.name} (Bank)`, "orange"); }
             state.weaponIndex++; state.weaponMil -= 25000;
         }
         save(); updateUI();
@@ -164,35 +163,32 @@
     }
 
     function train(mode) {
-        if(mode === 'att') { state.xp.att += 500; state.xp.hp += 150; state.tpc += 200; }
-        if(mode === 'def') { state.xp.def += 500; state.xp.hp += 150; state.tpc += 200; }
-        if(mode === 'slayer') { state.xp.att += 300; state.xp.def += 300; state.xp.slay += 600; state.tpc += 700; }
-        if(mode === 'raid') { state.xp.att += 3000; state.xp.def += 3000; state.xp.hp += 3000; state.tpc += 3000; }
+        if(mode === 'att') { state.xp.att += 500; state.xp.hp += 150; state.sp += 200; }
+        if(mode === 'def') { state.xp.def += 500; state.xp.hp += 150; state.sp += 200; }
+        if(mode === 'slayer') { state.xp.att += 400; state.xp.def += 400; state.xp.slay += 800; state.sp += 1000; }
+        if(mode === 'raid') { state.xp.att += 4000; state.xp.def += 4000; state.xp.hp += 4000; state.sp += 4000; }
         save(); updateUI();
     }
 
     function renderShop() {
         const list = document.getElementById('shop-list');
-        if(!list) return;
         list.innerHTML = '';
         globalShopItems.forEach(it => {
             const card = document.createElement('div');
             card.className = 'shop-item-card';
-            const canAfford = state.tpc >= it.cost;
+            const canAfford = state.sp >= it.cost;
             card.innerHTML = `
                 <img src="${it.img}" class="item-icon">
-                <div style="font-size:10px; color:#fff;">${it.name}</div>
-                <div class="price-tag" style="color:${canAfford ? '#00ff00' : '#ff0000'}">${it.cost.toLocaleString()}</div>
+                <div style="font-size:10px; color:#fff; height:20px;">${it.name}</div>
+                <div style="font-size:12px; color:${canAfford ? '#00ff00' : '#ff0000'}">${it.cost.toLocaleString()} SP</div>
             `;
             card.onclick = () => {
-                if(!canAfford) return addChatMessage("Need more TPC!", "red");
-                if(state.inventory.length >= 28) return addChatMessage("Inventory Full!", "red");
-                
-                state.tpc -= it.cost;
+                if(!canAfford) return addChatMessage("Not enough SP!", "red");
+                if(state.inventory.length >= 28) return addChatMessage("Inv Full!", "red");
+                state.sp -= it.cost;
                 state.inventory.push({...it});
-                addChatMessage(`Bought ${it.name}!`, "green");
-                save(); updateUI();
-                renderShop(); // Refresh price colors
+                addChatMessage(`Bought ${it.name}`, "green");
+                save(); updateUI(); renderShop();
             };
             list.appendChild(card);
         });
@@ -208,7 +204,7 @@
     }
 
     function updateUI() {
-        document.getElementById('tpc-bal').innerText = state.tpc.toLocaleString();
+        document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
         document.getElementById('armor-mil').innerText = state.armorMil.toLocaleString();
         const a=xpToLvl(state.xp.att), d=xpToLvl(state.xp.def), h=xpToLvl(state.xp.hp), l=xpToLvl(state.xp.slay);
         document.getElementById('skills-display').innerHTML = `
@@ -221,9 +217,12 @@
     function equip(idx) {
         const it = state.inventory[idx];
         if(!it) return;
-        if(it.type === 'food') {
-            state.xp.hp += 1500; state.inventory.splice(idx, 1);
-            addChatMessage("Ate Shark: +1500 HP XP", "#00ff00");
+        if(it.type === 'food' || it.type === 'potion') {
+            const bonus = it.type === 'food' ? 2000 : 5000;
+            state.xp.hp += bonus; 
+            if(it.type === 'potion') { state.xp.att += 5000; state.xp.def += 5000; }
+            state.inventory.splice(idx, 1);
+            addChatMessage(`Used ${it.name}: +XP Boost`, "#00ff00");
         } else {
             if(it.req?.def && xpToLvl(state.xp.def) < it.req.def) return addChatMessage(`Need ${it.req.def} Def!`, "red");
             if(it.req?.att && xpToLvl(state.xp.att) < it.req.att) return addChatMessage(`Need ${it.req.att} Att!`, "red");
@@ -257,7 +256,6 @@
     function renderBank() {
         const bGrid = document.getElementById('bank-grid');
         const iGrid = document.getElementById('bank-inv-grid');
-        if(!bGrid || !iGrid) return;
         bGrid.innerHTML = ''; iGrid.innerHTML = '';
         state.bank.forEach((it, i) => {
             const div = document.createElement('div'); div.className = 'slot';
@@ -292,9 +290,7 @@
         cb.scrollTop = cb.scrollHeight;
     }
 
-    load();
-    updateUI();
-    renderShop();
+    load(); updateUI(); renderShop();
 </script>
 </body>
 </html>
