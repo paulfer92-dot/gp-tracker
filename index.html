@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Shop Points Edition</title>
+    <title>OSRS Tracker - Set Progression</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -34,8 +34,6 @@
         .input-group { margin-top: auto; display: flex; gap: 5px; flex-shrink: 0; }
         input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
         .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
-        .shop-grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px; }
-        .shop-item-card { background: rgba(0,0,0,0.3); border: 1px solid #5d4d37; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px; min-height: 90px; cursor: pointer; text-align: center; }
     </style>
 </head>
 <body>
@@ -74,15 +72,14 @@
 
     <div id="view-bank" class="view-pane">
         <div id="bank-grid" class="inventory-tab" style="width:100%; height:180px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
-        <div style="text-align:center; margin: 10px 0; font-size: 12px; color: #fff;">INVENTORY</div>
         <div id="bank-inv-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 
     <div id="view-shop" class="view-pane">
-        <div id="shop-list" class="shop-grid-container"></div>
+        <div id="shop-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px;"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Currency renamed to Shop Points (SP). Shop expanded!</div>
+    <div class="chat-container" id="chatbox">Progression order: Rune > Dragon > Dharok > Bandos > Torva</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -98,43 +95,52 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_SHOP_POINTS_V16';
-    const STARTER_WEAPON = { name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} };
-
+    const STORAGE_KEY = 'OSRS_FIXED_ORDER_V17';
+    
     let state = {
         sp: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
         xp: { att: 0, str: 0, def: 0, hp: 1200, slay: 0 },
-        inventory: [Object.assign({}, STARTER_WEAPON)], bank: [],
+        inventory: [{ name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} }], 
+        bank: [],
         equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
     };
 
     const armorProgression = [
+        // RUNE SET
+        { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head', req: {def: 40} },
         { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', req: {def: 40} },
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs', req: {def: 40} },
+        // DRAGON SET
+        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head', req: {def: 60} },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body', req: {def: 60} },
+        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs', req: {def: 60} },
+        // DHAROK SET
+        { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head', req: {def: 70} },
         { name: 'Dharok Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body', req: {def: 70} },
+        { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs', req: {def: 70} },
+        // BANDOS SET
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', req: {def: 65} },
-        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', req: {def: 80} }
+        { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs', req: {def: 65} },
+        // TORVA SET
+        { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head', req: {def: 80} },
+        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', req: {def: 80} },
+        { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs', req: {def: 80} }
     ];
 
     const weaponProgression = [
         { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon', req: {att: 40} },
         { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon', req: {att: 60} },
         { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon', req: {att: 70} },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon', req: {att: 70} },
+        { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon', req: {att: 80} },
         { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon', req: {att: 80} }
     ];
 
     const globalShopItems = [
-        { name:'Shark', cost:500, img:'https://oldschool.runescape.wiki/images/Shark.png', type:'food' },
         { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png', type:'food' },
         { name:'Super Combat', cost:15000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png', type:'potion' },
-        { name:'Archers Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Archers_ring.png', type:'ring' },
-        { name:'Seers Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Seers_ring.png', type:'ring' },
-        { name:'Warrior Ring', cost:45000, img:'https://oldschool.runescape.wiki/images/Warrior_ring.png', type:'ring' },
         { name:'Suffering', cost:65000, img:'https://oldschool.runescape.wiki/images/Ring_of_suffering.png', type:'ring' },
-        { name:'Occult', cost:48000, img:'https://oldschool.runescape.wiki/images/Occult_necklace.png', type:'amulet' },
         { name:'Anguish', cost:55000, img:'https://oldschool.runescape.wiki/images/Necklace_of_anguish.png', type:'amulet' },
-        { name:'Tormented', cost:52000, img:'https://oldschool.runescape.wiki/images/Tormented_bracelet.png', type:'shield' },
-        { name:'Amulet Fury', cost:30000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' },
         { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' }
     ];
 
@@ -146,27 +152,41 @@
         state.armorMil += (val * 1000);
         state.weaponMil += (val * 1000);
 
-        while(state.armorMil >= 20000 && state.pieceIndex < armorProgression.length) {
+        // Armor Unlock Logic
+        while(state.armorMil >= 15000 && state.pieceIndex < armorProgression.length) {
             let item = {...armorProgression[state.pieceIndex]};
-            if(state.inventory.length < 28) { state.inventory.push(item); addChatMessage(`Unlocked: ${item.name}`, "yellow"); }
-            else { state.bank.push(item); addChatMessage(`Unlocked: ${item.name} (Bank)`, "orange"); }
-            state.pieceIndex++; state.armorMil -= 20000;
+            if(state.inventory.length < 28) {
+                state.inventory.push(item);
+                addChatMessage(`Unlocked: ${item.name}`, "yellow");
+            } else {
+                state.bank.push(item);
+                addChatMessage(`Unlocked ${item.name} to Bank (Inv Full)`, "orange");
+            }
+            state.pieceIndex++; state.armorMil -= 15000;
         }
-        while(state.weaponMil >= 25000 && state.weaponIndex < weaponProgression.length) {
+
+        // Weapon Unlock Logic
+        while(state.weaponMil >= 20000 && state.weaponIndex < weaponProgression.length) {
             let item = {...weaponProgression[state.weaponIndex]};
-            if(state.inventory.length < 28) { state.inventory.push(item); addChatMessage(`Unlocked: ${item.name}`, "#00ffff"); }
-            else { state.bank.push(item); addChatMessage(`Unlocked: ${item.name} (Bank)`, "orange"); }
-            state.weaponIndex++; state.weaponMil -= 25000;
+            if(state.inventory.length < 28) {
+                state.inventory.push(item);
+                addChatMessage(`Unlocked: ${item.name}`, "#00ffff");
+            } else {
+                state.bank.push(item);
+                addChatMessage(`Unlocked ${item.name} to Bank (Inv Full)`, "orange");
+            }
+            state.weaponIndex++; state.weaponMil -= 20000;
         }
+        
         save(); updateUI();
         document.getElementById('mil-input').value = '';
     }
 
     function train(mode) {
-        if(mode === 'att') { state.xp.att += 500; state.xp.hp += 150; state.sp += 200; }
-        if(mode === 'def') { state.xp.def += 500; state.xp.hp += 150; state.sp += 200; }
-        if(mode === 'slayer') { state.xp.att += 400; state.xp.def += 400; state.xp.slay += 800; state.sp += 1000; }
-        if(mode === 'raid') { state.xp.att += 4000; state.xp.def += 4000; state.xp.hp += 4000; state.sp += 4000; }
+        if(mode === 'att') { state.xp.att += 500; state.xp.hp += 150; state.sp += 300; }
+        if(mode === 'def') { state.xp.def += 500; state.xp.hp += 150; state.sp += 300; }
+        if(mode === 'slayer') { state.xp.att += 400; state.xp.def += 400; state.xp.slay += 800; state.sp += 1200; }
+        if(mode === 'raid') { state.xp.att += 4000; state.xp.def += 4000; state.sp += 5000; }
         save(); updateUI();
     }
 
@@ -176,19 +196,14 @@
         globalShopItems.forEach(it => {
             const card = document.createElement('div');
             card.className = 'shop-item-card';
+            card.style = "background:rgba(0,0,0,0.3); border:1px solid #5d4d37; padding:5px; text-align:center; cursor:pointer;";
             const canAfford = state.sp >= it.cost;
-            card.innerHTML = `
-                <img src="${it.img}" class="item-icon">
-                <div style="font-size:10px; color:#fff; height:20px;">${it.name}</div>
-                <div style="font-size:12px; color:${canAfford ? '#00ff00' : '#ff0000'}">${it.cost.toLocaleString()} SP</div>
-            `;
+            card.innerHTML = `<img src="${it.img}" class="item-icon"><div style="font-size:10px;">${it.name}</div><div style="color:${canAfford ? '#0ff00' : '#ff0000'}">${it.cost} SP</div>`;
             card.onclick = () => {
-                if(!canAfford) return addChatMessage("Not enough SP!", "red");
-                if(state.inventory.length >= 28) return addChatMessage("Inv Full!", "red");
-                state.sp -= it.cost;
-                state.inventory.push({...it});
-                addChatMessage(`Bought ${it.name}`, "green");
-                save(); updateUI(); renderShop();
+                if(state.sp >= it.cost && state.inventory.length < 28) {
+                    state.sp -= it.cost; state.inventory.push({...it});
+                    save(); updateUI(); renderShop();
+                } else { addChatMessage("Cannot buy!", "red"); }
             };
             list.appendChild(card);
         });
@@ -207,10 +222,7 @@
         document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
         document.getElementById('armor-mil').innerText = state.armorMil.toLocaleString();
         const a=xpToLvl(state.xp.att), d=xpToLvl(state.xp.def), h=xpToLvl(state.xp.hp), l=xpToLvl(state.xp.slay);
-        document.getElementById('skills-display').innerHTML = `
-            <div class="skill-card">Attack: ${a}</div><div class="skill-card">Defense: ${d}</div>
-            <div class="skill-card">HP: ${h}</div><div class="skill-card">Slayer: ${l}</div>
-        `;
+        document.getElementById('skills-display').innerHTML = `<div class="skill-card">Att: ${a}</div><div class="skill-card">Def: ${d}</div><div class="skill-card">HP: ${h}</div><div class="skill-card">Slay: ${l}</div>`;
         renderInv(); renderEquip();
     }
 
@@ -218,11 +230,8 @@
         const it = state.inventory[idx];
         if(!it) return;
         if(it.type === 'food' || it.type === 'potion') {
-            const bonus = it.type === 'food' ? 2000 : 5000;
-            state.xp.hp += bonus; 
-            if(it.type === 'potion') { state.xp.att += 5000; state.xp.def += 5000; }
-            state.inventory.splice(idx, 1);
-            addChatMessage(`Used ${it.name}: +XP Boost`, "#00ff00");
+            state.xp.hp += 3000; state.inventory.splice(idx, 1);
+            addChatMessage(`Used ${it.name}`, "#00ff00");
         } else {
             if(it.req?.def && xpToLvl(state.xp.def) < it.req.def) return addChatMessage(`Need ${it.req.def} Def!`, "red");
             if(it.req?.att && xpToLvl(state.xp.att) < it.req.att) return addChatMessage(`Need ${it.req.att} Att!`, "red");
@@ -254,8 +263,7 @@
     }
 
     function renderBank() {
-        const bGrid = document.getElementById('bank-grid');
-        const iGrid = document.getElementById('bank-inv-grid');
+        const bGrid = document.getElementById('bank-grid'); const iGrid = document.getElementById('bank-inv-grid');
         bGrid.innerHTML = ''; iGrid.innerHTML = '';
         state.bank.forEach((it, i) => {
             const div = document.createElement('div'); div.className = 'slot';
