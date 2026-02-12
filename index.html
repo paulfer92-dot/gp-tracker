@@ -3,121 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V45 Mobile Fix</title>
+    <title>OSRS Tracker V46</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
         
-        /* THE FIX: Prevents Safari from eating the bottom of the app */
         html, body { 
-            margin: 0; padding: 0; 
-            height: 100%; width: 100%; 
-            background: #000; overflow: hidden;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; overflow: hidden; /* Prevents the whole page from bouncing */
             font-family: 'RuneScape UF', sans-serif;
         }
 
-        .top-nav { 
-            height: 60px; background: #000; 
-            border-bottom: 2px solid var(--osrs-orange); 
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            position: relative; z-index: 100;
+        .app-shell {
+            height: 100svh; /* Small Viewport Height - ignores dynamic bars */
+            display: flex; flex-direction: column;
+            max-width: 500px; margin: 0 auto; background: var(--bg-main);
         }
 
-        .nav-btn { 
-            background: #3e3529; color: #fff; border: 1px solid #000; 
-            font-family: 'RuneScape UF'; font-size: 18px; 
-            cursor: pointer; -webkit-appearance: none;
+        /* MOVE EVERYTHING CLICKABLE UP */
+        .top-nav {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            height: 55px; border-bottom: 2px solid var(--osrs-orange);
+        }
+        .nav-btn {
+            background: #3e3529; color: #fff; border: 1px solid #000;
+            font-family: 'RuneScape UF'; font-size: 18px; cursor: pointer;
         }
         .nav-btn.active { background: var(--osrs-orange); color: #000; }
 
-        .app-shell { 
-            height: calc(100dvh - 60px); /* Uses Dynamic Viewport Height */
-            max-width: 500px; margin: 0 auto; 
-            background: var(--bg-main); 
-            display: flex; flex-direction: column;
-            padding-bottom: env(safe-area-inset-bottom); /* iOS Safe Area Fix */
+        .input-section {
+            background: #222; padding: 10px; border-bottom: 1px solid #444;
+            display: flex; gap: 8px;
         }
+        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; border-radius: 4px; }
+        
+        .header-stats { display: flex; justify-content: space-around; padding: 8px; background: #2a241c; color: var(--osrs-yellow); font-size: 16px; }
 
-        .header-stats { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); }
-
-        .view-pane { flex: 1; display: none; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .view-pane { flex: 1; display: none; padding: 15px; overflow-y: auto; }
         .view-pane.active { display: block; }
 
         .inv-grid { 
-            display: grid; grid-template-columns: repeat(4, 55px); gap: 8px; 
+            display: grid; grid-template-columns: repeat(4, 60px); gap: 10px; 
             background: var(--bg-inv); padding: 12px; border: 3px solid #3e3529; 
-            width: fit-content; margin: 0 auto; pointer-events: auto;
+            width: fit-content; margin: 10px auto;
         }
+        .slot { width: 60px; height: 60px; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; justify-content: center; align-items: center; }
+        .item-icon { width: 50px; height: 50px; }
 
-        .slot { 
-            width: 55px; height: 55px; background: rgba(0,0,0,0.5); 
-            border: 1px solid #3e3529; display: flex; 
-            justify-content: center; align-items: center; 
-            position: relative; z-index: 50; cursor: pointer;
-        }
-        .item-icon { width: 45px; height: 45px; pointer-events: none; }
+        .chatbox { background: #726451; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 10px; height: 100px; overflow-y: auto; }
 
-        .chatbox { 
-            background: #726451; padding: 10px; font-size: 16px; 
-            border: 2px solid #3e3529; margin: 10px; height: 80px; overflow-y: auto; 
-        }
-
-        .input-bar { display: flex; padding: 10px; background: #222; gap: 10px; margin-bottom: 10px; }
-        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; }
+        /* Empty space at bottom so Safari doesn't block important stuff */
+        .safari-spacer { height: 80px; pointer-events: none; }
     </style>
 </head>
 <body>
 
-<div class="top-nav">
-    <button class="nav-btn active" id="btn-combat" onclick="setTab('combat')">COMBAT</button>
-    <button class="nav-btn" id="btn-shop" onclick="setTab('shop')">SHOP</button>
-    <button class="nav-btn" id="btn-stats" onclick="setTab('stats')">STATS</button>
-</div>
-
 <div class="app-shell">
-    <div class="header-stats">
-        <div>$ Arm: <span id="arm-bank">0</span></div>
-        <div>$ Wep: <span id="wep-bank">0</span></div>
+    <div class="top-nav">
+        <button class="nav-btn active" id="btn-combat" onclick="setTab('combat')">COMBAT</button>
+        <button class="nav-btn" id="btn-shop" onclick="setTab('shop')">SHOP</button>
+        <button class="nav-btn" id="btn-stats" onclick="setTab('stats')">STATS</button>
     </div>
 
-    <div id="pane-combat" class="active view-pane">
+    <div class="input-section">
+        <input type="number" id="cash-in" placeholder="Deposit $ amount...">
+        <button onclick="deposit()" style="background:#006400; color:white; padding:0 20px; font-family:'RuneScape UF'; border-radius:4px;">ADD</button>
+    </div>
+
+    <div class="header-stats">
+        <div>Arm Bank: $<span id="arm-bank">0</span></div>
+        <div>Wep Bank: $<span id="wep-bank">0</span></div>
+    </div>
+
+    <div id="pane-combat" class="view-pane active">
         <div class="inv-grid" id="main-inv"></div>
     </div>
 
     <div id="pane-shop" class="view-pane">
-        <div id="shop-items"></div>
+        <div id="shop-items" style="color:var(--osrs-yellow)">Items unlock automatically as you deposit!</div>
     </div>
 
     <div id="pane-stats" class="view-pane">
         <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
-            <p>Next Armor: <span id="stat-arm-cost" style="color:#0f0">$20</span></p>
-            <p>Next Weapon: <span style="color:#0f0">$25</span></p>
-            <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET ALL</button>
+            <p>Next Armor: <span id="stat-arm-cost" style="color:#0f0">$20</span> (Total: <span id="stat-arm-count">0</span>)</p>
+            <p>Next Weapon: <span style="color:#0f0">$25</span> (Total: <span id="stat-wep-count">0</span>)</p>
+            <hr>
+            <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; cursor:pointer;">WIPE SAVE</button>
         </div>
     </div>
 
-    <div class="chatbox" id="chat">V45: iPhone Air Layout Fix Applied.</div>
-
-    <div class="input-bar">
-        <input type="number" id="cash-in" placeholder="Deposit...">
-        <button onclick="deposit()" style="background:#006400; color:white; padding:0 15px;">ADD</button>
-    </div>
+    <div class="chatbox" id="chat">System: V46 Online. Inputs moved to Top Zone.</div>
+    <div class="safari-spacer"></div>
 </div>
 
 <script>
-    const KEY = 'OSRS_V45_MOBILE';
+    const KEY = 'OSRS_V46_FINAL';
     let s = { arm:0, wep:0, aI:0, wI:0, inv: [] };
 
+    // V46 Corrected Pool
     const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
+        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' }, // RE-ADDED
         { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
+        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' },
+        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png' },
+        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png' },
+        { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png' },
+        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png' }
     ];
 
     const WEAPON_POOL = [
         { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' }
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' },
+        { name: 'Dragon Dagger', img: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png' }
     ];
 
     function getArmCost() {
@@ -129,34 +129,36 @@
     function deposit() {
         let val = parseInt(document.getElementById('cash-in').value) || 0;
         if (val <= 0) return;
-        s.arm += val; s.wep += val;
+        
+        s.arm += val; 
+        s.wep += val;
 
+        // Armor Logic
         let aPrice = getArmCost();
         while (s.aI < ARMOR_POOL.length && s.arm >= aPrice) {
             s.inv.push(ARMOR_POOL[s.aI]);
-            log("Unlocked: " + ARMOR_POOL[s.aI].name, "yellow");
+            log("Unlocked Armor: " + ARMOR_POOL[s.aI].name, "yellow");
             s.arm -= aPrice; s.aI++; aPrice = getArmCost();
         }
+
+        // Weapon Logic (Strict $25 increments)
         while (s.wI < WEAPON_POOL.length && s.wep >= 25) {
             s.inv.push(WEAPON_POOL[s.wI]);
-            log("Unlocked: " + WEAPON_POOL[s.wI].name, "#00ff00");
+            log("Unlocked Weapon: " + WEAPON_POOL[s.wI].name, "#00ff00");
             s.wep -= 25; s.wI++;
         }
+
         document.getElementById('cash-in').value = '';
         save(); refresh();
-    }
-
-    function setTab(t) {
-        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('pane-'+t).classList.add('active');
-        document.getElementById('btn-'+t).classList.add('active');
     }
 
     function refresh() {
         document.getElementById('arm-bank').innerText = s.arm;
         document.getElementById('wep-bank').innerText = s.wep;
         document.getElementById('stat-arm-cost').innerText = "$" + getArmCost();
+        document.getElementById('stat-arm-count').innerText = s.aI;
+        document.getElementById('stat-wep-count').innerText = s.wI;
+
         const grid = document.getElementById('main-inv');
         grid.innerHTML = '';
         for(let i=0; i<28; i++) {
@@ -166,7 +168,18 @@
         }
     }
 
-    function log(m, c) { const b = document.getElementById('chat'); b.innerHTML += `<div style="color:${c}">${m}</div>`; b.scrollTop = b.scrollHeight; }
+    function setTab(t) {
+        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('pane-'+t).classList.add('active');
+        document.getElementById('btn-'+t).classList.add('active');
+    }
+
+    function log(m, c) { 
+        const b = document.getElementById('chat'); 
+        b.innerHTML += `<div style="color:${c}">• ${m}</div>`; 
+        b.scrollTop = b.scrollHeight; 
+    }
     function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
     function load() { const d = localStorage.getItem(KEY); if(d) s = JSON.parse(d); }
     function wipeData() { localStorage.removeItem(KEY); location.reload(); }
