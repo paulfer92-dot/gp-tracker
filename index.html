@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Persistent Mil</title>
+    <title>OSRS Tracker - Expanded Shop</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -34,7 +34,8 @@
         .input-group { margin-top: auto; display: flex; gap: 5px; flex-shrink: 0; }
         input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
         .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
-        .reset-btn-tap { background: #8b0000; color: #fff; width: 100%; padding: 15px; margin-top: 10px; border: 2px solid #000; font-family: 'RuneScape UF'; cursor: pointer; }
+        .reset-btn-tap { background: #8b0000; color: #fff; width: 100%; padding: 15px; margin-top: 10px; border: 2px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-weight: bold; }
+        .shop-item { width: 100%; height: 70px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--osrs-yellow); }
     </style>
 </head>
 <body>
@@ -67,19 +68,22 @@
 
     <div id="view-stats" class="view-pane">
         <div class="skills-grid" id="skills-display"></div>
-        <button class="reset-btn-tap" onclick="confirmReset()">WIPE ALL DATA (INSTANT)</button>
+        <button class="reset-btn-tap" onclick="confirmReset()">FORCE HARD RESET</button>
     </div>
 
     <div id="view-bank" class="view-pane">
-        <div style="text-align:center; padding: 2px; font-size: 12px;">BANK (TAP TO WITHDRAW)</div>
+        <div style="text-align:center; font-size: 12px;">BANK</div>
         <div id="bank-grid" class="inventory-tab" style="width:100%; height:180px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
-        <div style="text-align:center; padding: 2px; font-size: 12px;">INVENTORY (TAP TO DEPOSIT)</div>
+        <div style="text-align:center; font-size: 12px;">INVENTORY</div>
         <div id="bank-inv-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 
-    <div id="view-shop" class="view-pane"><div id="shop-grid" class="inventory-tab" style="width:100%; height:auto;"></div></div>
+    <div id="view-shop" class="view-pane">
+        <div style="text-align:center; padding-bottom: 5px;">SHOP (COST IN TPC)</div>
+        <div id="shop-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(3, 1fr); gap: 5px;"></div>
+    </div>
 
-    <div class="chat-container" id="chatbox">Persistence active. Mil is now tracked.</div>
+    <div class="chat-container" id="chatbox">Shop Inventory expanded.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -95,15 +99,23 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_PERSISTENT_V6';
+    const STORAGE_KEY = 'OSRS_SHOP_FIX_V8';
     const STARTER_WEAPON = { name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} };
 
     let state = {
         tpc: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
         xp: { att: 0, str: 0, def: 0, hp: 1200, slay: 0 },
-        inventory: [STARTER_WEAPON], bank: [],
+        inventory: [Object.assign({}, STARTER_WEAPON)], bank: [],
         equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
     };
+
+    const shopItems = [
+        { name:'Fury', cost:45000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' },
+        { name:'B-Gloves', cost:25000, img:'https://oldschool.runescape.wiki/images/Barrows_gloves.png', type:'shield' }, // Hand slot mapped to shield for now
+        { name:'Prims', cost:60000, img:'https://oldschool.runescape.wiki/images/Primordial_boots.png', type:'feet' },
+        { name:'B-Ring', cost:15000, img:'https://oldschool.runescape.wiki/images/Berserker_ring.png', type:'ring' },
+        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' }
+    ];
 
     const armorProgression = [
         { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head', req: {def: 40} },
@@ -128,22 +140,17 @@
     function addMil() {
         const dollars = parseInt(document.getElementById('mil-input').value) || 0;
         if(dollars <= 0) return;
-        
-        const addedK = dollars * 1000;
-        state.armorMil += addedK; 
-        state.weaponMil += addedK;
-
+        state.armorMil += (dollars * 1000); state.weaponMil += (dollars * 1000);
         while(state.armorMil >= 20000 && state.pieceIndex < armorProgression.length) {
             state.bank.push({...armorProgression[state.pieceIndex]});
-            addChatMessage(`Unlocked: ${armorProgression[state.pieceIndex].name}`, "yellow");
+            addChatMessage(`Bank Unlock: ${armorProgression[state.pieceIndex].name}`, "yellow");
             state.pieceIndex++; state.armorMil -= 20000;
         }
         while(state.weaponMil >= 25000 && state.weaponIndex < weaponProgression.length) {
             state.bank.push({...weaponProgression[state.weaponIndex]});
-            addChatMessage(`Unlocked: ${weaponProgression[state.weaponIndex].name}`, "#00ffff");
+            addChatMessage(`Bank Unlock: ${weaponProgression[state.weaponIndex].name}`, "#00ffff");
             state.weaponIndex++; state.weaponMil -= 25000;
         }
-        
         save(); updateUI();
         document.getElementById('mil-input').value = '';
     }
@@ -153,6 +160,35 @@
         else if(type === 'slayer') { state.xp.att += 400; state.xp.slay += 200; state.xp.hp += 130; state.tpc += 250; }
         else if(type === 'raid') { state.xp.att += 2000; state.xp.str += 2000; state.xp.def += 2000; state.xp.hp += 2000; state.tpc += 1500; }
         save(); updateUI();
+    }
+
+    function switchTab(t) {
+        document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-' + t).classList.add('active');
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'shop') renderShop();
+        updateUI();
+    }
+
+    function renderShop() {
+        const grid = document.getElementById('shop-grid');
+        grid.innerHTML = '';
+        shopItems.forEach(it => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<img src="${it.img}" class="item-icon"><span>${it.cost}</span>`;
+            div.onclick = () => {
+                if(state.tpc >= it.cost && state.inventory.length < 28) {
+                    state.tpc -= it.cost;
+                    state.inventory.push({...it});
+                    addChatMessage(`Purchased ${it.name}!`, "green");
+                    save(); updateUI();
+                } else if(state.tpc < it.cost) {
+                    addChatMessage("Not enough TPC!", "red");
+                }
+            };
+            grid.appendChild(div);
+        });
     }
 
     function updateUI() {
@@ -166,13 +202,6 @@
         `;
         renderInv(); renderEquip();
         if(document.getElementById('view-bank').classList.contains('active')) renderBank();
-    }
-
-    function switchTab(t) {
-        document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + t).classList.add('active');
-        document.getElementById('btn-' + t).classList.add('active');
-        updateUI();
     }
 
     function renderInv() {
@@ -232,19 +261,8 @@
         }
     }
 
-    function renderShop() {
-        const grid = document.getElementById('shop-grid'); grid.innerHTML = '';
-        const items = [{ name:'Fury', cost:45000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' }];
-        items.forEach(it => {
-            const div = document.createElement('div'); div.className = 'slot'; div.style="width:80px; height:80px; flex-direction:column; font-size:10px;";
-            div.innerHTML = `<img src="${it.img}" class="item-icon"><span>${it.cost}</span>`;
-            div.onclick = () => { if(state.tpc >= it.cost && state.inventory.length < 28) { state.tpc -= it.cost; state.inventory.push({...it}); save(); updateUI(); } };
-            grid.appendChild(div);
-        });
-    }
-
     function confirmReset() {
-        if(confirm("Are you sure you want to delete all progress?")) {
+        if(confirm("WIPE EVERYTHING?")) {
             localStorage.removeItem(STORAGE_KEY);
             state = {
                 tpc: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
@@ -253,17 +271,15 @@
                 equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
             };
             save(); updateUI();
-            addChatMessage("GAME RESET", "red");
+            addChatMessage("ACCOUNT WIPED", "red");
+            switchTab('combat');
         }
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function load() {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if(saved) {
-            const parsed = JSON.parse(saved);
-            state = Object.assign(state, parsed);
-        }
+        if(saved) state = Object.assign(state, JSON.parse(saved));
     }
     function addChatMessage(t, c='white') {
         const cb = document.getElementById('chatbox');
