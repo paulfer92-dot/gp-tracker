@@ -3,103 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OSRS V47 - Air Fix</title>
+    <title>OSRS V48 - Safari Fix</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-inv: #4e4435; }
+        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg: #1a1712; }
         
+        /* THE CRITICAL FIX: Stops Safari from bouncing/blocking clicks */
         html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100dvh;
-            background: #000; overflow: hidden; 
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #000; overflow: hidden; touch-action: manipulation;
             font-family: 'RuneScape UF', sans-serif;
         }
 
-        .app-shell {
-            height: 100%; display: flex; flex-direction: column;
-            max-width: 500px; margin: 0 auto; background: #1a1712;
+        .container {
+            display: flex; flex-direction: column;
+            height: 100dvh; max-width: 500px; margin: 0 auto;
+            background: var(--bg); position: relative;
         }
 
-        /* 1. TOP NAVIGATION (SAFE ZONE) */
-        .nav-header {
+        /* 1. STICKY TOP NAV (Highest Z-Index) */
+        .top-bar {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            height: 65px; background: #000; border-bottom: 3px solid var(--osrs-orange);
-            z-index: 100;
+            height: 70px; z-index: 999; border-bottom: 3px solid var(--osrs-orange);
+            background: #000;
         }
-        .nav-btn {
+        .tab-btn {
             background: #3e3529; color: #fff; border: 1px solid #111;
-            font-family: 'RuneScape UF'; font-size: 20px; cursor: pointer;
+            font-size: 18px; cursor: pointer !important; font-family: 'RuneScape UF';
+            -webkit-tap-highlight-color: transparent;
         }
-        .nav-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
+        .tab-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
 
-        /* 2. TOP INPUT (SAFE ZONE) */
-        .input-area {
-            background: #222; padding: 12px; border-bottom: 2px solid #444;
-            display: flex; gap: 10px; z-index: 90;
-        }
-        input { flex: 1; padding: 15px; background: #000; color: #0f0; border: 1px solid #666; font-size: 18px; border-radius: 5px; }
-        .add-btn { background: #006400; color: white; padding: 0 20px; border-radius: 5px; cursor: pointer; border: none; font-family: 'RuneScape UF'; font-size: 18px; }
+        /* 2. STATS & INPUT AREA */
+        .stats-strip { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); font-size: 14px; }
+        .input-row { display: flex; padding: 10px; gap: 10px; background: #222; }
+        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #555; font-size: 16px; border-radius: 4px; }
+        .add-btn { background: #006400; color: #fff; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer !important; }
 
-        .header-stats { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); font-size: 18px; }
-
-        /* 3. SCROLLABLE CONTENT AREA */
-        .main-view { flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 120px; /* Space for Safari bottom bar */ }
+        /* 3. CONTENT (Centered & Visible) */
+        .content { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
         .pane { display: none; }
         .pane.active { display: block; }
 
+        /* INVENTORY GRID */
         .inv-grid { 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; 
-            background: var(--bg-inv); padding: 10px; border: 4px solid #3e3529; 
-            width: 280px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; 
+            background: #4e4435; padding: 10px; border: 3px solid #3e3529; 
+            width: 260px; margin: 0 auto;
         }
-        .slot { aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 1px solid #3e3529; display: flex; justify-content: center; align-items: center; }
-        .item-icon { width: 85%; height: 85%; object-fit: contain; }
+        .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
+        .item-img { width: 80%; height: 80%; object-fit: contain; }
 
-        .chatbox { background: #726451; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin-top: 15px; min-height: 80px; }
+        .chat { background: #726451; padding: 8px; font-size: 15px; border: 2px solid #3e3529; margin-top: 15px; min-height: 60px; color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="app-shell">
-    <div class="nav-header">
-        <button class="nav-btn active" id="b-combat" onclick="setTab('combat')">COMBAT</button>
-        <button class="nav-btn" id="b-shop" onclick="setTab('shop')">SHOP</button>
-        <button class="nav-btn" id="b-stats" onclick="setTab('stats')">STATS</button>
+<div class="container">
+    <div class="top-bar">
+        <button class="tab-btn active" onclick="setTab('combat')">COMBAT</button>
+        <button class="tab-btn" onclick="setTab('shop')">SHOP</button>
+        <button class="tab-btn" onclick="setTab('stats')">STATS</button>
     </div>
 
-    <div class="input-area">
-        <input type="number" id="cash-in" placeholder="Deposit cash...">
-        <button class="add-btn" onclick="deposit()">ADD</button>
+    <div class="stats-strip">
+        <div>Armor Bank: $<span id="arm-val">0</span></div>
+        <div>Wep Bank: $<span id="wep-val">0</span></div>
     </div>
 
-    <div class="header-stats">
-        <div>$ Arm: <span id="arm-bank">0</span></div>
-        <div>$ Wep: <span id="wep-bank">0</span></div>
+    <div class="input-row">
+        <input type="number" id="cash" placeholder="Enter $ amount">
+        <button class="add-btn" onclick="deposit()">DEPOSIT</button>
     </div>
 
-    <div class="main-view">
+    <div class="content">
         <div id="p-combat" class="pane active">
-            <div class="inv-grid" id="main-inv"></div>
-            <div class="chatbox" id="chat">V47: Air Fix. All buttons moved to the Top Safe Zone.</div>
+            <div class="inv-grid" id="grid"></div>
+            <div class="chat" id="chat">System: V48 Loaded. Rune Platebody fix active.</div>
         </div>
 
         <div id="p-shop" class="pane">
-            <div style="color:var(--osrs-yellow); text-align:center; padding:20px;">
-                Rewards unlock automatically as you deposit!<br><br>
-                Armor: $20 / $40 / $70<br>
-                Weapons: $25 (Every tier)
+            <div style="color:var(--osrs-yellow); text-align:center; padding-top:20px;">
+                Items unlock automatically!<br><br>
+                Next Armor Step: $<span id="next-arm-text">20</span><br>
+                Next Weapon Step: $25
             </div>
         </div>
 
         <div id="p-stats" class="pane">
-            <div style="background:#222; padding:20px; border:1px solid var(--osrs-orange); border-radius:10px;">
-                <p>Armor Unlocks: <span id="s-arm-count">0</span> (Next: $<span id="s-arm-cost">20</span>)</p>
-                <p>Weapon Unlocks: <span id="s-wep-count">0</span> (Next: $25)</p>
-                <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; margin-top:20px;">FULL WIPE</button>
+            <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
+                <p>Armor Unlocks: <span id="arm-count">0</span></p>
+                <p>Weapon Unlocks: <span id="wep-count">0</span></p>
+                <button onclick="wipe()" style="color:red; background:none; border:1px solid red; width:100%; padding:8px;">WIPE ALL DATA</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const KEY = 'OSRS_V47_AIR';
-    let s = { arm:0,
+    const KEY = 'OSRS_V48_SAFE';
+    let s = { arm:0, wep:0, aI:0, wI:0, inv: [] };
+
+    const ARMOR = [
+        { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
+        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
+        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' }
+    ];
+
+    const WEAPONS = [
+        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' }
+    ];
+
+    function getArmCost() {
+        if (s.aI < 4) return 20;
+        if (s.aI < 8) return 40;
+        return 70;
+    }
+
+    function deposit() {
+        let val = parseInt(document.getElementById('cash').value) || 0;
+        if (val <= 0) return;
+        s.arm += val; s.wep += val;
+
+        let aCost = getArmCost();
+        while (s.aI < ARMOR.length && s.arm >= aCost) {
+            s.inv.push(ARMOR[s.aI]);
+            log("Unlocked Armor: " + ARMOR[s.aI].name, "yellow");
+            s.arm -= aCost; s.aI++; aCost = getArmCost();
+        }
+
+        while (s.wI < WEAPONS.length && s.wep >= 25) {
+            s.inv.push(WEAPONS[s.wI]);
+            log("Unlocked Weapon: " + WEAPONS[s.wI].name, "#00ff00");
+            s.wep -= 25; s.wI++;
+        }
+        document.getElementById('cash').value = '';
+        save(); refresh();
+    }
+
+    function refresh() {
+        document.getElementById('arm-val').innerText = s.arm;
+        document.getElementById('wep-val').innerText = s.wep;
+        document.getElementById('arm-count').innerText = s.aI;
+        document.getElementById('wep-count').innerText = s.wI;
+        document.getElementById('next-arm-text').innerText = getArmCost();
+
+        const g = document.getElementById('grid');
+        g.innerHTML = '';
+        for(let i=0; i<28; i++) {
+            const d = document.createElement('div'); d.className = 'slot';
+            if(s.inv[i]) d.innerHTML = `<img src="${s.inv[i].img}" class="item-img">`;
+            g.appendChild(d);
+        }
+    }
+
+    function setTab(name) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('p-'+name).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function log(m, c) { 
+        const b = document.getElementById('chat'); 
+        b.innerHTML += `<div style="color:${c}">* ${m}</div>`; 
+        b.scrollTop = b.scrollHeight; 
+    }
+
+    function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
+    function load() { const d = localStorage.getItem(KEY); if(d) s = JSON.parse(d); }
+    function wipe() { localStorage.removeItem(KEY); location.reload(); }
+
+    load(); refresh();
+</script>
+</body>
+</html>
