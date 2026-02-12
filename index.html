@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Ultimate Tracker v4</title>
+    <title>OSRS Ultimate Tracker - Final</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; }
@@ -13,7 +13,7 @@
         
         .app-shell { display: flex; flex-direction: column; align-items: center; padding: 15px; background: #1a1712; border-radius: 15px; border: 1px solid #333; max-width: 400px; width: 95%; position: relative; height: 95vh; }
         
-        /* HP HUD */
+        /* Stats & HUD */
         .stats-header { width: 100%; display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 18px; color: var(--osrs-yellow); }
         .hp-section { width: 100%; margin-bottom: 8px; }
         .hp-label { font-size: 14px; display: flex; justify-content: space-between; color: #fff; margin-bottom: 2px; }
@@ -22,7 +22,7 @@
         .player-hp-bar { background: linear-gradient(to bottom, #00ff00, #008000); }
         .boss-hp-bar { background: linear-gradient(to bottom, #ff0000, #800000); }
 
-        /* Equipment Tab Fixed */
+        /* Equipment Tab - Precision Layout */
         .equip-inv-container { display: flex; gap: 8px; }
         .equip-tab { width: 180px; height: 220px; background-color: var(--inv-bg); border: 3px solid #3e3529; background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png'); background-size: 160px; background-repeat: no-repeat; background-position: center; position: relative; flex-shrink: 0; }
         .e-slot { position: absolute; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; background: rgba(0,0,0,0.1); border-radius: 4px; }
@@ -35,7 +35,7 @@
         .slot { width: 38px; height: 38px; background: rgba(0, 0, 0, 0.2); border-radius: 2px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .item-icon { width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(1px 1px 1px #000); }
         
-        /* Overlays */
+        /* Shop & Overlays */
         #shop-overlay, #death-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column; padding: 20px; border-radius: 15px; }
         .bank-container { width: 100%; height: 220px; background: #5d5342; border: 3px solid #3e3529; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
         .shop-item { background: #3e3529; border: 2px solid #5d5342; padding: 10px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -120,6 +120,7 @@
     <div style="margin-top:10px; display:flex; gap:5px; width:100%;">
         <input type="number" id="bal-input" placeholder="$ Savings..." style="flex:1; padding:10px; font-family:'RuneScape UF';">
         <button onclick="manualDeposit()" style="font-family:'RuneScape UF';">Update</button>
+        <button onclick="resetGame()" style="background:#800000; color:white; font-family:'RuneScape UF'; padding:10px;">Reset</button>
     </div>
 </div>
 
@@ -146,24 +147,7 @@
         { name: 'Ultor Ring', img: 'https://oldschool.runescape.wiki/images/Ultor_ring.png', type: 'ring', cost: 120000, str: 12 }
     ];
 
-    function switchView(viewId, btn) {
-        document.querySelectorAll('.game-view').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('view-' + viewId).classList.add('active');
-        btn.classList.add('active');
-        if(viewId === 'bank') renderBank();
-    }
-
-    function addChatMessage(text, color = '') {
-        const div = document.createElement('div');
-        div.className = `chat-line ${color}`;
-        div.innerText = text;
-        const cb = document.getElementById('chatbox');
-        cb.appendChild(div);
-        cb.scrollTop = cb.scrollHeight;
-        if(cb.childNodes.length > 6) cb.removeChild(cb.firstChild);
-    }
-
+    // --- Progression Logic ---
     function manualDeposit() {
         const val = parseInt(document.getElementById('bal-input').value) || 0;
         if(val <= 0) return;
@@ -172,23 +156,29 @@
         checkUnlocks();
         updateUI();
         document.getElementById('bal-input').value = '';
-        addChatMessage(`Saved $${val}! +${val*1000} TPC.`, 'green');
+        addChatMessage(`Saved $${val}! Total: $${state.dollars}. +${(val*1000).toLocaleString()} TPC.`, 'green');
     }
 
     function checkUnlocks() {
-        const idx = Math.floor(state.dollars / 20);
-        if(idx > 0 && idx <= tier1Items.length) {
-            const item = tier1Items[idx-1];
-            if(!state.inventory.find(i=>i.name===item.name) && !state.bank.find(i=>i.name===item.name)) {
-                state.inventory.push({...item});
-                addChatMessage(`Unlocked: ${item.name}`, 'yellow');
+        const tierIndex = Math.floor(state.dollars / 20);
+        for (let i = 0; i < tierIndex; i++) {
+            if (tier1Items[i]) {
+                const item = tier1Items[i];
+                const owned = state.inventory.some(v => v.name === item.name) || 
+                              state.bank.some(v => v.name === item.name) || 
+                              Object.values(state.equipped).some(v => v && v.name === item.name);
+                if (!owned) {
+                    state.inventory.push({...item});
+                    addChatMessage(`Unlocked: ${item.name}!`, 'yellow');
+                }
             }
         }
     }
 
+    // --- Combat Core ---
     function runCombatLoop(onWin) {
+        if (combatInterval) clearInterval(combatInterval);
         combatInterval = setInterval(() => {
-            // Stats Calculation
             let bonusStr = 0; let bonusDef = 0;
             for(let s in state.equipped) {
                 if(state.equipped[s]) {
@@ -196,14 +186,12 @@
                     bonusDef += state.equipped[s].def || 0;
                 }
             }
-
             let maxHit = 5 + Math.floor(state.dollars/20) + Math.floor(bonusStr/4);
             if(state.currentStyle === 'aggressive') maxHit += 5;
             bossHp -= Math.floor(Math.random() * maxHit);
 
-            let bossMax = 8;
             let reduction = Math.min(0.5, bonusDef / 100);
-            let bHit = Math.floor(Math.random() * bossMax * (1 - reduction));
+            let bHit = Math.floor(Math.random() * 8 * (1 - reduction));
             if(state.currentStyle === 'defensive') bHit = Math.floor(bHit * 0.5);
             playerHp -= bHit;
 
@@ -221,10 +209,11 @@
     }
 
     function startRaid() {
-        if(combatInterval) return;
+        if(combatInterval) { addChatMessage("Finish your current fight!", "purple"); return; }
         bossMaxHp = 1000; bossHp = 1000;
         document.getElementById('boss-name').innerText = "Great Olm";
         document.getElementById('boss-ui').style.display = 'block';
+        addChatMessage("Raid Started!", "yellow");
         runCombatLoop(() => {
             state.raidKC++;
             if(Math.floor(Math.random()*1000) === 1) {
@@ -236,12 +225,13 @@
     }
 
     function getSlayerTask() {
-        if(combatInterval) return;
+        if(combatInterval) { addChatMessage("Finish your current fight!", "purple"); return; }
         const mobs = [{n:"Gargoyle", h:200, x:200, t:5000}, {n:"Abyssal Demon", h:300, x:350, t:8000}];
         const task = mobs[Math.floor(Math.random()*mobs.length)];
         bossMaxHp = task.h; bossHp = task.h;
         document.getElementById('boss-name').innerText = task.n;
         document.getElementById('boss-ui').style.display = 'block';
+        addChatMessage(`New Task: ${task.n}`, "yellow");
         runCombatLoop(() => {
             state.slayerKC++; state.tpc += task.t; state.slayerXP += task.x;
             if(state.slayerXP >= state.slayerLvl * 1000) state.slayerLvl++;
@@ -250,6 +240,7 @@
         });
     }
 
+    // --- Death & UI ---
     function handleDeath() {
         const fee = Math.max(500, Math.floor(state.tpc * 0.10));
         document.getElementById('reclaim-msg').innerText = `Fee: ${fee.toLocaleString()} TPC (10%)`;
@@ -265,6 +256,28 @@
         } else { alert("Insufficient TPC!"); }
     }
 
+    function updateUI() {
+        playerMaxHp = 10 + Math.floor(state.dollars / 5);
+        document.getElementById('tpc-bal').innerText = state.tpc.toLocaleString();
+        document.getElementById('cb-lvl').innerText = 3 + Math.floor(state.dollars / 10);
+        document.getElementById('slayer-lvl').innerText = state.slayerLvl;
+        document.getElementById('p-hp-text').innerText = `${playerHp}/${playerMaxHp}`;
+        document.getElementById('p-fill').style.width = (playerHp/playerMaxHp)*100 + "%";
+        document.getElementById('raid-kc-text').innerText = `KC: ${state.raidKC}`;
+        document.getElementById('slayer-kc-text').innerText = `KC: ${state.slayerKC}`;
+        if(bossMaxHp > 0) {
+            document.getElementById('enemy-hp-text').innerText = `${Math.ceil(bossHp)}/${bossMaxHp}`;
+            document.getElementById('enemy-fill').style.width = (bossHp/bossMaxHp)*100 + "%";
+        }
+        for(let s in state.equipped) {
+            const el = document.getElementById(`${s}-slot`);
+            el.innerHTML = state.equipped[s] ? `<img src="${state.equipped[s].img}" class="item-icon">` : '';
+        }
+        renderInv(); renderBank();
+        localStorage.setItem('osrs_master_v5', JSON.stringify(state));
+    }
+
+    // --- Helper Functions ---
     function openShop() {
         const list = document.getElementById('shop-list'); list.innerHTML = '';
         shopItems.forEach((item, i) => {
@@ -281,7 +294,23 @@
         document.getElementById('shop-overlay').style.display = 'flex';
     }
     function closeShop() { document.getElementById('shop-overlay').style.display = 'none'; }
-
+    function resetGame() { if(confirm("Reset everything?")) { localStorage.clear(); location.reload(); } }
+    function switchView(viewId, btn) {
+        document.querySelectorAll('.game-view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
+        btn.classList.add('active');
+        if(viewId === 'bank') renderBank();
+    }
+    function addChatMessage(text, color = '') {
+        const div = document.createElement('div');
+        div.className = `chat-line ${color}`;
+        div.innerText = text;
+        const cb = document.getElementById('chatbox');
+        cb.appendChild(div);
+        cb.scrollTop = cb.scrollHeight;
+        if(cb.childNodes.length > 6) cb.removeChild(cb.firstChild);
+    }
     function renderInv() {
         const grid = document.getElementById('inv-grid'); grid.innerHTML = '';
         for(let i=0; i<12; i++) {
@@ -301,7 +330,6 @@
             grid.appendChild(div);
         }
     }
-
     function renderBank() {
         const grid = document.getElementById('bank-grid'); grid.innerHTML = '';
         state.bank.forEach((item, i) => {
@@ -316,7 +344,6 @@
             grid.appendChild(div);
         });
     }
-
     function depositAll() { state.bank = [...state.bank, ...state.inventory]; state.inventory = []; updateUI(); }
     function equipItem(idx) {
         const item = state.inventory[idx]; const old = state.equipped[item.type];
@@ -334,26 +361,8 @@
         document.getElementById('style-' + s.substring(0,3)).classList.add('active');
     }
 
-    function updateUI() {
-        playerMaxHp = 10 + Math.floor(state.dollars / 5);
-        document.getElementById('tpc-bal').innerText = state.tpc.toLocaleString();
-        document.getElementById('cb-lvl').innerText = 3 + Math.floor(state.dollars / 10);
-        document.getElementById('p-hp-text').innerText = `${playerHp}/${playerMaxHp}`;
-        document.getElementById('p-fill').style.width = (playerHp/playerMaxHp)*100 + "%";
-        document.getElementById('raid-kc-text').innerText = `KC: ${state.raidKC}`;
-        document.getElementById('slayer-kc-text').innerText = `KC: ${state.slayerKC}`;
-        if(bossMaxHp > 0) {
-            document.getElementById('enemy-hp-text').innerText = `${Math.ceil(bossHp)}/${bossMaxHp}`;
-            document.getElementById('enemy-fill').style.width = (bossHp/bossMaxHp)*100 + "%";
-        }
-        for(let s in state.equipped) {
-            const el = document.getElementById(`${s}-slot`);
-            el.innerHTML = state.equipped[s] ? `<img src="${state.equipped[s].img}" class="item-icon">` : '';
-        }
-        renderInv(); localStorage.setItem('osrs_save_v4', JSON.stringify(state));
-    }
-
-    const saved = localStorage.getItem('osrs_save_v4');
+    // --- Init ---
+    const saved = localStorage.getItem('osrs_master_v5');
     if(saved) state = JSON.parse(saved);
     playerHp = 10 + Math.floor(state.dollars / 5);
     updateUI();
