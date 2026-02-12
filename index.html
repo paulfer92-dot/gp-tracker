@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V38 Power Armor</title>
+    <title>OSRS Tracker - V39 Slayer Update</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
@@ -82,17 +82,17 @@
 
     <div id="pane-stats" class="view-pane">
         <div class="emergency-reset">
-            <button class="reset-btn" onclick="wipeData()">WIPE ALL GAME DATA</button>
+            <button class="reset-btn" onclick="wipeData()">WIPE ALL DATA</button>
         </div>
         <div style="padding:15px; background:#222; border:1px solid var(--osrs-orange);">
-            <h3 style="color:var(--osrs-yellow); margin-top:0">STATS</h3>
-            <p>Armor Reward Milestone: $<span id="stat-arm">0</span> / 25</p>
-            <p>Holiday Milestone: $<span id="stat-holiday">0</span> / 500</p>
+            <h3 style="color:var(--osrs-yellow); margin-top:0">TRACKER</h3>
+            <p>Armor Unlock Milestone ($25): $<span id="stat-arm">0</span></p>
+            <p>Holiday Milestone ($500): $<span id="stat-holiday">0</span></p>
             <p>Total XP: <span id="xp-stat">0</span></p>
         </div>
     </div>
 
-    <div class="chatbox" id="chat">Bandos and Torva sets added to rewards! Avernic Defender added.</div>
+    <div class="chatbox" id="chat">Dharok Helm replaced with Slayer Helmet in rewards.</div>
 
     <div class="input-bar">
         <input type="number" id="cash-in" placeholder="Deposit $...">
@@ -101,27 +101,26 @@
 </div>
 
 <script>
-    const KEY = 'OSRS_V38_TORVA';
+    const KEY = 'OSRS_V39_SLAYER';
     let s = {
         sp:0, arm:0, wep:0, holi:0, aI:0, wI:0, hI:0, xp:0,
         inv: [{name:'Bronze Scim', img:'https://oldschool.runescape.wiki/images/Bronze_scimitar.png', type:'weapon'}],
         bank: [], equip: {head:null, body:null, weapon:null, legs:null, shield:null}
     };
 
+    // Dharok Helm Removed, Slayer Helmet Added
     const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
         { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
         { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
         { name: 'Dragon Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
         { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
-        { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head' },
+        { name: 'Slayer Helmet', img: 'https://oldschool.runescape.wiki/images/Slayer_helmet.png', type: 'head' }, // REPLACED DHAROK
         { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
         { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png', type: 'shield' },
-        // --- NEW BANDOS ---
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body' },
         { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs' },
-        // --- NEW TORVA ---
         { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head' },
         { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' },
         { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs' },
@@ -244,7 +243,7 @@
         }
     }
 
-    function wipeData() { if(confirm("PERMANENTLY WIPE ALL DATA?")) { localStorage.removeItem(KEY); location.reload(); } }
+    function wipeData() { if(confirm("RESET ALL PROGRESS?")) { localStorage.removeItem(KEY); location.reload(); } }
     function log(m, c) { const b = document.getElementById('chat'); b.innerHTML += `<div style="color:${c}">${m}</div>`; b.scrollTop = b.scrollHeight; }
     function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
     function load() { const d = localStorage.getItem(KEY); if(d) s = Object.assign(s, JSON.parse(d)); }
