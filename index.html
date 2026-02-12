@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - iPad Fix V31</title>
+    <title>OSRS Tracker - V33</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; background: #000; font-family: 'RuneScape UF', sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; background: #000; font-family: 'RuneScape UF', sans-serif; color: #fff; overflow-x: hidden; }
 
         .top-nav {
-            position: sticky; top: 0; width: 100%; height: 60px; background: #000; 
+            position: sticky; top: 0; width: 100%; height: 65px; background: #000; 
             border-bottom: 2px solid var(--osrs-orange); display: grid; 
             grid-template-columns: repeat(4, 1fr); padding: 5px; z-index: 9999;
         }
         .nav-btn { background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; font-size: 16px; cursor: pointer; }
         .nav-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
 
-        .app-shell { width: 100%; max-width: 500px; margin: 0 auto; background: var(--bg-main); min-height: 100vh; padding-bottom: 100px; }
+        .app-shell { width: 100%; max-width: 500px; margin: 0 auto; background: var(--bg-main); min-height: 100vh; padding-bottom: 150px; }
         .header-stats { display: flex; justify-content: space-around; padding: 15px; background: #2a241c; color: var(--osrs-yellow); font-size: 22px; border-bottom: 1px solid #3e3529; }
 
         .view-pane { display: none; padding: 15px; width: 100%; }
@@ -30,9 +30,15 @@
 
         .equip-box { width: 200px; height: 230px; background: var(--bg-inv) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center/contain; position: relative; margin: 0 auto 15px auto; border: 2px solid #3e3529; }
         
-        .reset-btn { background: #800000; color: white; border: 2px solid red; padding: 15px; width: 100%; font-family: 'RuneScape UF'; font-size: 20px; margin-bottom: 20px; cursor: pointer; }
-        .shop-row { background: #3e3529; border: 1px solid #5d4d37; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
-        .chatbox { background: #726451; color: #fff; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 15px; min-height: 80px; overflow-y: auto; }
+        /* High-Visibility Reset for iPad */
+        .emergency-reset { background: #500; border: 3px solid #f00; padding: 20px; text-align: center; margin-bottom: 30px; border-radius: 10px; }
+        .reset-btn { background: #ff0000; color: #fff; border: 2px solid #fff; padding: 15px; width: 100%; font-family: 'RuneScape UF'; font-size: 22px; cursor: pointer; }
+
+        .shop-row { background: #3e3529; border: 1px solid #5d4d37; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .chatbox { background: #726451; color: #fff; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 15px; min-height: 100px; overflow-y: auto; }
+        
+        .input-bar { display: flex; padding: 15px; background: #222; gap: 10px; border-top: 1px solid #444; }
+        input { flex: 1; padding: 15px; font-size: 18px; background: #000; color: #0f0; border: 1px solid #444; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -59,9 +65,9 @@
             <div id="legs-slot" class="slot" style="position:absolute; top:140px; left:75px" onclick="unequip('legs')"></div>
         </div>
         <div class="inv-grid" id="inv-combat"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:20px 0;">
-            <button onclick="train(500)" style="height:60px; background:#3e3529; color:white; font-family:'RuneScape UF'; font-size:18px;">SLAY MONSTER</button>
-            <button onclick="train(5000)" style="height:60px; background:#4e1a1a; color:white; font-family:'RuneScape UF'; font-size:18px;">SOLO RAID</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:25px 0;">
+            <button onclick="train(500)" style="height:70px; background:#3e3529; color:white; font-family:'RuneScape UF'; font-size:20px; border:1px solid #fff;">SLAY</button>
+            <button onclick="train(5000)" style="height:70px; background:#4e1a1a; color:white; font-family:'RuneScape UF'; font-size:20px; border:1px solid #fff;">RAID</button>
         </div>
     </div>
 
@@ -76,52 +82,60 @@
     </div>
 
     <div id="pane-stats" class="view-pane">
-        <button class="reset-btn" onclick="wipeData()">WIPE ALL DATA (RESET)</button>
-        <div style="padding:20px; background:#222; border:2px solid var(--osrs-orange); font-size:18px;">
-            <h2 style="color:var(--osrs-yellow); margin-top:0">CHAR PROGRESS</h2>
-            <p>Armor Unlock: $<span id="stat-arm">0</span> / 20</p>
-            <p>Weapon Unlock: $<span id="stat-wep">0</span> / 100</p>
-            <p>Rare Item Progress: $<span id="stat-rare">0</span> / 1000</p>
-            <p>Items Discovered: <span id="stat-count">0</span></p>
+        <div class="emergency-reset">
+            <div style="font-weight:bold; margin-bottom:10px;">RESET GAME DATA</div>
+            <button class="reset-btn" onclick="wipeData()">WIPE ALL PROGRESS</button>
+        </div>
+        <div style="padding:20px; background:#222; border:2px solid var(--osrs-orange);">
+            <h2 style="color:var(--osrs-yellow); margin-top:0">COLLECTION LOG</h2>
+            <p>Armor Upgrades ($20): $<span id="stat-arm">0</span></p>
+            <p>Weapon Upgrades ($100): $<span id="stat-wep">0</span></p>
+            <p>Items Unlocked: <span id="stat-count">0</span></p>
+            <p>Total XP: <span id="xp-stat">0</span></p>
         </div>
     </div>
 
-    <div class="chatbox" id="chat">Armor now unlocks every $20. Wipe button restored.</div>
+    <div class="chatbox" id="chat">Dharok Helm removed from rewards. Progression restored.</div>
 
-    <div style="display:flex; padding:15px; background:#222; gap:10px;">
-        <input type="number" id="cash-in" placeholder="Deposit $..." style="flex:1; padding:15px; font-size:18px; background:#000; color:#0f0; border:1px solid #444;">
-        <button onclick="deposit()" style="background:#006400; color:white; padding:0 20px; font-family:'RuneScape UF'; font-size:18px;">ADD</button>
+    <div class="input-bar">
+        <input type="number" id="cash-in" placeholder="Enter $ amount...">
+        <button onclick="deposit()" style="background:#006400; color:white; padding:0 30px; font-family:'RuneScape UF'; font-size:20px; border:none;">ADD</button>
     </div>
 </div>
 
 <script>
-    const KEY = 'OSRS_SCROLL_V31';
+    const KEY = 'OSRS_V33_FINAL';
     let s = {
         sp:0, arm:0, wep:0, rare:0, aI:0, wI:0, xp:0,
         inv: [{name:'Iron Scim', img:'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type:'weapon'}],
         bank: [], equip: {head:null, body:null, weapon:null, legs:null, shield:null}
     };
 
-    const ARMOR_DATA = [
+    // DHAROK HELM EXCLUDED FROM THIS POOL
+    const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
-        { name: 'Rune Body', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
-        { name: 'Rune Legs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
         { name: 'Rune Shield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
+        { name: 'Rune Legs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
+        { name: 'Rune Body', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
+        { name: 'Dragon Legs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
+        { name: 'Dragon Shield', img: 'https://oldschool.runescape.wiki/images/Dragon_square_shield.png', type: 'shield' },
         { name: 'Dragon Body', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
-        { name: 'Dragon Legs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' }
+        { name: 'Dharok Body', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body' },
+        { name: 'Dharok Legs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' }
     ];
 
-    const WEAP_DATA = [
-        { name: 'Dragon Scim', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
-        { name: 'Dharok Axe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon' }
+    const WEAP_POOL = [
+        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
+        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
+        { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon' },
+        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon' },
+        { name: 'Godsword', img: 'https://oldschool.runescape.wiki/images/Armadyl_godsword.png', type: 'weapon' }
     ];
 
-    const SHOP_DATA = [
+    const SHOP_ITEMS = [
         { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png' },
-        { name:'Super Combat', cost:10000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
-        { name:'Anglerfish', cost:2500, img:'https://oldschool.runescape.wiki/images/Anglerfish.png' },
-        { name:'Prayer Pot', cost:5000, img:'https://oldschool.runescape.wiki/images/Prayer_potion%284%29.png' },
-        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' }
+        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' },
+        { name:'Dharok Helm', cost:75000, img:'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type:'head' }
     ];
 
     function setTab(t) {
@@ -135,9 +149,9 @@
     function deposit() {
         let v = parseInt(document.getElementById('cash-in').value) || 0;
         if(v <= 0) return;
-        s.arm += v; s.wep += v; s.rare += v;
-        while(s.arm >= 20 && s.aI < ARMOR_DATA.length) { push(ARMOR_DATA[s.aI]); log("New Armor Found!", "yellow"); s.aI++; s.arm -= 20; }
-        while(s.wep >= 100 && s.wI < WEAP_DATA.length) { push(WEAP_DATA[s.wI]); log("New Weapon Found!", "cyan"); s.wI++; s.wep -= 100; }
+        s.arm += v; s.wep += v;
+        while(s.arm >= 20 && s.aI < ARMOR_POOL.length) { push(ARMOR_POOL[s.aI]); log("New Armor!", "yellow"); s.aI++; s.arm -= 20; }
+        while(s.wep >= 100 && s.wI < WEAP_POOL.length) { push(WEAP_POOL[s.wI]); log("New Weapon!", "cyan"); s.wI++; s.wep -= 100; }
         document.getElementById('cash-in').value = '';
         save(); refresh();
     }
@@ -148,6 +162,7 @@
     function refresh() {
         document.getElementById('sp-val').innerText = s.sp.toLocaleString();
         document.getElementById('xp-val').innerText = s.xp.toLocaleString();
+        document.getElementById('xp-stat').innerText = s.xp.toLocaleString();
         document.getElementById('stat-arm').innerText = s.arm;
         document.getElementById('stat-wep').innerText = s.wep;
         document.getElementById('stat-count').innerText = s.aI + s.wI;
@@ -184,8 +199,8 @@
         });
 
         const sList = document.getElementById('shop-list');
-        sList.innerHTML = '<h3 style="color:var(--osrs-yellow); text-align:center">SHOP INVENTORY</h3>';
-        SHOP_DATA.forEach(it => {
+        sList.innerHTML = '<h3 style="color:var(--osrs-yellow); text-align:center">MEMBER SHOP</h3>';
+        SHOP_ITEMS.forEach(it => {
             const row = document.createElement('div'); row.className = 'shop-row';
             row.innerHTML = `<span><img src="${it.img}" style="width:24px; vertical-align:middle;"> ${it.name}</span> <b>${it.cost} SP</b>`;
             row.onclick = () => { if(s.sp >= it.cost && s.inv.length < 28) { s.sp -= it.cost; push(it); save(); refresh(); } };
@@ -205,7 +220,7 @@
         }
     }
 
-    function wipeData() { if(confirm("Wipe all items and points?")) { localStorage.removeItem(KEY); location.reload(); } }
+    function wipeData() { if(confirm("ABSOLUTELY WIPE EVERYTHING?")) { localStorage.removeItem(KEY); location.reload(); } }
     function log(m, c) { const b = document.getElementById('chat'); b.innerHTML += `<div style="color:${c}">${m}</div>`; b.scrollTop = b.scrollHeight; }
     function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
     function load() { const d = localStorage.getItem(KEY); if(d) s = Object.assign(s, JSON.parse(d)); }
