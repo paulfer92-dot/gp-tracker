@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Expanded Shop</title>
+    <title>OSRS Tracker - Shop Fixed</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -35,7 +35,7 @@
         input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
         .dep-btn { background: #006400; color: #fff; padding: 0 15px; border: none; cursor: pointer; font-family: 'RuneScape UF'; }
         .reset-btn-tap { background: #8b0000; color: #fff; width: 100%; padding: 15px; margin-top: 10px; border: 2px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-weight: bold; }
-        .shop-item { width: 100%; height: 70px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--osrs-yellow); }
+        .shop-item { width: 100%; height: 70px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--osrs-yellow); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -72,18 +72,18 @@
     </div>
 
     <div id="view-bank" class="view-pane">
-        <div style="text-align:center; font-size: 12px;">BANK</div>
+        <div style="text-align:center; font-size: 12px;">BANK (TAP TO WITHDRAW)</div>
         <div id="bank-grid" class="inventory-tab" style="width:100%; height:180px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
-        <div style="text-align:center; font-size: 12px;">INVENTORY</div>
+        <div style="text-align:center; font-size: 12px; margin-top: 10px;">INVENTORY (TAP TO DEPOSIT)</div>
         <div id="bank-inv-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 
     <div id="view-shop" class="view-pane">
-        <div style="text-align:center; padding-bottom: 5px;">SHOP (COST IN TPC)</div>
-        <div id="shop-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(3, 1fr); gap: 5px;"></div>
+        <div style="text-align:center; padding-bottom: 10px;">SHOP (COST IN TPC)</div>
+        <div id="shop-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(3, 1fr); gap: 8px;"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Shop Inventory expanded.</div>
+    <div class="chat-container" id="chatbox">Shop logic re-initialized.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -99,7 +99,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_SHOP_FIX_V8';
+    const STORAGE_KEY = 'OSRS_SHOP_REBUILD_V9';
     const STARTER_WEAPON = { name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon', req: {att: 1} };
 
     let state = {
@@ -111,10 +111,11 @@
 
     const shopItems = [
         { name:'Fury', cost:45000, img:'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type:'amulet' },
-        { name:'B-Gloves', cost:25000, img:'https://oldschool.runescape.wiki/images/Barrows_gloves.png', type:'shield' }, // Hand slot mapped to shield for now
+        { name:'B-Gloves', cost:25000, img:'https://oldschool.runescape.wiki/images/Barrows_gloves.png', type:'shield' },
         { name:'Prims', cost:60000, img:'https://oldschool.runescape.wiki/images/Primordial_boots.png', type:'feet' },
         { name:'B-Ring', cost:15000, img:'https://oldschool.runescape.wiki/images/Berserker_ring.png', type:'ring' },
-        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' }
+        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'head' },
+        { name:'Obby Cape', cost:10000, img:'https://oldschool.runescape.wiki/images/Obsidian_cape.png', type:'head' }
     ];
 
     const armorProgression = [
@@ -166,25 +167,36 @@
         document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('view-' + t).classList.add('active');
         document.getElementById('btn-' + t).classList.add('active');
+        
+        // Forced rendering on tab switch
         if(t === 'shop') renderShop();
+        if(t === 'bank') renderBank();
+        
         updateUI();
     }
 
     function renderShop() {
         const grid = document.getElementById('shop-grid');
+        if(!grid) return;
         grid.innerHTML = '';
         shopItems.forEach(it => {
             const div = document.createElement('div');
             div.className = 'shop-item';
-            div.innerHTML = `<img src="${it.img}" class="item-icon"><span>${it.cost}</span>`;
+            div.innerHTML = `
+                <img src="${it.img}" class="item-icon">
+                <div style="margin-top:2px;">${it.name}</div>
+                <div style="color:#00ff00;">${it.cost}</div>
+            `;
             div.onclick = () => {
                 if(state.tpc >= it.cost && state.inventory.length < 28) {
                     state.tpc -= it.cost;
                     state.inventory.push({...it});
-                    addChatMessage(`Purchased ${it.name}!`, "green");
+                    addChatMessage(`Bought ${it.name}!`, "green");
                     save(); updateUI();
                 } else if(state.tpc < it.cost) {
-                    addChatMessage("Not enough TPC!", "red");
+                    addChatMessage("Need more TPC!", "red");
+                } else {
+                    addChatMessage("Inventory full!", "red");
                 }
             };
             grid.appendChild(div);
@@ -200,12 +212,14 @@
             <div class="skill-card">Def: ${d}</div><div class="skill-card">HP: ${h}</div>
             <div class="skill-card">Slay: ${l}</div><div class="skill-card">Total: ${a+s+d+h+l}</div>
         `;
-        renderInv(); renderEquip();
-        if(document.getElementById('view-bank').classList.contains('active')) renderBank();
+        renderInv(); 
+        renderEquip();
     }
 
     function renderInv() {
-        const grid = document.getElementById('inv-grid'); grid.innerHTML = '';
+        const grid = document.getElementById('inv-grid');
+        if(!grid) return;
+        grid.innerHTML = '';
         state.inventory.forEach((it, i) => {
             const div = document.createElement('div'); div.className = 'slot';
             div.innerHTML = `<img src="${it.img}" class="item-icon">`;
@@ -218,23 +232,25 @@
     function renderBank() {
         const bGrid = document.getElementById('bank-grid');
         const iGrid = document.getElementById('bank-inv-grid');
+        if(!bGrid || !iGrid) return;
         bGrid.innerHTML = ''; iGrid.innerHTML = '';
         state.bank.forEach((it, i) => {
             const div = document.createElement('div'); div.className = 'slot';
             div.innerHTML = `<img src="${it.img}" class="item-icon">`;
-            div.onclick = () => { if(state.inventory.length < 28) { state.inventory.push(state.bank.splice(i, 1)[0]); save(); updateUI(); } };
+            div.onclick = () => { if(state.inventory.length < 28) { state.inventory.push(state.bank.splice(i, 1)[0]); save(); updateUI(); renderBank(); } };
             bGrid.appendChild(div);
         });
         state.inventory.forEach((it, i) => {
             const div = document.createElement('div'); div.className = 'slot';
             div.innerHTML = `<img src="${it.img}" class="item-icon">`;
-            div.onclick = () => { state.bank.push(state.inventory.splice(i, 1)[0]); save(); updateUI(); };
+            div.onclick = () => { state.bank.push(state.inventory.splice(i, 1)[0]); save(); updateUI(); renderBank(); };
             iGrid.appendChild(div);
         });
     }
 
     function equip(idx) {
         const it = state.inventory[idx];
+        if(!it) return;
         if(it.req) {
             if(it.req.att && xpToLvl(state.xp.att) < it.req.att) return addChatMessage(`Need ${it.req.att} Attack!`, "red");
             if(it.req.def && xpToLvl(state.xp.def) < it.req.def) return addChatMessage(`Need ${it.req.def} Defence!`, "red");
@@ -262,7 +278,7 @@
     }
 
     function confirmReset() {
-        if(confirm("WIPE EVERYTHING?")) {
+        if(confirm("THIS WILL ERASE EVERYTHING. ARE YOU SURE?")) {
             localStorage.removeItem(STORAGE_KEY);
             state = {
                 tpc: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
@@ -270,7 +286,8 @@
                 inventory: [Object.assign({}, STARTER_WEAPON)], bank: [],
                 equipped: { head:null, body:null, weapon:null, legs:null, shield:null, amulet:null, feet:null, ring:null }
             };
-            save(); updateUI();
+            save(); 
+            updateUI();
             addChatMessage("ACCOUNT WIPED", "red");
             switchTab('combat');
         }
@@ -289,6 +306,7 @@
 
     load();
     updateUI();
+    renderShop(); // Initial shop population
 </script>
 </body>
 </html>
