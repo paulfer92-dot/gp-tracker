@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V40 God-Tier Armor</title>
+    <title>OSRS Tracker - V42 Spec Shop</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
@@ -29,10 +29,6 @@
         .item-icon { width: 40px; height: 40px; filter: drop-shadow(1px 1px 1px #000); }
 
         .equip-box { width: 200px; height: 230px; background: var(--bg-inv) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center/contain; position: relative; margin: 0 auto 15px auto; border: 2px solid #3e3529; }
-        
-        .emergency-reset { background: #400; border: 2px solid #f00; padding: 15px; text-align: center; margin-bottom: 20px; }
-        .reset-btn { background: #f00; color: #fff; border: 1px solid #fff; padding: 10px; width: 100%; font-family: 'RuneScape UF'; font-size: 18px; }
-
         .shop-row { background: #3e3529; border: 1px solid #5d4d37; padding: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
         .chatbox { background: #726451; color: #fff; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 15px; min-height: 100px; overflow-y: auto; }
         
@@ -55,7 +51,7 @@
         <div style="color:#00ff00">XP: <span id="xp-val">0</span></div>
     </div>
 
-    <div id="pane-combat" class="view-pane active">
+    <div id="pane-combat" class="active view-pane">
         <div class="equip-box">
             <div id="head-slot" class="slot" style="position:absolute; top:12px; left:75px" onclick="unequip('head')"></div>
             <div id="weapon-slot" class="slot" style="position:absolute; top:92px; left:20px" onclick="unequip('weapon')"></div>
@@ -81,18 +77,15 @@
     </div>
 
     <div id="pane-stats" class="view-pane">
-        <div class="emergency-reset">
-            <button class="reset-btn" onclick="wipeData()">WIPE ALL DATA</button>
-        </div>
         <div style="padding:15px; background:#222; border:1px solid var(--osrs-orange);">
-            <h3 style="color:var(--osrs-yellow); margin-top:0">TRACKER</h3>
-            <p>Armor Unlock Milestone ($25): $<span id="stat-arm">0</span></p>
-            <p>Holiday Milestone ($500): $<span id="stat-holiday">0</span></p>
-            <p>Total XP: <span id="xp-stat">0</span></p>
+            <h3 style="color:var(--osrs-yellow); margin-top:0">STATUS</h3>
+            <p>Next Reward at: <span id="stat-cost" style="color:#0f0">$20</span></p>
+            <p>Holiday Milestone: $<span id="stat-holiday">0</span></p>
+            <button onclick="wipeData()" style="background:#400; color:white; width:100%; border:1px solid red; padding:5px; margin-top:10px;">WIPE DATA</button>
         </div>
     </div>
 
-    <div class="chatbox" id="chat">Dharok Helm removed. Justiciar & Inquisitor sets added!</div>
+    <div class="chatbox" id="chat">Welcome to V42. Spec weapons added to shop.</div>
 
     <div class="input-bar">
         <input type="number" id="cash-in" placeholder="Deposit $...">
@@ -101,7 +94,7 @@
 </div>
 
 <script>
-    const KEY = 'OSRS_V40_RARE';
+    const KEY = 'OSRS_V42_SPECS';
     let s = {
         sp:0, arm:0, wep:0, holi:0, aI:0, wI:0, hI:0, xp:0,
         inv: [{name:'Bronze Scim', img:'https://oldschool.runescape.wiki/images/Bronze_scimitar.png', type:'weapon'}],
@@ -112,49 +105,60 @@
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
         { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
         { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
-        { name: 'Dragon Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
         { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
+        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
+        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
         { name: 'Slayer Helmet', img: 'https://oldschool.runescape.wiki/images/Slayer_helmet.png', type: 'head' },
         { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' },
-        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
         { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png', type: 'shield' },
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body' },
         { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs' },
-        // --- INQUISITOR ---
         { name: 'Inquisitor\'s Great Helm', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_great_helm.png', type: 'head' },
         { name: 'Inquisitor\'s Hauberk', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_hauberk.png', type: 'body' },
         { name: 'Inquisitor\'s Plateskirt', img: 'https://oldschool.runescape.wiki/images/Inquisitor%27s_plateskirt.png', type: 'legs' },
-        // --- JUSTICIAR ---
         { name: 'Justiciar Faceguard', img: 'https://oldschool.runescape.wiki/images/Justiciar_faceguard.png', type: 'head' },
         { name: 'Justiciar Chestguard', img: 'https://oldschool.runescape.wiki/images/Justiciar_chestguard.png', type: 'body' },
         { name: 'Justiciar Legguards', img: 'https://oldschool.runescape.wiki/images/Justiciar_legguards.png', type: 'legs' },
-        // --- END GAME ---
         { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head' },
         { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' },
         { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs' },
         { name: 'Avernic Defender', img: 'https://oldschool.runescape.wiki/images/Avernic_defender.png', type: 'shield' }
     ];
 
-    const WEAP_POOL = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
-        { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon' },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon' }
-    ];
-
-    const HOLIDAY_POOL = [
-        { name: 'Red Partyhat', img: 'https://oldschool.runescape.wiki/images/Red_partyhat.png', type: 'head' },
-        { name: 'Santa Hat', img: 'https://oldschool.runescape.wiki/images/Santa_hat.png', type: 'head' },
-        { name: 'Blue Partyhat', img: 'https://oldschool.runescape.wiki/images/Blue_partyhat.png', type: 'head' },
-        { name: 'Scythe', img: 'https://oldschool.runescape.wiki/images/Scythe.png', type: 'weapon' }
-    ];
-
     const SHOP_ITEMS = [
-        { name:'Anglerfish', cost:3000, img:'https://oldschool.runescape.wiki/images/Anglerfish.png' },
-        { name:'Super Combat', cost:12000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
-        { name:'Twisted Bow', cost:1000000, img:'https://oldschool.runescape.wiki/images/Twisted_bow.png', type:'weapon' },
-        { name:'Scythe of Vitur', cost:950000, img:'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type:'weapon' }
+        { name:'Dragon Claws', cost:250000, img:'https://oldschool.runescape.wiki/images/Dragon_claws.png', type:'weapon' },
+        { name:'Armadyl Godsword', cost:400000, img:'https://oldschool.runescape.wiki/images/Armadyl_godsword.png', type:'weapon' },
+        { name:'Voidwaker', cost:650000, img:'https://oldschool.runescape.wiki/images/Voidwaker.png', type:'weapon' },
+        { name:'Zaryte Crossbow', cost:850000, img:'https://oldschool.runescape.wiki/images/Zaryte_crossbow.png', type:'weapon' },
+        { name:'Eldritch Staff', cost:1200000, img:'https://oldschool.runescape.wiki/images/Eldritch_nightmare_staff.png', type:'weapon' },
+        { name:'Twisted Bow', cost:2500000, img:'https://oldschool.runescape.wiki/images/Twisted_bow.png', type:'weapon' },
+        { name:'Scythe of Vitur', cost:2500000, img:'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type:'weapon' }
     ];
+
+    function getNextCost() {
+        if (s.aI < 5) return 20;
+        if (s.aI < 6) return 40;
+        return 60;
+    }
+
+    function deposit() {
+        let v = parseInt(document.getElementById('cash-in').value) || 0;
+        if(v <= 0) return;
+        s.arm += v; s.holi += v;
+        let price = getNextCost();
+        while(s.aI < ARMOR_POOL.length && s.arm >= price) {
+            push(ARMOR_POOL[s.aI]);
+            log("Unlocked: " + ARMOR_POOL[s.aI].name, "yellow");
+            s.arm -= price; s.aI++; price = getNextCost();
+        }
+        while(s.holi >= 500 && s.hI < 4) {
+            const hp = [{name:'Red Partyhat', img:'https://oldschool.runescape.wiki/images/Red_partyhat.png', type:'head'}, {name:'Santa Hat', img:'https://oldschool.runescape.wiki/images/Santa_hat.png', type:'head'}];
+            if(hp[s.hI]) push(hp[s.hI]);
+            s.hI++; s.holi -= 500;
+        }
+        document.getElementById('cash-in').value = '';
+        save(); refresh();
+    }
 
     function setTab(t) {
         document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
@@ -164,39 +168,16 @@
         refresh();
     }
 
-    function deposit() {
-        let v = parseInt(document.getElementById('cash-in').value) || 0;
-        if(v <= 0) return;
-        
-        s.arm += v; s.wep += v; s.holi += v;
-
-        while(s.arm >= 25 && s.aI < ARMOR_POOL.length) { 
-            push(ARMOR_POOL[s.aI]); log("Unlock: " + ARMOR_POOL[s.aI].name, "yellow"); s.aI++; s.arm -= 25; 
-        }
-        while(s.wep >= 100 && s.wI < WEAP_POOL.length) { 
-            push(WEAP_POOL[s.wI]); log("Unlock: " + WEAP_POOL[s.wI].name, "cyan"); s.wI++; s.wep -= 100; 
-        }
-        while(s.holi >= 500 && s.hI < HOLIDAY_POOL.length) {
-            push(HOLIDAY_POOL[s.hI]);
-            log("🎁 HOLIDAY DROP: " + HOLIDAY_POOL[s.hI].name, "#ff69b4");
-            s.hI++; s.holi -= 500;
-        }
-
-        document.getElementById('cash-in').value = '';
-        save(); refresh();
-    }
-
     function train(amt) { s.sp += amt; s.xp += amt; log(`+${amt} XP`, "green"); save(); refresh(); }
     function push(it) { if(s.inv.length < 28) s.inv.push({...it}); else s.bank.push({...it}); }
 
     function refresh() {
         document.getElementById('sp-val').innerText = s.sp.toLocaleString();
         document.getElementById('xp-val').innerText = s.xp.toLocaleString();
-        document.getElementById('xp-stat').innerText = s.xp.toLocaleString();
-        document.getElementById('stat-arm').innerText = s.arm;
+        document.getElementById('stat-cost').innerText = "$" + getNextCost();
         document.getElementById('stat-holiday').innerText = s.holi;
 
-        ['combat', 'bank', 'shop'].forEach(view => {
+        ['combat', 'bank'].forEach(view => {
             const grid = document.getElementById('inv-'+view);
             if(!grid) return; grid.innerHTML = '';
             for(let i=0; i<28; i++) {
@@ -205,7 +186,7 @@
                     div.innerHTML = `<img src="${s.inv[i].img}" class="item-icon">`;
                     div.onclick = () => {
                         if(view === 'bank') s.bank.push(s.inv.splice(i, 1)[0]);
-                        else if(view === 'combat') {
+                        else {
                             let item = s.inv[i];
                             if(item.type) {
                                 let old = s.equip[item.type];
@@ -230,7 +211,7 @@
         });
 
         const sList = document.getElementById('shop-list');
-        sList.innerHTML = '<h3 style="color:var(--osrs-yellow); text-align:center">MEMBER SHOP</h3>';
+        sList.innerHTML = '<h3 style="color:var(--osrs-yellow); text-align:center">ELITE ARSENAL</h3>';
         SHOP_ITEMS.forEach(it => {
             const row = document.createElement('div'); row.className = 'shop-row';
             row.innerHTML = `<span><img src="${it.img}" style="width:24px; vertical-align:middle;"> ${it.name}</span> <span style="color:#0f0">${it.cost.toLocaleString()} SP</span>`;
@@ -244,14 +225,8 @@
         }
     }
 
-    function unequip(type) {
-        if(s.equip[type] && s.inv.length < 28) {
-            s.inv.push(s.equip[type]); s.equip[type] = null;
-            save(); refresh();
-        }
-    }
-
-    function wipeData() { if(confirm("RESET ALL PROGRESS?")) { localStorage.removeItem(KEY); location.reload(); } }
+    function unequip(type) { if(s.equip[type] && s.inv.length < 28) { s.inv.push(s.equip[type]); s.equip[type] = null; save(); refresh(); } }
+    function wipeData() { if(confirm("RESET?")) { localStorage.removeItem(KEY); location.reload(); } }
     function log(m, c) { const b = document.getElementById('chat'); b.innerHTML += `<div style="color:${c}">${m}</div>`; b.scrollTop = b.scrollHeight; }
     function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
     function load() { const d = localStorage.getItem(KEY); if(d) s = Object.assign(s, JSON.parse(d)); }
