@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - V36 Holiday Fix</title>
+    <title>OSRS Tracker - V38 Power Armor</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
@@ -85,14 +85,14 @@
             <button class="reset-btn" onclick="wipeData()">WIPE ALL GAME DATA</button>
         </div>
         <div style="padding:15px; background:#222; border:1px solid var(--osrs-orange);">
-            <h3 style="color:var(--osrs-yellow); margin-top:0">STATISTICS</h3>
-            <p>Next Unlock ($25): $<span id="stat-arm">0</span></p>
-            <p>Holiday Progress: $<span id="stat-holiday">0</span> / 500</p>
+            <h3 style="color:var(--osrs-yellow); margin-top:0">STATS</h3>
+            <p>Armor Reward Milestone: $<span id="stat-arm">0</span> / 25</p>
+            <p>Holiday Milestone: $<span id="stat-holiday">0</span> / 500</p>
             <p>Total XP: <span id="xp-stat">0</span></p>
         </div>
     </div>
 
-    <div class="chatbox" id="chat">Dharok Helm added to rewards. Holiday fix active.</div>
+    <div class="chatbox" id="chat">Bandos and Torva sets added to rewards! Avernic Defender added.</div>
 
     <div class="input-bar">
         <input type="number" id="cash-in" placeholder="Deposit $...">
@@ -101,21 +101,31 @@
 </div>
 
 <script>
-    const KEY = 'OSRS_V36_FIX';
+    const KEY = 'OSRS_V38_TORVA';
     let s = {
         sp:0, arm:0, wep:0, holi:0, aI:0, wI:0, hI:0, xp:0,
         inv: [{name:'Bronze Scim', img:'https://oldschool.runescape.wiki/images/Bronze_scimitar.png', type:'weapon'}],
         bank: [], equip: {head:null, body:null, weapon:null, legs:null, shield:null}
     };
 
-    // Dragon Shield REMOVED - Dharok Helm ADDED
     const ARMOR_POOL = [
         { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
-        { name: 'Rune Shield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
-        { name: 'Rune Legs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
-        { name: 'Dragon Legs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
+        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
+        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
+        { name: 'Dragon Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
+        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
         { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head' },
-        { name: 'Dragon Body', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' }
+        { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' },
+        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
+        { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png', type: 'shield' },
+        // --- NEW BANDOS ---
+        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body' },
+        { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs' },
+        // --- NEW TORVA ---
+        { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head' },
+        { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' },
+        { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs' },
+        { name: 'Avernic Defender', img: 'https://oldschool.runescape.wiki/images/Avernic_defender.png', type: 'shield' }
     ];
 
     const WEAP_POOL = [
@@ -129,16 +139,14 @@
         { name: 'Red Partyhat', img: 'https://oldschool.runescape.wiki/images/Red_partyhat.png', type: 'head' },
         { name: 'Santa Hat', img: 'https://oldschool.runescape.wiki/images/Santa_hat.png', type: 'head' },
         { name: 'Blue Partyhat', img: 'https://oldschool.runescape.wiki/images/Blue_partyhat.png', type: 'head' },
-        { name: 'Green Partyhat', img: 'https://oldschool.runescape.wiki/images/Green_partyhat.png', type: 'head' },
-        { name: 'Scythe', img: 'https://oldschool.runescape.wiki/images/Scythe.png', type: 'weapon' },
-        { name: 'Bunny Ears', img: 'https://oldschool.runescape.wiki/images/Bunny_ears.png', type: 'head' }
+        { name: 'Scythe', img: 'https://oldschool.runescape.wiki/images/Scythe.png', type: 'weapon' }
     ];
 
     const SHOP_ITEMS = [
         { name:'Anglerfish', cost:3000, img:'https://oldschool.runescape.wiki/images/Anglerfish.png' },
         { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' },
-        { name:'Torva Platebody', cost:500000, img:'https://oldschool.runescape.wiki/images/Torva_platebody.png', type:'body' },
-        { name:'Twisted Bow', cost:1000000, img:'https://oldschool.runescape.wiki/images/Twisted_bow.png', type:'weapon' }
+        { name:'Twisted Bow', cost:1000000, img:'https://oldschool.runescape.wiki/images/Twisted_bow.png', type:'weapon' },
+        { name:'Scythe of Vitur', cost:950000, img:'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type:'weapon' }
     ];
 
     function setTab(t) {
@@ -153,24 +161,18 @@
         let v = parseInt(document.getElementById('cash-in').value) || 0;
         if(v <= 0) return;
         
-        s.arm += v; 
-        s.wep += v; 
-        s.holi += v;
+        s.arm += v; s.wep += v; s.holi += v;
 
-        // Armor logic
         while(s.arm >= 25 && s.aI < ARMOR_POOL.length) { 
             push(ARMOR_POOL[s.aI]); log("Unlock: " + ARMOR_POOL[s.aI].name, "yellow"); s.aI++; s.arm -= 25; 
         }
-        // Weapon logic
         while(s.wep >= 100 && s.wI < WEAP_POOL.length) { 
             push(WEAP_POOL[s.wI]); log("Unlock: " + WEAP_POOL[s.wI].name, "cyan"); s.wI++; s.wep -= 100; 
         }
-        // HOLIDAY FIX: Handle large chunks of $500 milestones
         while(s.holi >= 500 && s.hI < HOLIDAY_POOL.length) {
             push(HOLIDAY_POOL[s.hI]);
             log("🎁 HOLIDAY DROP: " + HOLIDAY_POOL[s.hI].name, "#ff69b4");
-            s.hI++;
-            s.holi -= 500;
+            s.hI++; s.holi -= 500;
         }
 
         document.getElementById('cash-in').value = '';
