@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Persistent Edition</title>
+    <title>OSRS Tracker - Jewelry Expansion</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; }
@@ -55,7 +55,6 @@
     <div id="log-overlay">
         <div style="font-size: 18px; color: var(--osrs-yellow); margin-bottom: 10px; border-bottom: 1px solid #000;">Collection Log</div>
         <div style="font-size: 14px; color: #fff; margin-bottom: 10px;">Boss KC: <span id="log-kc">0</span></div>
-        <div style="font-size: 12px; margin-bottom: 5px; color: var(--osrs-orange);">Unique Drops:</div>
         <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
             <img id="log-pet" src="https://oldschool.runescape.wiki/images/Pet_general_graardor.png" class="item-icon pet-icon-locked">
             <div id="log-pet-name" style="font-size: 10px; color: #777;">Pet Graardor</div>
@@ -97,7 +96,7 @@
         <div style="background:#3e3529; display:flex; height:25px;"><button onclick="renderShop('general')" style="flex:1; font-family:'RuneScape UF'; font-size:10px;">General</button><button onclick="renderShop('slayer')" style="flex:1; font-family:'RuneScape UF'; font-size:10px; background:#4e1a1a; color:white;">Slayer Shop</button></div>
         <div class="grid-container" id="shop-grid"></div>
     </div>
-    <div class="chat-container" id="chatbox">Progress Saved.</div>
+    <div class="chat-container" id="chatbox">Welcome to OSRS Tracker!</div>
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
         <button class="nav-btn" id="btn-bank" onclick="switchTab('bank')">Bank</button>
@@ -109,7 +108,7 @@
     </div>
 </div>
 <script>
-    const STORAGE_KEY = 'OSRS_TRACKER_SAVE_V1';
+    const STORAGE_KEY = 'OSRS_TRACKER_SAVE_V2';
     let state = {
         tpc: 0, totalK: 0, bossKC: 0, hasPet: false,
         atkXP: 0, strXP: 0, defXP: 0, hpXP: 1154, currentHP: 10,
@@ -122,9 +121,16 @@
     const generalItems = [
         { name: 'Lobster', cost: 150, img: 'https://oldschool.runescape.wiki/images/Cooked_lobster.png', type: 'food', heal: 12 },
         { name: 'Super Combat', cost: 5000, img: 'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png', type: 'pot', str: 12 },
-        { name: 'Amulet of Glory', cost: 3500, img: 'https://oldschool.runescape.wiki/images/Amulet_of_glory.png', type: 'amulet', bonus: 10 },
-        { name: 'Berserker Ring', cost: 15000, img: 'https://oldschool.runescape.wiki/images/Berserker_ring.png', type: 'ring', effect: 'strength' }
+        { name: 'Amulet of Power', cost: 2500, img: 'https://oldschool.runescape.wiki/images/Amulet_of_power.png', type: 'amulet', bonus: 6 },
+        { name: 'Amulet of Glory', cost: 8500, img: 'https://oldschool.runescape.wiki/images/Amulet_of_glory.png', type: 'amulet', bonus: 10 },
+        { name: 'Amulet of Fury', cost: 45000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_fury.png', type: 'amulet', bonus: 15 },
+        { name: 'Amulet of Torture', cost: 120000, img: 'https://oldschool.runescape.wiki/images/Amulet_of_torture.png', type: 'amulet', bonus: 20 },
+        { name: 'Warrior Ring', cost: 12000, img: 'https://oldschool.runescape.wiki/images/Warrior_ring.png', type: 'ring', bonus: 4 },
+        { name: 'Berserker Ring', cost: 25000, img: 'https://oldschool.runescape.wiki/images/Berserker_ring.png', type: 'ring', effect: 'strength' },
+        { name: 'Archers Ring', cost: 25000, img: 'https://oldschool.runescape.wiki/images/Archers_ring.png', type: 'ring', bonus: 8 },
+        { name: 'Ring of Suffering', cost: 85000, img: 'https://oldschool.runescape.wiki/images/Ring_of_suffering.png', type: 'ring', bonus: 20 }
     ];
+
     const slayerItems = [
         { name: 'Black Mask', cost: 10000, img: 'https://oldschool.runescape.wiki/images/Black_mask_%2810%29.png', type: 'head', effect: 'slayer_boost' },
         { name: 'Holy Gauntlets', cost: 8000, img: 'https://oldschool.runescape.wiki/images/Holy_wraps.png', type: 'boots', effect: 'tpc_boost' },
@@ -134,23 +140,20 @@
     function saveGame() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function loadGame() {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if(saved) {
-            const parsed = JSON.parse(saved);
-            state = {...state, ...parsed};
-            addChatMessage("Game Loaded!", "green");
-        }
+        if(saved) { state = {...state, ...JSON.parse(saved)}; }
     }
 
     function processDeposit() {
         const val = parseInt(document.getElementById('dollar-input').value) || 0;
-        if(val > 0) { state.totalK += (val * 10); saveGame(); updateUI(); document.getElementById('dollar-input').value = ''; }
+        if(val > 0) { state.totalK += (val * 10); saveGame(); updateUI(); document.getElementById('dollar-input').value = ''; addChatMessage("Mil progress updated!", "green"); }
     }
 
     function buyItem(item) {
         if(state.tpc >= item.cost && state.inventory.length < 12) {
             state.tpc -= item.cost; state.inventory.push({...item});
             addChatMessage(`Bought ${item.name}!`, 'yellow'); saveGame(); updateUI();
-        }
+        } else if (state.inventory.length >= 12) { addChatMessage("Inv full!", "red"); }
+        else { addChatMessage("Not enough TPC!", "red"); }
     }
 
     let combatInterval = null;
@@ -161,8 +164,8 @@
         document.getElementById('boss-ui').style.display = 'block';
         document.getElementById('boss-name').innerText = type;
         combatInterval = setInterval(() => {
-            let maxHit = 5 + (state.equipped.ring?.effect === 'strength' ? 2 : 0) + (state.boost.active ? Math.floor(state.boost.str/2) : 0);
-            let hit = Math.floor(Math.random() * (maxHit + 1));
+            let bonus = (state.equipped.ring?.effect === 'strength' ? 4 : 0) + (state.equipped.amulet?.bonus || 0)/2;
+            let hit = Math.floor(Math.random() * (6 + bonus));
             bHp -= hit; state.atkXP += hit * 4; state.hpXP += hit * 1.33;
             if(bHp <= 0) { clearInterval(combatInterval); combatInterval = null; document.getElementById('boss-ui').style.display = 'none'; saveGame(); }
             updateUI(bHp, bMax);
@@ -177,7 +180,7 @@
         document.getElementById('boss-name').innerText = "Greater Demon (Task)";
         combatInterval = setInterval(() => {
             let maxHit = 8;
-            if(state.equipped.head?.effect === 'slayer_boost') maxHit = Math.floor(maxHit * 1.5);
+            if(state.equipped.head?.effect === 'slayer_boost') maxHit = 12;
             let hit = Math.floor(Math.random() * (maxHit + 1));
             bHp -= hit;
             if(bHp <= 0) { 
@@ -195,23 +198,21 @@
         document.getElementById('boss-ui').style.display = 'block';
         document.getElementById('boss-name').innerText = "General Graardor";
         combatInterval = setInterval(() => {
-            let maxHit = 5 + (state.equipped.ring?.effect === 'strength' ? 2 : 0);
-            let hit = Math.floor(Math.random() * (maxHit + 1));
+            let hit = Math.floor(Math.random() * 8);
             bHp -= hit;
-            if(Math.random() > 0.8) {
-                state.currentHP -= 4;
-                if(state.currentHP <= 0) { clearInterval(combatInterval); combatInterval = null; state.currentHP = 10; document.getElementById('boss-ui').style.display = 'none'; saveGame(); }
+            if(Math.random() > 0.85) {
+                state.currentHP -= 5;
+                if(state.currentHP <= 0) { clearInterval(combatInterval); combatInterval = null; state.currentHP = 10; document.getElementById('boss-ui').style.display = 'none'; saveGame(); addChatMessage("You died!", "red");}
             }
             if(bHp <= 0) {
                 clearInterval(combatInterval); combatInterval = null;
-                state.bossKC++;
-                state.tpc += (50 + Math.floor(Math.random() * 50));
+                state.bossKC++; state.tpc += 100;
                 if(Math.floor(Math.random() * 1000) === 7) {
                     state.hasPet = true;
                     state.inventory.push({ name: 'Pet Graardor', img: 'https://oldschool.runescape.wiki/images/Pet_general_graardor.png', type: 'shield' });
-                    addChatMessage("You have a funny feeling...", "green");
+                    addChatMessage("You have a funny feeling you're being followed...", "green");
                 }
-                document.getElementById('boss-ui').style.display = 'none'; saveGame();
+                document.getElementById('boss-ui').style.display = 'none'; saveGame(); updateUI();
             }
             updateUI(bHp, bMax);
         }, 1200);
