@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - Set Progression</title>
+    <title>OSRS Tracker - Full Set Progression</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
@@ -71,7 +71,8 @@
     </div>
 
     <div id="view-bank" class="view-pane">
-        <div id="bank-grid" class="inventory-tab" style="width:100%; height:180px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
+        <div id="bank-grid" class="inventory-tab" style="width:100%; height:200px; grid-template-columns: repeat(6, 1fr); overflow-y: auto;"></div>
+        <div style="text-align:center; padding:5px; color:#fff;">INVENTORY</div>
         <div id="bank-inv-grid" class="inventory-tab" style="width:100%; height:auto; grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 
@@ -79,7 +80,7 @@
         <div id="shop-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 5px;"></div>
     </div>
 
-    <div class="chat-container" id="chatbox">Progression order: Rune > Dragon > Dharok > Bandos > Torva</div>
+    <div class="chat-container" id="chatbox">Deposit to unlock full Rune, Dragon, Dharok, Bandos, and Torva sets piece-by-piece.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -95,7 +96,7 @@
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_FIXED_ORDER_V17';
+    const STORAGE_KEY = 'OSRS_FULL_SETS_V18';
     
     let state = {
         sp: 0, armorMil: 0, weaponMil: 0, pieceIndex: 0, weaponIndex: 0,
@@ -106,22 +107,24 @@
     };
 
     const armorProgression = [
-        // RUNE SET
+        // RUNE
         { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head', req: {def: 40} },
         { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body', req: {def: 40} },
         { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs', req: {def: 40} },
-        // DRAGON SET
+        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield', req: {def: 40} },
+        // DRAGON
         { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head', req: {def: 60} },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body', req: {def: 60} },
         { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs', req: {def: 60} },
-        // DHAROK SET
+        { name: 'Dragon Kiteshield', img: 'https://oldschool.runescape.wiki/images/Dragon_kiteshield.png', type: 'shield', req: {def: 60} },
+        // DHAROK
         { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head', req: {def: 70} },
         { name: 'Dharok Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body', req: {def: 70} },
         { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs', req: {def: 70} },
-        // BANDOS SET
+        // BANDOS
         { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png', type: 'body', req: {def: 65} },
         { name: 'Bandos Tassets', img: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png', type: 'legs', req: {def: 65} },
-        // TORVA SET
+        // TORVA
         { name: 'Torva Full Helm', img: 'https://oldschool.runescape.wiki/images/Torva_full_helm.png', type: 'head', req: {def: 80} },
         { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', req: {def: 80} },
         { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs', req: {def: 80} }
@@ -132,7 +135,6 @@
         { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon', req: {att: 60} },
         { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon', req: {att: 70} },
         { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon', req: {att: 70} },
-        { name: 'Ghrazi Rapier', img: 'https://oldschool.runescape.wiki/images/Ghrazi_rapier.png', type: 'weapon', req: {att: 80} },
         { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon', req: {att: 80} }
     ];
 
@@ -149,32 +151,19 @@
     function addMil() {
         const val = parseInt(document.getElementById('mil-input').value) || 0;
         if(val <= 0) return;
+        
+        // Every $1000 deposited checks for items. 
+        // Armor costs 10k per piece, Weapons 20k per piece.
         state.armorMil += (val * 1000);
         state.weaponMil += (val * 1000);
 
-        // Armor Unlock Logic
-        while(state.armorMil >= 15000 && state.pieceIndex < armorProgression.length) {
-            let item = {...armorProgression[state.pieceIndex]};
-            if(state.inventory.length < 28) {
-                state.inventory.push(item);
-                addChatMessage(`Unlocked: ${item.name}`, "yellow");
-            } else {
-                state.bank.push(item);
-                addChatMessage(`Unlocked ${item.name} to Bank (Inv Full)`, "orange");
-            }
-            state.pieceIndex++; state.armorMil -= 15000;
+        while(state.armorMil >= 10000 && state.pieceIndex < armorProgression.length) {
+            unlockItem(armorProgression[state.pieceIndex], "Armor");
+            state.pieceIndex++; state.armorMil -= 10000;
         }
 
-        // Weapon Unlock Logic
         while(state.weaponMil >= 20000 && state.weaponIndex < weaponProgression.length) {
-            let item = {...weaponProgression[state.weaponIndex]};
-            if(state.inventory.length < 28) {
-                state.inventory.push(item);
-                addChatMessage(`Unlocked: ${item.name}`, "#00ffff");
-            } else {
-                state.bank.push(item);
-                addChatMessage(`Unlocked ${item.name} to Bank (Inv Full)`, "orange");
-            }
+            unlockItem(weaponProgression[state.weaponIndex], "Weapon");
             state.weaponIndex++; state.weaponMil -= 20000;
         }
         
@@ -182,11 +171,22 @@
         document.getElementById('mil-input').value = '';
     }
 
+    function unlockItem(itemData, category) {
+        let item = {...itemData};
+        if(state.inventory.length < 28) {
+            state.inventory.push(item);
+            addChatMessage(`Unlocked ${category}: ${item.name}`, category === "Armor" ? "yellow" : "#00ffff");
+        } else {
+            state.bank.push(item);
+            addChatMessage(`Unlocked ${item.name} (Sent to Bank)`, "orange");
+        }
+    }
+
     function train(mode) {
-        if(mode === 'att') { state.xp.att += 500; state.xp.hp += 150; state.sp += 300; }
-        if(mode === 'def') { state.xp.def += 500; state.xp.hp += 150; state.sp += 300; }
-        if(mode === 'slayer') { state.xp.att += 400; state.xp.def += 400; state.xp.slay += 800; state.sp += 1200; }
-        if(mode === 'raid') { state.xp.att += 4000; state.xp.def += 4000; state.sp += 5000; }
+        if(mode === 'att') { state.xp.att += 600; state.xp.hp += 200; state.sp += 400; }
+        if(mode === 'def') { state.xp.def += 600; state.xp.hp += 200; state.sp += 400; }
+        if(mode === 'slayer') { state.xp.att += 500; state.xp.def += 500; state.xp.slay += 1000; state.sp += 1500; }
+        if(mode === 'raid') { state.xp.att += 5000; state.xp.def += 5000; state.sp += 6000; }
         save(); updateUI();
     }
 
@@ -196,9 +196,8 @@
         globalShopItems.forEach(it => {
             const card = document.createElement('div');
             card.className = 'shop-item-card';
-            card.style = "background:rgba(0,0,0,0.3); border:1px solid #5d4d37; padding:5px; text-align:center; cursor:pointer;";
             const canAfford = state.sp >= it.cost;
-            card.innerHTML = `<img src="${it.img}" class="item-icon"><div style="font-size:10px;">${it.name}</div><div style="color:${canAfford ? '#0ff00' : '#ff0000'}">${it.cost} SP</div>`;
+            card.innerHTML = `<img src="${it.img}" class="item-icon"><div style="font-size:10px;">${it.name}</div><div style="color:${canAfford ? '#00ff00' : '#ff0000'}">${it.cost.toLocaleString()} SP</div>`;
             card.onclick = () => {
                 if(state.sp >= it.cost && state.inventory.length < 28) {
                     state.sp -= it.cost; state.inventory.push({...it});
@@ -220,7 +219,7 @@
 
     function updateUI() {
         document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
-        document.getElementById('armor-mil').innerText = state.armorMil.toLocaleString();
+        document.getElementById('armor-mil').innerText = (state.armorMil / 1000).toFixed(0);
         const a=xpToLvl(state.xp.att), d=xpToLvl(state.xp.def), h=xpToLvl(state.xp.hp), l=xpToLvl(state.xp.slay);
         document.getElementById('skills-display').innerHTML = `<div class="skill-card">Att: ${a}</div><div class="skill-card">Def: ${d}</div><div class="skill-card">HP: ${h}</div><div class="skill-card">Slay: ${l}</div>`;
         renderInv(); renderEquip();
