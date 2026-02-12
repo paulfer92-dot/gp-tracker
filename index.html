@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --osrs-border: #3e3529; --osrs-panel: #4e4435; --osrs-text: #ff981f; }
@@ -15,18 +15,17 @@
         }
 
         /* HEADER */
-        .top-bar { width: 100%; background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; }
-        input { padding: 8px; background: #000; color: #0f0; border: 1px solid #555; width: 80px; font-size: 16px; }
-        button.add-btn { background: #006400; color: #fff; border: 1px solid #000; padding: 8px 15px; cursor: pointer; font-family: 'RuneScape UF'; }
+        .top-bar { width: 100%; background: #222; padding: 10px; border-bottom: 2px solid var(--osrs-border); text-align: center; z-index: 100; }
+        .input-row { display: flex; justify-content: center; gap: 8px; }
+        input { padding: 10px; background: #000; color: #0f0; border: 1px solid #555; width: 100px; font-size: 16px; border-radius: 4px; }
+        button.add-btn { background: #006400; color: #fff; border: 1px solid #000; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-family: 'RuneScape UF'; }
 
-        /* EQUIPMENT BOX (OSRS EXACT RATIO) */
+        /* EQUIPMENT SCREEN */
         .equip-window {
             background: var(--osrs-panel); border: 3px solid var(--osrs-border);
             width: 220px; height: 260px; margin: 15px 0;
             position: relative; flex-shrink: 0;
         }
-
-        /* SLOT STYLING */
         .slot {
             position: absolute; width: 40px; height: 40px;
             background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border);
@@ -35,22 +34,29 @@
         .slot img { max-width: 90%; max-height: 90%; object-fit: contain; z-index: 5; }
         
         /* SILHOUETTES */
-        .slot::before {
-            content: ""; position: absolute; width: 24px; height: 24px;
-            opacity: 0.2; background-size: contain; background-repeat: no-repeat; background-position: center;
-        }
+        .slot::before { content: ""; position: absolute; width: 24px; height: 24px; opacity: 0.15; background-size: contain; background-repeat: no-repeat; background-position: center; }
+        #s-head::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2C8.5 2 6 4.5 6 8v2c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.5-2.5-6-6-6z"/></svg>'); }
+        #s-body::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M21 7h-4l-1-2h-8l-1 2H3v10h18V7z"/></svg>'); }
+        #s-weapon::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M19.7 4.3c-.4-.4-1-.4-1.4 0L13 9.6 9.6 6.2c-.4-.4-1-.4-1.4 0L4.3 10.1c-.4.4-.4 1 0 1.4L11 18.2V22h2v-3.8l6.7-6.7c.4-.4.4-1.1 0-1.5z"/></svg>'); }
+        #s-shield::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2L4 5v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V5l-8-3z"/></svg>'); }
+        #s-legs::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6 2v20h4v-7h4v7h4V2H6z"/></svg>'); }
+        #s-boots::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M5 17h4l1 3h8v-2h-6l-1-3h-6v2z"/></svg>'); }
 
-        /* PIXEL POSITIONING */
-        #s-head   { top: 10px;  left: 90px; }  #s-head::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2C8.5 2 6 4.5 6 8v2c0 3.3 2.7 6 6 6s6-2.7 6-6V8c0-3.5-2.5-6-6-6z"/></svg>'); }
-        #s-cape   { top: 55px;  left: 45px; }
+        /* COORDINATE MAP */
+        #s-head   { top: 10px;  left: 90px; }
         #s-neck   { top: 55px;  left: 90px; }
-        #s-ammo   { top: 55px;  left: 135px;}
-        #s-weapon { top: 100px; left: 30px; }  #s-weapon::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M19.7 4.3c-.4-.4-1-.4-1.4 0L13 9.6 9.6 6.2c-.4-.4-1-.4-1.4 0L4.3 10.1c-.4.4-.4 1 0 1.4L11 18.2V22h2v-3.8l6.7-6.7c.4-.4.4-1.1 0-1.5z"/></svg>'); }
-        #s-body   { top: 100px; left: 90px; }  #s-body::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M21 7h-4l-1-2h-8l-1 2H3v10h18V7z"/></svg>'); }
-        #s-shield { top: 100px; left: 150px;}  #s-shield::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M12 2L4 5v6c0 5.5 3.5 10.5 8 12 4.5-1.5 8-6.5 8-12V5l-8-3z"/></svg>'); }
-        #s-legs   { top: 145px; left: 90px; }  #s-legs::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M6 2v20h4v-7h4v7h4V2H6z"/></svg>'); }
-        #s-hands  { top: 190px; left: 30px; }
-        #s-boots  { top: 190px; left: 90px; }  #s-boots::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M5 17h4l1 3h8v-2h-6l-1-3h-6v2z"/></svg>'); }
-        #s-ring   { top: 190px; left: 150px;}
+        #s-weapon { top: 100px; left: 30px; }
+        #s-body   { top: 100px; left: 90px; }
+        #s-shield { top: 100px; left: 150px;}
+        #s-legs   { top: 145px; left: 90px; }
+        #s-boots  { top: 190px; left: 90px; }
 
         /* INVENTORY */
+        .inv-wrapper { 
+            background: var(--osrs-panel); border: 3px solid var(--osrs-border); 
+            width: 240px; padding: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+        }
+        .i-slot { width: 48px; height: 48px; background: rgba(0,0,0,0.4); border: 1px solid var(--osrs-border); display: flex; align-items: center; justify-content: center; }
+        .i-slot img { width: 85%; height: 85%; object-fit: contain; }
+
+        .chat { background: #000; width: 95%; height: 70px; margin-top: 1
