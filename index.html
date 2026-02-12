@@ -3,88 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker - All Tabs Restored</title>
+    <title>OSRS Tracker - Tab Fix</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
         :root { --inv-bg: #4e4435; --osrs-yellow: #ffff00; --osrs-orange: #ff981f; --slot-border: #3e3529; --slot-bg: rgba(0,0,0,0.4); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; color: var(--osrs-orange); font-family: 'RuneScape UF', sans-serif; margin: 0; display: flex; justify-content: center; overflow: hidden; }
-        .app-shell { width: 98%; max-width: 420px; height: 98vh; background: #1a1712; border: 1px solid #333; padding: 10px; display: flex; flex-direction: column; }
+        body { background: #000; color: var(--osrs-orange); font-family: 'RuneScape UF', sans-serif; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        .app-shell { width: 100%; max-width: 420px; height: 100%; background: #1a1712; border: 1px solid #333; padding: 10px; display: flex; flex-direction: column; }
         
-        /* Stats Header Shortened */
-        .stats-header { display: flex; justify-content: space-between; border-bottom: 2px solid #3e3529; padding-bottom: 5px; margin-bottom: 10px; font-size: 18px; }
+        /* Stats Top Bar */
+        .stats-header { display: flex; justify-content: space-between; border-bottom: 2px solid #3e3529; padding-bottom: 5px; margin-bottom: 5px; font-size: 16px; flex-shrink: 0; }
         
-        .view-pane { display: none; flex-grow: 1; overflow-y: auto; flex-direction: column; }
-        .view-pane.active { display: flex; }
+        /* Content Area */
+        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .view-pane { display: none; width: 100%; }
+        .view-pane.active { display: flex; flex-direction: column; }
         
-        /* Inventory Grid */
+        /* Shared Inventory Grid (Fixed 28 Slots) */
         .inventory-grid { 
             width: 172px; height: 295px; background: var(--inv-bg); border: 2px solid var(--slot-border); 
             display: grid; grid-template-columns: repeat(4, 38px); grid-template-rows: repeat(7, 38px); 
-            gap: 2px; padding: 4px; align-content: start; margin: 0 auto;
+            gap: 2px; padding: 4px; margin: 0 auto;
         }
         .slot { width: 38px; height: 38px; background: var(--slot-bg); border: 1px solid var(--slot-border); display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .item-icon { width: 32px; height: 32px; filter: drop-shadow(1px 1px 1px #000); }
         
-        /* Nav System */
-        .nav-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-top: 5px; flex-shrink: 0; }
-        .nav-btn { padding: 12px 2px; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; font-size: 14px; text-transform: uppercase; }
-        .nav-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
+        /* Equipment Layout */
+        .equip-window { width: 180px; height: 215px; background: var(--inv-bg) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center; background-size: contain; position: relative; border: 2px solid var(--slot-border); margin: 0 auto; }
         
-        .equip-window { width: 180px; height: 215px; background: var(--inv-bg) url('https://oldschool.runescape.wiki/images/Equipment_window.png') no-repeat center; background-size: contain; position: relative; border: 2px solid var(--slot-border); }
-        .chat-container { height: 60px; background: #726451; border: 2px solid var(--slot-border); margin: 5px 0; padding: 5px; overflow-y: auto; font-size: 14px; color: #fff; }
-        .bank-container { width: 100%; background: #3e3529; border: 2px solid #000; padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; overflow-y: auto; height: 180px; }
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
-        .shop-item { background: rgba(0,0,0,0.3); border: 1px solid #5d4d37; padding: 5px; text-align: center; cursor: pointer; }
+        /* Bank/Shop Specials */
+        .bank-storage { width: 100%; background: #2a241c; border: 2px solid #000; padding: 5px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; height: 160px; overflow-y: auto; margin-bottom: 10px; }
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 5px; height: 160px; overflow-y: auto; }
+        .shop-item { background: #3e3529; border: 1px solid #5d4d37; padding: 5px; text-align: center; cursor: pointer; font-size: 12px; }
+
+        /* Nav Bar */
+        .nav-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 5px 0; flex-shrink: 0; }
+        .nav-btn { padding: 12px 0; background: #3e3529; color: #fff; border: 1px solid #000; font-family: 'RuneScape UF'; cursor: pointer; text-align: center; }
+        .nav-btn.active { background: var(--osrs-orange); color: #000; }
         
-        .stat-line { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; font-size: 16px; }
+        .chat-container { height: 50px; background: #726451; border: 2px solid var(--slot-border); padding: 5px; overflow-y: auto; font-size: 13px; color: #fff; flex-shrink: 0; }
+        .input-area { display: flex; gap: 5px; padding-top: 5px; flex-shrink: 0; }
+        input { flex: 1; padding: 10px; background: #222; color: #00ff00; border: 1px solid #444; font-family: 'RuneScape UF'; }
     </style>
 </head>
 <body>
 <div class="app-shell">
     <div class="stats-header">
-        <div style="color:var(--osrs-yellow)">Shop Points: <span id="sp-bal">0</span></div>
-        <div style="color:#00ff00;">XP Gained: <span id="xp-total">0</span></div>
+        <div style="color:var(--osrs-yellow)">Shop: <span id="sp-bal">0</span></div>
+        <div style="color:#00ff00">XP: <span id="xp-total">0</span></div>
     </div>
 
-    <div id="view-combat" class="view-pane active">
-        <div style="display: flex; gap: 8px; justify-content: center;">
-            <div class="equip-window">
-                <div id="head-slot" style="position: absolute; top: 12px; left: 73px;" class="slot" onclick="unequip('head')"></div>
-                <div id="body-slot" style="position: absolute; top: 85px; left: 73px;" class="slot" onclick="unequip('body')"></div>
-                <div id="weapon-slot" style="position: absolute; top: 85px; left: 18px;" class="slot" onclick="unequip('weapon')"></div>
-                <div id="shield-slot" style="position: absolute; top: 85px; left: 128px;" class="slot" onclick="unequip('shield')"></div>
-                <div id="legs-slot" style="position: absolute; top: 126px; left: 73px;" class="slot" onclick="unequip('legs')"></div>
+    <div class="main-content">
+        <div id="view-combat" class="view-pane active">
+            <div style="display: flex; gap: 5px; justify-content: center; align-items: flex-start;">
+                <div class="equip-window">
+                    <div id="head-slot" style="position: absolute; top: 12px; left: 73px;" class="slot" onclick="unequip('head')"></div>
+                    <div id="body-slot" style="position: absolute; top: 85px; left: 73px;" class="slot" onclick="unequip('body')"></div>
+                    <div id="weapon-slot" style="position: absolute; top: 85px; left: 18px;" class="slot" onclick="unequip('weapon')"></div>
+                    <div id="shield-slot" style="position: absolute; top: 85px; left: 128px;" class="slot" onclick="unequip('shield')"></div>
+                    <div id="legs-slot" style="position: absolute; top: 126px; left: 73px;" class="slot" onclick="unequip('legs')"></div>
+                </div>
+                <div class="inventory-grid" id="inv-grid-combat"></div>
             </div>
-            <div class="inventory-grid" id="inv-grid"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button class="nav-btn" style="border-color:orange" onclick="train(500)">Slay Monster</button>
+                <button class="nav-btn" style="background:#4e1a1a" onclick="train(5000)">Solo Raid</button>
+            </div>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:10px;">
-            <button class="nav-btn" style="background:#3e3529; border: 1px solid var(--osrs-orange);" onclick="train(500)">Slay Monster</button>
-            <button class="nav-btn" style="background:#4e1a1a; border: 1px solid red;" onclick="train(5000)">Solo Raid</button>
+
+        <div id="view-bank" class="view-pane">
+            <div class="bank-storage" id="bank-grid"></div>
+            <div style="text-align:center; font-size:12px; margin-bottom:5px;">INVENTORY (TAP TO DEPOSIT)</div>
+            <div class="inventory-grid" id="inv-grid-bank"></div>
+        </div>
+
+        <div id="view-shop" class="view-pane">
+            <div class="shop-grid" id="shop-items"></div>
+            <div style="text-align:center; font-size:12px; margin-top:10px;">INVENTORY</div>
+            <div class="inventory-grid" id="inv-grid-shop"></div>
+        </div>
+
+        <div id="view-stats" class="view-pane">
+            <div style="padding:10px; background:#222; border:1px solid #444;">
+                <h3 style="color:var(--osrs-yellow); margin-top:0;">Progress</h3>
+                <p>Armor: $<span id="arm-p">0</span>/50</p>
+                <p>Weapon: $<span id="wep-p">0</span>/100</p>
+                <p>Rare: $<span id="rare-p">0</span>/1000</p>
+                <hr>
+                <p>Total Items Unlocked: <span id="items-count">0</span></p>
+            </div>
         </div>
     </div>
 
-    <div id="view-bank" class="view-pane">
-        <div class="bank-container" id="bank-grid"></div>
-        <div style="text-align:center; margin:10px 0; font-size: 12px; color:var(--osrs-yellow)">CLICK INVENTORY TO DEPOSIT</div>
-        <div class="inventory-grid" id="bank-inv-grid"></div>
-    </div>
-
-    <div id="view-shop" class="view-pane">
-        <div class="shop-grid" id="shop-list"></div>
-        <div style="text-align:center; margin:10px 0; font-size: 12px;">ACTIVE INVENTORY</div>
-        <div class="inventory-grid" id="shop-inv-grid"></div>
-    </div>
-
-    <div id="view-stats" class="view-pane">
-        <h3 style="text-align:center; color:var(--osrs-yellow)">Progression Stats</h3>
-        <div class="stat-line"><span>Armor Progress:</span> <span>$<span id="arm-prog">0</span>/50</span></div>
-        <div class="stat-line"><span>Weapon Progress:</span> <span>$<span id="wep-prog">0</span>/100</span></div>
-        <div class="stat-line"><span>Rare Item Progress:</span> <span>$<span id="rare-prog">0</span>/1000</span></div>
-        <div class="stat-line"><span>Items Found:</span> <span><span id="items-total">0</span></span></div>
-    </div>
-
-    <div class="chat-container" id="chatbox">All tabs functional. $50 Armor | $100 Weapon | $1k Rare</div>
+    <div class="chat-container" id="chatbox">Tabs Fixed. $50 Armor / $100 Weapon.</div>
 
     <div class="nav-tabs">
         <button class="nav-btn active" id="btn-combat" onclick="switchTab('combat')">Combat</button>
@@ -93,22 +104,22 @@
         <button class="nav-btn" id="btn-stats" onclick="switchTab('stats')">Stats</button>
     </div>
 
-    <div class="input-group" style="display:flex; gap:5px; margin-top:auto; padding-top: 5px;">
-        <input type="number" id="mil-input" style="flex:1; padding:12px; background:#222; color:#00ff00; border:1px solid #444; font-family: 'RuneScape UF';" placeholder="Deposit $...">
-        <button onclick="addMil()" style="background:#006400; color:#fff; padding:0 20px; border:none; font-family:'RuneScape UF'; cursor:pointer;">DEPOSIT</button>
+    <div class="input-area">
+        <input type="number" id="mil-input" placeholder="Deposit $ amount...">
+        <button onclick="addMil()" style="background:#006400; color:#fff; padding:0 15px; border:none; font-family:'RuneScape UF'; cursor:pointer;">DEPOSIT</button>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'OSRS_MASTER_V25';
+    const STORAGE_KEY = 'OSRS_FIXED_UI_V26';
     let state = {
-        sp: 0, armorMil: 0, weaponMil: 0, rareMil: 0, pieceIndex: 0, weaponIndex: 0, xp: 0,
-        inventory: [{ name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon' }], 
+        sp: 0, armM: 0, wepM: 0, rareM: 0, aIdx: 0, wIdx: 0, xp: 0,
+        inv: [{ name: 'Iron Scimitar', img: 'https://oldschool.runescape.wiki/images/Iron_scimitar.png', type: 'weapon' }], 
         bank: [],
-        equipped: { head:null, body:null, weapon:null, legs:null, shield:null }
+        equip: { head:null, body:null, weapon:null, legs:null, shield:null }
     };
 
-    const armorProgression = [
+    const ARMOR = [
         { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
         { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
         { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
@@ -116,85 +127,90 @@
         { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png', type: 'head' },
         { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png', type: 'body' },
         { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
-        { name: 'Dragon Kiteshield', img: 'https://oldschool.runescape.wiki/images/Dragon_kiteshield.png', type: 'shield' },
         { name: 'Dharok Helm', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_med_helm.png', type: 'head' },
-        { name: 'Dharok Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body' },
-        { name: 'Dharok Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' }
+        { name: 'Dharok Body', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body' },
+        { name: 'Dharok Legs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' }
     ];
 
-    const weaponProgression = [
+    const WEPS = [
         { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
         { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
         { name: 'Dharok Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon' }
     ];
 
-    const rarePool = [
+    const RARES = [
         { name: 'Red Partyhat', img: 'https://oldschool.runescape.wiki/images/Red_partyhat.png', type: 'head' },
-        { name: 'Blue Partyhat', img: 'https://oldschool.runescape.wiki/images/Blue_partyhat.png', type: 'head' },
         { name: 'Santa Hat', img: 'https://oldschool.runescape.wiki/images/Santa_hat.png', type: 'head' }
     ];
 
-    const globalShopItems = [
+    const SHOP = [
         { name:'Manta Ray', cost:1500, img:'https://oldschool.runescape.wiki/images/Manta_ray.png' },
-        { name:'Super Combat', cost:25000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
-        { name:'Fire Cape', cost:75000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' }
+        { name:'Super Combat', cost:20000, img:'https://oldschool.runescape.wiki/images/Super_combat_potion%284%29.png' },
+        { name:'Fire Cape', cost:50000, img:'https://oldschool.runescape.wiki/images/Fire_cape.png', type:'body' }
     ];
 
     function addMil() {
         const val = parseInt(document.getElementById('mil-input').value) || 0;
         if(val <= 0) return;
-        state.armorMil += val; state.weaponMil += val; state.rareMil += val;
+        state.armM += val; state.wepM += val; state.rareM += val;
 
-        while(state.armorMil >= 50 && state.pieceIndex < armorProgression.length) {
-            addItem(armorProgression[state.pieceIndex]);
-            addChatMessage(`Got ${armorProgression[state.pieceIndex].name}`, "yellow");
-            state.pieceIndex++; state.armorMil -= 50;
+        while(state.armM >= 50 && state.aIdx < ARMOR.length) {
+            pushItem(ARMOR[state.aIdx]);
+            msg(`Unlocked: ${ARMOR[state.aIdx].name}`, "yellow");
+            state.aIdx++; state.armM -= 50;
         }
-        while(state.weaponMil >= 100 && state.weaponIndex < weaponProgression.length) {
-            addItem(weaponProgression[state.weaponIndex]);
-            addChatMessage(`Got ${weaponProgression[state.weaponIndex].name}`, "#00ffff");
-            state.weaponIndex++; state.weaponMil -= 100;
+        while(state.wepM >= 100 && state.wIdx < WEPS.length) {
+            pushItem(WEPS[state.wIdx]);
+            msg(`Unlocked: ${WEPS[state.wIdx].name}`, "cyan");
+            state.wIdx++; state.wepM -= 100;
         }
-        while(state.rareMil >= 1000) {
-            const r = rarePool[Math.floor(Math.random()*rarePool.length)];
-            addItem(r);
-            addChatMessage(`RARE: ${r.name}!`, "#ff00ff");
-            state.rareMil -= 1000;
+        while(state.rareM >= 1000) {
+            const r = RARES[Math.floor(Math.random()*RARES.length)];
+            pushItem(r);
+            msg(`RARE: ${r.name}`, "magenta");
+            state.rareM -= 1000;
         }
         save(); updateUI();
         document.getElementById('mil-input').value = '';
     }
 
-    function addItem(item) {
-        if(state.inventory.length < 28) state.inventory.push({...item});
-        else state.bank.push({...item});
+    function pushItem(it) {
+        if(state.inv.length < 28) state.inv.push({...it});
+        else state.bank.push({...it});
     }
 
-    function train(gain) {
-        state.sp += gain;
-        state.xp += gain;
-        addChatMessage(`+${gain} Shop Points`, "green");
+    function train(g) {
+        state.sp += g; state.xp += g;
+        msg(`+${g} Points`, "green");
         save(); updateUI();
     }
 
-    function renderInv(containerId, mode) {
-        const grid = document.getElementById(containerId);
+    function switchTab(t) {
+        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + t).classList.add('active');
+        document.getElementById('btn-' + t).classList.add('active');
+        updateUI();
+    }
+
+    function renderInventory(id, mode) {
+        const grid = document.getElementById(id);
         if(!grid) return;
         grid.innerHTML = '';
         for(let i=0; i<28; i++) {
             const div = document.createElement('div');
             div.className = 'slot';
-            if(state.inventory[i]) {
-                const item = state.inventory[i];
+            const item = state.inv[i];
+            if(item) {
                 div.innerHTML = `<img src="${item.img}" class="item-icon">`;
                 div.onclick = () => {
                     if(mode === 'bank') {
-                        state.bank.push(state.inventory.splice(i, 1)[0]);
+                        state.bank.push(state.inv.splice(i, 1)[0]);
                     } else if(mode === 'combat') {
-                        const old = state.equipped[item.type];
-                        state.equipped[item.type] = item;
-                        state.inventory.splice(i, 1);
-                        if(old) state.inventory.push(old);
+                        const old = state.equip[item.type];
+                        state.equip[item.type] = item;
+                        state.inv.splice(i, 1);
+                        if(old) state.inv.push(old);
                     }
                     save(); updateUI();
                 };
@@ -203,85 +219,70 @@
         }
     }
 
-    function renderBank() {
-        const grid = document.getElementById('bank-grid');
-        grid.innerHTML = '';
-        state.bank.forEach((item, i) => {
-            const div = document.createElement('div');
-            div.className = 'slot';
-            div.innerHTML = `<img src="${item.img}" class="item-icon">`;
-            div.onclick = () => {
-                if(state.inventory.length < 28) {
-                    state.inventory.push(state.bank.splice(i, 1)[0]);
-                    save(); updateUI();
-                }
-            };
-            grid.appendChild(div);
-        });
-    }
-
-    function renderShop() {
-        const list = document.getElementById('shop-list');
-        list.innerHTML = '';
-        globalShopItems.forEach(it => {
-            const card = document.createElement('div');
-            card.className = 'shop-item';
-            card.innerHTML = `<img src="${it.img}" class="item-icon"><br><small>${it.cost.toLocaleString()} SP</small>`;
-            card.onclick = () => {
-                if(state.sp >= it.cost && state.inventory.length < 28) {
-                    state.sp -= it.cost;
-                    state.inventory.push({...it});
-                    save(); updateUI();
-                }
-            };
-            list.appendChild(card);
-        });
-    }
-
     function updateUI() {
         document.getElementById('sp-bal').innerText = state.sp.toLocaleString();
         document.getElementById('xp-total').innerText = state.xp.toLocaleString();
-        document.getElementById('arm-prog').innerText = state.armorMil;
-        document.getElementById('wep-prog').innerText = state.weaponMil;
-        document.getElementById('rare-prog').innerText = state.rareMil;
-        document.getElementById('items-total').innerText = state.pieceIndex + state.weaponIndex;
-        
-        renderInv('inv-grid', 'combat');
-        renderInv('bank-inv-grid', 'bank');
-        renderInv('shop-inv-grid', 'none');
-        renderBank();
-        renderShop();
+        document.getElementById('arm-p').innerText = state.armM;
+        document.getElementById('wep-p').innerText = state.wepM;
+        document.getElementById('rare-p').innerText = state.rareM;
+        document.getElementById('items-count').innerText = state.aIdx + state.wIdx;
 
-        for(let slot in state.equipped) {
-            const el = document.getElementById(`${slot}-slot`);
-            if(el) el.innerHTML = state.equipped[slot] ? `<img src="${state.equipped[slot].img}" class="item-icon">` : '';
+        renderInventory('inv-grid-combat', 'combat');
+        renderInventory('inv-grid-bank', 'bank');
+        renderInventory('inv-grid-shop', 'none');
+
+        const bGrid = document.getElementById('bank-grid');
+        bGrid.innerHTML = '';
+        state.bank.forEach((it, i) => {
+            const d = document.createElement('div'); d.className = 'slot';
+            d.innerHTML = `<img src="${it.img}" class="item-icon">`;
+            d.onclick = () => {
+                if(state.inv.length < 28) {
+                    state.inv.push(state.bank.splice(i, 1)[0]);
+                    save(); updateUI();
+                }
+            };
+            bGrid.appendChild(d);
+        });
+
+        const sGrid = document.getElementById('shop-items');
+        sGrid.innerHTML = '';
+        SHOP.forEach(it => {
+            const d = document.createElement('div'); d.className = 'shop-item';
+            d.innerHTML = `<img src="${it.img}" class="item-icon"><br>${it.cost}`;
+            d.onclick = () => {
+                if(state.sp >= it.cost && state.inv.length < 28) {
+                    state.sp -= it.cost; pushItem(it);
+                    save(); updateUI();
+                }
+            };
+            sGrid.appendChild(d);
+        });
+
+        for(let s in state.equip) {
+            const el = document.getElementById(`${s}-slot`);
+            if(el) el.innerHTML = state.equip[s] ? `<img src="${state.equip[s].img}" class="item-icon">` : '';
         }
     }
 
-    function unequip(type) {
-        if(state.equipped[type] && state.inventory.length < 28) {
-            state.inventory.push(state.equipped[type]);
-            state.equipped[type] = null;
+    function unequip(s) {
+        if(state.equip[s] && state.inv.length < 28) {
+            state.inv.push(state.equip[s]);
+            state.equip[s] = null;
             save(); updateUI();
         }
     }
 
-    function switchTab(t) {
-        document.querySelectorAll('.view-pane, .nav-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + t).classList.add('active');
-        document.getElementById('btn-' + t).classList.add('active');
-        updateUI();
+    function msg(t, c) {
+        const cb = document.getElementById('chatbox');
+        cb.innerHTML += `<div style="color:${c}">${t}</div>`;
+        cb.scrollTop = cb.scrollHeight;
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function load() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if(saved) state = Object.assign(state, JSON.parse(saved));
-    }
-    function addChatMessage(t, c) {
-        const cb = document.getElementById('chatbox');
-        cb.innerHTML += `<div style="color:${c}">${t}</div>`;
-        cb.scrollTop = cb.scrollHeight;
+        const data = localStorage.getItem(STORAGE_KEY);
+        if(data) state = Object.assign(state, JSON.parse(data));
     }
 
     load(); updateUI();
