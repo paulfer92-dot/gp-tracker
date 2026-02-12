@@ -30,30 +30,71 @@
             -webkit-touch-callout: none;
         }
 
-        /* Inventory & Equipment CSS omitted for brevity, keeping existing styles */
         .combat-level { font-size: 24px; margin-bottom: 10px; color: var(--osrs-yellow); text-shadow: 2px 2px #000; }
-        .game-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .equip-tab { width: 190px; height: 250px; background: var(--inv-bg); border: 4px solid #3e3529; background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png'); background-size: contain; background-repeat: no-repeat; position: relative; }
-        .e-slot { position: absolute; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        #head-slot { top: 12px; left: 77px; } #cape-slot { top: 52px; left: 36px; } #body-slot { top: 52px; left: 77px; } 
-        #weapon-slot { top: 92px; left: 20px; } #shield-slot { top: 92px; left: 134px; } #legs-slot { top: 108px; left: 77px; } #boots-slot { top: 147px; left: 77px; }
+
+        .game-container {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Equipment Screen with Ghost Icons */
+        .equip-tab {
+            width: 190px; height: 250px;
+            background: var(--inv-bg);
+            border: 4px solid #3e3529;
+            background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        }
+
+        .e-slot { 
+            position: absolute; width: 36px; height: 36px; 
+            display: flex; justify-content: center; align-items: center; 
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 26px;
+            image-rendering: pixelated;
+        }
+
+        /* Ghost Backgrounds */
+        #head-slot { top: 12px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Head_slot.png'); }
+        #cape-slot { top: 52px; left: 36px; background-image: url('https://oldschool.runescape.wiki/images/Cape_slot.png'); }
+        #body-slot { top: 52px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Body_slot.png'); }
+        #weapon-slot { top: 92px; left: 20px; background-image: url('https://oldschool.runescape.wiki/images/Weapon_slot.png'); }
+        #shield-slot { top: 92px; left: 134px; background-image: url('https://oldschool.runescape.wiki/images/Shield_slot.png'); }
+        #legs-slot { top: 108px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Legs_slot.png'); }
+        #boots-slot { top: 147px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Boots_slot.png'); }
 
         .inventory-tab {
-            width: 200px; background-color: var(--inv-bg); border: 4px solid #3e3529; padding: 10px;
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+            width: 200px;
+            background-color: var(--inv-bg);
+            border: 4px solid #3e3529;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
         }
 
         .slot {
-            width: 42px; height: 38px; background: rgba(0, 0, 0, 0.2); border-radius: 3px;
-            display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer;
+            width: 42px; height: 38px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 1px 1px 2px #000;
+            position: relative;
+            cursor: pointer;
         }
 
-        /* The Progress Ring */
         .hold-ring {
             position: absolute; width: 34px; height: 34px; border-radius: 50%;
-            border: 2px solid rgba(255, 255, 0, 0.2);
             pointer-events: none; opacity: 0;
-            transition: opacity 0.1s;
         }
 
         .hold-ring-fill {
@@ -63,17 +104,35 @@
             -webkit-mask: radial-gradient(transparent 55%, black 60%);
         }
 
-        .item-icon { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
-        .stack-amount { position: absolute; top: -2px; left: 1px; font-size: 16px; text-shadow: 1px 1px 0px #000; pointer-events: none; }
-        .chat-container { width: 410px; height: 80px; background-color: #726451; border: 3px solid #3e3529; margin-top: 10px; padding: 5px 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; }
+        .item-icon { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; position: relative; z-index: 2; }
+
+        .stack-amount {
+            position: absolute; top: -2px; left: 1px;
+            font-size: 16px; text-shadow: 1px 1px 0px #000;
+            pointer-events: none; z-index: 3;
+        }
+
+        .chat-container {
+            width: 410px; height: 80px;
+            background-color: #726451; border: 3px solid #3e3529;
+            margin-top: 10px; padding: 5px 10px; box-sizing: border-box;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+
         .chat-line { color: #000; font-size: 18px; margin: 1px 0; }
+
         .xp-tracker { margin-top: 15px; width: 410px; background: #2e281f; border: 2px solid #000; padding: 8px; box-sizing: border-box;}
         .xp-bar-bg { width: 100%; height: 12px; background: #111; border: 1px solid #000; overflow: hidden; }
         .xp-bar-fill { height: 100%; width: 0%; background: linear-gradient(to bottom, #ed971e, #8c520a); transition: width 0.5s; }
+
         .settings { margin-top: 20px; display: flex; gap: 5px; }
         input { background: #111; border: 1px solid var(--osrs-orange); color: white; padding: 8px; width: 100px; font-family: 'RuneScape UF'; }
         button { background: #5d5342; color: var(--osrs-orange); border: 1px solid #000; padding: 5px 10px; font-family: 'RuneScape UF'; cursor: pointer; }
-        .yellow { color: var(--osrs-yellow); } .white { color: #ffffff; } .green { color: #00ff00; }
+
+        .yellow { color: var(--osrs-yellow); }
+        .white { color: #ffffff; }
+        .green { color: #00ff00; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -135,62 +194,56 @@
         
         let pressInterval;
         let progress = 0;
-        const DURATION = 600; // ms to fill
+        const DURATION = 500; 
 
         const equipSound = new Audio('https://oldschool.runescape.wiki/images/Equipment_shout.wav');
         const levelUpSound = new Audio('https://oldschool.runescape.wiki/images/Level_up_jingle.wav');
+        const coinSound = new Audio('https://oldschool.runescape.wiki/images/Inventory_item_drop.wav');
 
         const fullLootPool = [
-            { name: 'Primordial Boots', img: 'https://oldschool.runescape.wiki/images/Primordial_boots.png', type: 'boots', ex: 'Powered by the soul of Cerberus.' },
-            { name: 'Elysian Spirit Shield', img: 'https://oldschool.runescape.wiki/images/Elysian_spirit_shield.png', type: 'shield', ex: 'The blessed shield of the Corporeal Beast.' },
-            { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', ex: 'Ancient Zarosian plate armor.' },
             { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon', ex: 'A heavy scythe that craves blood.' },
-            { name: 'Twisted Bow', img: 'https://oldschool.runescape.wiki/images/Twisted_bow.png', type: 'weapon', ex: 'A bow from the heart of the Great Olm.' }
+            { name: 'Twisted Bow', img: 'https://oldschool.runescape.wiki/images/Twisted_bow.png', type: 'weapon', ex: 'A bow from the heart of the Great Olm.' },
+            { name: 'Tumeken\'s Shadow', img: 'https://oldschool.runescape.wiki/images/Tumeken%27s_shadow.png', type: 'weapon', ex: 'A staff containing the desert sun.' },
+            { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body', ex: 'Ancient Zarosian plate armor.' },
+            { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs', ex: 'Heavy, ancient, and extremely powerful.' },
+            { name: 'Elysian Spirit Shield', img: 'https://oldschool.runescape.wiki/images/Elysian_spirit_shield.png', type: 'shield', ex: 'The blessed shield of the Corporeal Beast.' },
+            { name: 'Ancestral Robe Top', img: 'https://oldschool.runescape.wiki/images/Ancestral_robe_top.png', type: 'body', ex: 'Worn by the forgotten mages of Kourend.' },
+            { name: 'Dragon Claws', img: 'https://oldschool.runescape.wiki/images/Dragon_claws.png', type: 'weapon', ex: 'Viciously sharp claws.' },
+            { name: 'Primordial Boots', img: 'https://oldschool.runescape.wiki/images/Primordial_boots.png', type: 'boots', ex: 'Powered by the soul of Cerberus.' },
+            { name: 'Masori Body', img: 'https://oldschool.runescape.wiki/images/Masori_body_%28f%29.png', type: 'body', ex: 'Fortified armor of the desert raiders.' },
+            { name: 'Neitiznot Faceguard', img: 'https://oldschool.runescape.wiki/images/Neitiznot_faceguard.png', type: 'head', ex: 'The ultimate protection for a warrior.' },
+            { name: 'Avernic Defender', img: 'https://oldschool.runescape.wiki/images/Avernic_defender.png', type: 'shield', ex: 'A hilt from the Theatre of Blood.' },
+            { name: 'Infernal Cape', img: 'https://oldschool.runescape.wiki/images/Infernal_cape.png', type: 'cape', ex: 'The ultimate symbol of strength.' },
+            { name: 'Soulreaper Axe', img: 'https://oldschool.runescape.wiki/images/Soulreaper_axe.png', type: 'weapon', ex: 'A heavy axe that feasts on souls.' }
+            // ... Add more unique items here up to 25 to avoid any chance of filler.
         ];
 
         function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
         const shuffledLoot = shuffle([...fullLootPool]);
+
         const goals = Array.from({ length: 27 }, (_, i) => {
             const amount = (i + 1) * 100;
-            let item = i === 0 ? { name: 'Fire Cape', img: 'https://oldschool.runescape.wiki/images/Fire_cape.png', type: 'cape', ex: 'A cape of lava earned in the Fight Caves.' } : 
-                       shuffledLoot[i - 1] || { name: 'Dragon Dagger', img: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png', type: 'weapon', ex: 'A poison-tipped classic.' }; 
+            if (i === 0) return { threshold: 100, name: 'Fire Cape', img: 'https://oldschool.runescape.wiki/images/Fire_cape.png', type: 'cape', ex: 'A cape of lava earned in the Fight Caves.' };
+            if (i === 26) return { threshold: 2700, name: 'Max Cape', img: 'https://oldschool.runescape.wiki/images/Max_cape.png', type: 'cape', ex: 'A cape worn by those who have achieved the very best.' };
+            const item = shuffledLoot[i - 1] || { name: 'Dragon Dagger', img: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png', type: 'weapon', ex: 'A sharp classic.' };
             return { threshold: amount, ...item };
         });
 
         function startPress(e, index) {
             const dollars = parseInt(localStorage.getItem('savingsBalance')) || 0;
             if (dollars < goals[index-1].threshold) return;
-
             const ring = document.getElementById(`ring-${index}`);
             const fill = document.getElementById(`fill-${index}`);
             ring.style.opacity = "1";
             progress = 0;
-
             pressInterval = setInterval(() => {
                 progress += (10 / DURATION) * 100;
                 fill.style.background = `conic-gradient(var(--osrs-yellow) ${progress * 3.6}deg, transparent 0deg)`;
-                
-                if (progress >= 100) {
-                    clearInterval(pressInterval);
-                    equipItem(index);
-                    endPress();
-                }
+                if (progress >= 100) { clearInterval(pressInterval); equipItem(index); endPress(); }
             }, 10);
         }
 
-        function endPress() {
-            clearInterval(pressInterval);
-            document.querySelectorAll('.hold-ring').forEach(r => r.style.opacity = "0");
-        }
-
-        function equipItem(index) {
-            const goal = goals[index-1];
-            addChatMessage(`Examine: ${goal.name}`);
-            addChatMessage(goal.ex);
-            document.getElementById(goal.type + '-slot').innerHTML = `<img src="${goal.img}" class="item-icon">`;
-            equipSound.play();
-            if (navigator.vibrate) navigator.vibrate(50);
-        }
+        function endPress() { clearInterval(pressInterval); document.querySelectorAll('.hold-ring').forEach(r => r.style.opacity = "0"); }
 
         function addChatMessage(text) {
             const line = document.createElement('div');
@@ -198,6 +251,25 @@
             line.innerText = text;
             chatbox.appendChild(line);
             if (chatbox.childNodes.length > 5) chatbox.removeChild(chatbox.firstChild);
+        }
+
+        function equipItem(index) {
+            const goal = goals[index-1];
+            addChatMessage(`Examine: ${goal.name}`);
+            addChatMessage(goal.ex);
+            const slot = document.getElementById(goal.type + '-slot');
+            slot.innerHTML = `<img src="${goal.img}" class="item-icon">`;
+            slot.style.backgroundImage = "none"; // Hide ghost icon
+            equipSound.play();
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        function unequip(type) { 
+            const slot = document.getElementById(type + '-slot');
+            slot.innerHTML = ''; 
+            // Restore ghost icon
+            const icons = { head: 'Head', cape: 'Cape', body: 'Body', weapon: 'Weapon', shield: 'Shield', legs: 'Legs', boots: 'Boots' };
+            slot.style.backgroundImage = `url('https://oldschool.runescape.wiki/images/${icons[type]}_slot.png')`;
         }
 
         function updateDisplay(dollars) {
@@ -210,17 +282,24 @@
             amountDisplay.innerText = displayVal;
             amountDisplay.className = `stack-amount ${color}`;
             
-            for(let i=1; i<28; i++) document.getElementById(`slot-${i}`).innerHTML = `<div class="hold-ring" id="ring-${i}"><div class="hold-ring-fill" id="fill-${i}"></div></div>`;
+            for(let i=1; i<28; i++) {
+                const s = document.getElementById(`slot-${i}`);
+                s.innerHTML = `<div class="hold-ring" id="ring-${i}"><div class="hold-ring-fill" id="fill-${i}"></div></div>`;
+            }
+
             let unlocked = 0;
             goals.forEach((g, i) => {
                 if (dollars >= g.threshold) {
-                    const slot = document.getElementById(`slot-${i+1}`);
-                    slot.innerHTML += `<img src="${g.img}" class="item-icon">`;
+                    document.getElementById(`slot-${i+1}`).innerHTML += `<img src="${g.img}" class="item-icon">`;
                     unlocked++;
                 }
             });
 
             cbDisplay.innerText = 3 + Math.floor((unlocked / 27) * 123);
+            const next = goals.find(g => dollars < g.threshold) || {threshold: 2700};
+            document.getElementById('xp-bar-fill').style.width = Math.min((dollars/2700)*100, 100) + "%";
+            document.getElementById('next-unlock-name').innerText = unlocked >= 27 ? "MAXED!" : `Next: ??? ($${next.threshold})`;
+            
             localStorage.setItem('savingsBalance', dollars);
             return unlocked;
         }
@@ -228,9 +307,17 @@
         function updateBalance() {
             const newVal = parseInt(inputField.value) || 0;
             const oldUnlocks = parseInt(localStorage.getItem('unlockedCount')) || 0;
+            const oldVal = parseInt(localStorage.getItem('savingsBalance')) || 0;
             const newUnlocks = updateDisplay(newVal);
             localStorage.setItem('unlockedCount', newUnlocks);
-            if (newUnlocks > oldUnlocks) levelUpSound.play();
+            
+            if (newUnlocks > oldUnlocks) {
+                levelUpSound.play();
+                if (newUnlocks >= 27) { addChatMessage("CONGRATULATIONS!"); addChatMessage("You are now a Maxed Saver."); }
+                else { addChatMessage("Congratulations, you've just advanced your Combat level!"); }
+            } else if (newVal > oldVal) {
+                coinSound.currentTime = 0; coinSound.play();
+            }
         }
 
         const saved = localStorage.getItem('savingsBalance');
