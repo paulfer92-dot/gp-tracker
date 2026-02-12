@@ -2,189 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OSRS Tracker V46</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>OSRS V47 - Air Fix</title>
     <style>
         @import url('https://fonts.cdnfonts.com/css/runescape-uf');
-        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-main: #1a1712; --bg-inv: #4e4435; }
+        :root { --osrs-orange: #ff981f; --osrs-yellow: #ffff00; --bg-inv: #4e4435; }
         
         html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #000; overflow: hidden; /* Prevents the whole page from bouncing */
+            margin: 0; padding: 0; width: 100%; height: 100dvh;
+            background: #000; overflow: hidden; 
             font-family: 'RuneScape UF', sans-serif;
         }
 
         .app-shell {
-            height: 100svh; /* Small Viewport Height - ignores dynamic bars */
-            display: flex; flex-direction: column;
-            max-width: 500px; margin: 0 auto; background: var(--bg-main);
+            height: 100%; display: flex; flex-direction: column;
+            max-width: 500px; margin: 0 auto; background: #1a1712;
         }
 
-        /* MOVE EVERYTHING CLICKABLE UP */
-        .top-nav {
+        /* 1. TOP NAVIGATION (SAFE ZONE) */
+        .nav-header {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            height: 55px; border-bottom: 2px solid var(--osrs-orange);
+            height: 65px; background: #000; border-bottom: 3px solid var(--osrs-orange);
+            z-index: 100;
         }
         .nav-btn {
-            background: #3e3529; color: #fff; border: 1px solid #000;
-            font-family: 'RuneScape UF'; font-size: 18px; cursor: pointer;
+            background: #3e3529; color: #fff; border: 1px solid #111;
+            font-family: 'RuneScape UF'; font-size: 20px; cursor: pointer;
         }
-        .nav-btn.active { background: var(--osrs-orange); color: #000; }
+        .nav-btn.active { background: var(--osrs-orange); color: #000; font-weight: bold; }
 
-        .input-section {
-            background: #222; padding: 10px; border-bottom: 1px solid #444;
-            display: flex; gap: 8px;
+        /* 2. TOP INPUT (SAFE ZONE) */
+        .input-area {
+            background: #222; padding: 12px; border-bottom: 2px solid #444;
+            display: flex; gap: 10px; z-index: 90;
         }
-        input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; border-radius: 4px; }
-        
-        .header-stats { display: flex; justify-content: space-around; padding: 8px; background: #2a241c; color: var(--osrs-yellow); font-size: 16px; }
+        input { flex: 1; padding: 15px; background: #000; color: #0f0; border: 1px solid #666; font-size: 18px; border-radius: 5px; }
+        .add-btn { background: #006400; color: white; padding: 0 20px; border-radius: 5px; cursor: pointer; border: none; font-family: 'RuneScape UF'; font-size: 18px; }
 
-        .view-pane { flex: 1; display: none; padding: 15px; overflow-y: auto; }
-        .view-pane.active { display: block; }
+        .header-stats { display: flex; justify-content: space-around; padding: 10px; background: #2a241c; color: var(--osrs-yellow); font-size: 18px; }
+
+        /* 3. SCROLLABLE CONTENT AREA */
+        .main-view { flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 120px; /* Space for Safari bottom bar */ }
+        .pane { display: none; }
+        .pane.active { display: block; }
 
         .inv-grid { 
-            display: grid; grid-template-columns: repeat(4, 60px); gap: 10px; 
-            background: var(--bg-inv); padding: 12px; border: 3px solid #3e3529; 
-            width: fit-content; margin: 10px auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; 
+            background: var(--bg-inv); padding: 10px; border: 4px solid #3e3529; 
+            width: 280px; margin: 0 auto;
         }
-        .slot { width: 60px; height: 60px; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; justify-content: center; align-items: center; }
-        .item-icon { width: 50px; height: 50px; }
+        .slot { aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 1px solid #3e3529; display: flex; justify-content: center; align-items: center; }
+        .item-icon { width: 85%; height: 85%; object-fit: contain; }
 
-        .chatbox { background: #726451; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin: 10px; height: 100px; overflow-y: auto; }
-
-        /* Empty space at bottom so Safari doesn't block important stuff */
-        .safari-spacer { height: 80px; pointer-events: none; }
+        .chatbox { background: #726451; padding: 10px; font-size: 16px; border: 2px solid #3e3529; margin-top: 15px; min-height: 80px; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <div class="top-nav">
-        <button class="nav-btn active" id="btn-combat" onclick="setTab('combat')">COMBAT</button>
-        <button class="nav-btn" id="btn-shop" onclick="setTab('shop')">SHOP</button>
-        <button class="nav-btn" id="btn-stats" onclick="setTab('stats')">STATS</button>
+    <div class="nav-header">
+        <button class="nav-btn active" id="b-combat" onclick="setTab('combat')">COMBAT</button>
+        <button class="nav-btn" id="b-shop" onclick="setTab('shop')">SHOP</button>
+        <button class="nav-btn" id="b-stats" onclick="setTab('stats')">STATS</button>
     </div>
 
-    <div class="input-section">
-        <input type="number" id="cash-in" placeholder="Deposit $ amount...">
-        <button onclick="deposit()" style="background:#006400; color:white; padding:0 20px; font-family:'RuneScape UF'; border-radius:4px;">ADD</button>
+    <div class="input-area">
+        <input type="number" id="cash-in" placeholder="Deposit cash...">
+        <button class="add-btn" onclick="deposit()">ADD</button>
     </div>
 
     <div class="header-stats">
-        <div>Arm Bank: $<span id="arm-bank">0</span></div>
-        <div>Wep Bank: $<span id="wep-bank">0</span></div>
+        <div>$ Arm: <span id="arm-bank">0</span></div>
+        <div>$ Wep: <span id="wep-bank">0</span></div>
     </div>
 
-    <div id="pane-combat" class="view-pane active">
-        <div class="inv-grid" id="main-inv"></div>
-    </div>
+    <div class="main-view">
+        <div id="p-combat" class="pane active">
+            <div class="inv-grid" id="main-inv"></div>
+            <div class="chatbox" id="chat">V47: Air Fix. All buttons moved to the Top Safe Zone.</div>
+        </div>
 
-    <div id="pane-shop" class="view-pane">
-        <div id="shop-items" style="color:var(--osrs-yellow)">Items unlock automatically as you deposit!</div>
-    </div>
+        <div id="p-shop" class="pane">
+            <div style="color:var(--osrs-yellow); text-align:center; padding:20px;">
+                Rewards unlock automatically as you deposit!<br><br>
+                Armor: $20 / $40 / $70<br>
+                Weapons: $25 (Every tier)
+            </div>
+        </div>
 
-    <div id="pane-stats" class="view-pane">
-        <div style="background:#222; padding:15px; border:1px solid var(--osrs-orange);">
-            <p>Next Armor: <span id="stat-arm-cost" style="color:#0f0">$20</span> (Total: <span id="stat-arm-count">0</span>)</p>
-            <p>Next Weapon: <span style="color:#0f0">$25</span> (Total: <span id="stat-wep-count">0</span>)</p>
-            <hr>
-            <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; cursor:pointer;">WIPE SAVE</button>
+        <div id="p-stats" class="pane">
+            <div style="background:#222; padding:20px; border:1px solid var(--osrs-orange); border-radius:10px;">
+                <p>Armor Unlocks: <span id="s-arm-count">0</span> (Next: $<span id="s-arm-cost">20</span>)</p>
+                <p>Weapon Unlocks: <span id="s-wep-count">0</span> (Next: $25)</p>
+                <button onclick="wipeData()" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; margin-top:20px;">FULL WIPE</button>
+            </div>
         </div>
     </div>
-
-    <div class="chatbox" id="chat">System: V46 Online. Inputs moved to Top Zone.</div>
-    <div class="safari-spacer"></div>
 </div>
 
 <script>
-    const KEY = 'OSRS_V46_FINAL';
-    let s = { arm:0, wep:0, aI:0, wI:0, inv: [] };
-
-    // V46 Corrected Pool
-    const ARMOR_POOL = [
-        { name: 'Rune Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
-        { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' }, // RE-ADDED
-        { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
-        { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
-        { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' },
-        { name: 'Dragon Platebody', img: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png' },
-        { name: 'Dragon Full Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png' },
-        { name: 'Dragonfire Shield', img: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png' },
-        { name: 'Bandos Chestplate', img: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png' }
-    ];
-
-    const WEAPON_POOL = [
-        { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
-        { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
-        { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' },
-        { name: 'Dragon Dagger', img: 'https://oldschool.runescape.wiki/images/Dragon_dagger.png' }
-    ];
-
-    function getArmCost() {
-        if (s.aI < 4) return 20;
-        if (s.aI < 8) return 40;
-        return 70;
-    }
-
-    function deposit() {
-        let val = parseInt(document.getElementById('cash-in').value) || 0;
-        if (val <= 0) return;
-        
-        s.arm += val; 
-        s.wep += val;
-
-        // Armor Logic
-        let aPrice = getArmCost();
-        while (s.aI < ARMOR_POOL.length && s.arm >= aPrice) {
-            s.inv.push(ARMOR_POOL[s.aI]);
-            log("Unlocked Armor: " + ARMOR_POOL[s.aI].name, "yellow");
-            s.arm -= aPrice; s.aI++; aPrice = getArmCost();
-        }
-
-        // Weapon Logic (Strict $25 increments)
-        while (s.wI < WEAPON_POOL.length && s.wep >= 25) {
-            s.inv.push(WEAPON_POOL[s.wI]);
-            log("Unlocked Weapon: " + WEAPON_POOL[s.wI].name, "#00ff00");
-            s.wep -= 25; s.wI++;
-        }
-
-        document.getElementById('cash-in').value = '';
-        save(); refresh();
-    }
-
-    function refresh() {
-        document.getElementById('arm-bank').innerText = s.arm;
-        document.getElementById('wep-bank').innerText = s.wep;
-        document.getElementById('stat-arm-cost').innerText = "$" + getArmCost();
-        document.getElementById('stat-arm-count').innerText = s.aI;
-        document.getElementById('stat-wep-count').innerText = s.wI;
-
-        const grid = document.getElementById('main-inv');
-        grid.innerHTML = '';
-        for(let i=0; i<28; i++) {
-            const div = document.createElement('div'); div.className = 'slot';
-            if(s.inv[i]) div.innerHTML = `<img src="${s.inv[i].img}" class="item-icon">`;
-            grid.appendChild(div);
-        }
-    }
-
-    function setTab(t) {
-        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('pane-'+t).classList.add('active');
-        document.getElementById('btn-'+t).classList.add('active');
-    }
-
-    function log(m, c) { 
-        const b = document.getElementById('chat'); 
-        b.innerHTML += `<div style="color:${c}">• ${m}</div>`; 
-        b.scrollTop = b.scrollHeight; 
-    }
-    function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
-    function load() { const d = localStorage.getItem(KEY); if(d) s = JSON.parse(d); }
-    function wipeData() { localStorage.removeItem(KEY); location.reload(); }
-
-    load(); refresh();
-</script>
-</body>
-</html>
+    const KEY = 'OSRS_V47_AIR';
+    let s = { arm:0,
