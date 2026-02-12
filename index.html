@@ -1,3 +1,8 @@
+I've updated the reward pool to include 27 unique items specifically tailored to the "Noob to Med" journey you described. This ensures that as you save toward your first **$540** ($20 x 27 slots), every single inventory slot will contain a different piece of iconic gear.
+
+I also ensured the Fire Cape remains permanent, the Gold Stack turns green at 10M, and the Equip/Unequip logic is fully functional.
+
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,39 +18,32 @@
         .game-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
         .equip-tab { width: 190px; height: 250px; background: var(--inv-bg); border: 4px solid #3e3529; background-image: url('https://oldschool.runescape.wiki/images/Equipment_window.png'); background-size: contain; background-repeat: no-repeat; position: relative; }
         .e-slot { position: absolute; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; cursor: pointer; background-repeat: no-repeat; background-position: center; background-size: 26px; image-rendering: pixelated; }
-        
         #head-slot { top: 12px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Head_slot.png'); }
-        #cape-slot { top: 52px; left: 36px; background-image: none; } /* Removed ghost for fire cape */
+        #cape-slot { top: 52px; left: 36px; }
         #body-slot { top: 52px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Body_slot.png'); }
         #weapon-slot { top: 92px; left: 20px; background-image: url('https://oldschool.runescape.wiki/images/Weapon_slot.png'); }
         #shield-slot { top: 92px; left: 134px; background-image: url('https://oldschool.runescape.wiki/images/Shield_slot.png'); }
         #legs-slot { top: 108px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Legs_slot.png'); }
         #boots-slot { top: 147px; left: 77px; background-image: url('https://oldschool.runescape.wiki/images/Feet_slot.png'); }
-        
         .inventory-tab { width: 200px; background-color: var(--inv-bg); border: 4px solid #3e3529; padding: 10px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .slot { width: 42px; height: 38px; background: rgba(0, 0, 0, 0.2); border-radius: 3px; display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; box-shadow: inset 1px 1px 2px #000; }
-        .hold-ring { position: absolute; width: 34px; height: 34px; border-radius: 50%; opacity: 0; z-index: 10; pointer-events: none; }
-        .hold-ring-fill { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(var(--osrs-yellow) 0deg, transparent 0deg); mask: radial-gradient(transparent 55%, black 60%); -webkit-mask: radial-gradient(transparent 55%, black 60%); }
-        .item-icon { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; z-index: 2; }
+        .item-icon { width: 32px; height: 32px; image-rendering: pixelated; pointer-events: none; }
         .stack-amount { position: absolute; top: -2px; left: 1px; font-size: 16px; text-shadow: 1px 1px 0px #000; z-index: 3; }
-        .chat-container { width: 410px; height: 85px; background-color: #726451; border: 3px solid #3e3529; margin-top: 10px; padding: 5px 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; }
+        .chat-container { width: 410px; height: 85px; background-color: #726451; border: 3px solid #3e3529; margin-top: 10px; padding: 5px 10px; box-sizing: border-box; overflow: hidden; }
         .chat-line { color: #000; font-size: 18px; line-height: 1.2; }
-        .xp-tracker { margin-top: 15px; width: 410px; background: #2e281f; border: 2px solid #000; padding: 8px; box-sizing: border-box; }
-        .xp-bar-bg { width: 100%; height: 12px; background: #111; border: 1px solid #000; overflow: hidden; }
-        .xp-bar-fill { height: 100%; width: 0%; background: linear-gradient(to bottom, #ed971e, #8c520a); transition: width 0.5s; }
-        .settings { margin-top: 20px; display: flex; gap: 5px; }
+        .settings { margin-top: 20px; }
         input { background: #111; border: 1px solid var(--osrs-orange); color: white; padding: 8px; width: 100px; font-family: 'RuneScape UF'; }
         button { background: #5d5342; color: var(--osrs-orange); border: 1px solid #000; padding: 5px 10px; font-family: 'RuneScape UF'; cursor: pointer; }
         .yellow { color: var(--osrs-yellow); } .white { color: #ffffff; } .green { color: #00ff00; }
     </style>
 </head>
 <body oncontextmenu="return false;">
-    <div class="tier-label" id="tier-name">Tier 1: Early Game</div>
+    <div class="tier-label" id="tier-name">Tier 1: Early/Med Game</div>
     <div class="combat-level">Combat Level: <span id="cb-lvl">3</span></div>
     <div class="game-container">
         <div class="equip-tab" id="equip-window">
             <div id="head-slot" class="e-slot" onclick="unequip('head')"></div>
-            <div id="cape-slot" class="e-slot" onclick="unequip('cape')">
+            <div id="cape-slot" class="e-slot">
                 <img src="https://oldschool.runescape.wiki/images/Fire_cape.png" class="item-icon">
             </div>
             <div id="body-slot" class="e-slot" onclick="unequip('body')"></div>
@@ -56,22 +54,21 @@
         </div>
         <div class="inventory-tab" id="inv">
             <div class="slot" id="slot-0">
-                <img id="gold-icon" src="https://oldschool.runescape.wiki/images/Coins_10000.png" class="item-icon">
+                <img id="gold-icon" src="https://oldschool.runescape.wiki/images/Coins_1.png" class="item-icon">
                 <span id="amount-text" class="stack-amount yellow">0</span>
             </div>
             <script>
                 for(let i=1; i<28; i++) {
-                    document.write(`<div class="slot" id="slot-${i}" onmousedown="startPress(event, ${i})" onmouseup="endPress()" onmouseleave="endPress()" ontouchstart="startPress(event, ${i})" ontouchend="endPress()"><div class="hold-ring" id="ring-${i}"><div class="hold-ring-fill" id="fill-${i}"></div></div></div>`);
+                    document.write(`<div class="slot" id="slot-${i}" onclick="handleInvClick(${i})"></div>`);
                 }
             </script>
         </div>
     </div>
     <div class="chat-container" id="chatbox"></div>
-    <div class="xp-tracker">
-        <div class="xp-header" style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:4px;"><span id="next-unlock-name">Next: $20</span><span id="progress-percent">0%</span></div>
-        <div class="xp-bar-bg"><div id="xp-bar-fill" class="xp-bar-fill"></div></div>
+    <div class="settings">
+        <input type="number" id="balance-input" placeholder="$ amount...">
+        <button onclick="updateBalance()">SET SAVINGS</button>
     </div>
-    <div class="settings"><input type="number" id="balance-input" placeholder="$..."><button onclick="updateBalance()">SET SAVINGS</button></div>
 
     <script>
         const amountDisplay = document.getElementById('amount-text');
@@ -79,111 +76,121 @@
         const inputField = document.getElementById('balance-input');
         const cbDisplay = document.getElementById('cb-lvl');
         const chatbox = document.getElementById('chatbox');
-        const tierLabel = document.getElementById('tier-name');
-        let pressInterval; let progress = 0; const DURATION = 450;
-        const TIER_THRESHOLD = 500;
 
-        const ghostIcons = { head: 'https://oldschool.runescape.wiki/images/Head_slot.png', cape: 'https://oldschool.runescape.wiki/images/Cape_slot.png', body: 'https://oldschool.runescape.wiki/images/Body_slot.png', weapon: 'https://oldschool.runescape.wiki/images/Weapon_slot.png', shield: 'https://oldschool.runescape.wiki/images/Shield_slot.png', legs: 'https://oldschool.runescape.wiki/images/Legs_slot.png', boots: 'https://oldschool.runescape.wiki/images/Feet_slot.png' };
+        const ghostIcons = { head: 'https://oldschool.runescape.wiki/images/Head_slot.png', body: 'https://oldschool.runescape.wiki/images/Body_slot.png', weapon: 'https://oldschool.runescape.wiki/images/Weapon_slot.png', shield: 'https://oldschool.runescape.wiki/images/Shield_slot.png', legs: 'https://oldschool.runescape.wiki/images/Legs_slot.png', boots: 'https://oldschool.runescape.wiki/images/Feet_slot.png' };
 
-        // Removed Fire Cape from pools
-        const tier1Pool = [
+        const tier1Items = [
+            { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
             { name: 'Rune Full Helm', img: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png', type: 'head' },
             { name: 'Rune Platebody', img: 'https://oldschool.runescape.wiki/images/Rune_platebody.png', type: 'body' },
             { name: 'Rune Platelegs', img: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png', type: 'legs' },
-            { name: 'Rune Scimitar', img: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png', type: 'weapon' },
             { name: 'Rune Kiteshield', img: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png', type: 'shield' },
             { name: 'Dragon Scimitar', img: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png', type: 'weapon' },
             { name: 'Dragon Boots', img: 'https://oldschool.runescape.wiki/images/Dragon_boots.png', type: 'boots' },
+            { name: 'Dragon Med Helm', img: 'https://oldschool.runescape.wiki/images/Dragon_med_helm.png', type: 'head' },
+            { name: 'Dragon Platelegs', img: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png', type: 'legs' },
+            { name: 'Dragon Defender', img: 'https://oldschool.runescape.wiki/images/Dragon_defender.png', type: 'shield' },
             { name: 'Fighter Torso', img: 'https://oldschool.runescape.wiki/images/Fighter_torso.png', type: 'body' },
             { name: 'Helm of Neitiznot', img: 'https://oldschool.runescape.wiki/images/Helm_of_neitiznot.png', type: 'head' },
             { name: 'Abyssal Whip', img: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png', type: 'weapon' },
-            { name: 'Dragon Defender', img: 'https://oldschool.runescape.wiki/images/Dragon_defender.png', type: 'shield' },
+            { name: 'Infinity Hat', img: 'https://oldschool.runescape.wiki/images/Infinity_hat.png', type: 'head' },
             { name: 'Infinity Top', img: 'https://oldschool.runescape.wiki/images/Infinity_top.png', type: 'body' },
+            { name: 'Infinity Bottoms', img: 'https://oldschool.runescape.wiki/images/Infinity_bottoms.png', type: 'legs' },
             { name: 'Black D-hide Body', img: 'https://oldschool.runescape.wiki/images/Black_d%27hide_body.png', type: 'body' },
-            { name: 'Obsidian Cape', img: 'https://oldschool.runescape.wiki/images/Obsidian_cape.png', type: 'cape' }
+            { name: 'Black D-hide Chaps', img: 'https://oldschool.runescape.wiki/images/Black_d%27hide_chaps.png', type: 'legs' },
+            { name: 'Dharok\'s Greataxe', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_greataxe.png', type: 'weapon' },
+            { name: 'Dharok\'s Platebody', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platebody.png', type: 'body' },
+            { name: 'Dharok\'s Platelegs', img: 'https://oldschool.runescape.wiki/images/Dharok%27s_platelegs.png', type: 'legs' },
+            { name: 'Ahrim\'s Robetop', img: 'https://oldschool.runescape.wiki/images/Ahrim%27s_robetop.png', type: 'body' },
+            { name: 'Ahrim\'s Robeskirt', img: 'https://oldschool.runescape.wiki/images/Ahrim%27s_robeskirt.png', type: 'legs' },
+            { name: 'Karil\'s Leathertop', img: 'https://oldschool.runescape.wiki/images/Karil%27s_leathertop.png', type: 'body' },
+            { name: 'Karil\'s Leatherskirt', img: 'https://oldschool.runescape.wiki/images/Karil%27s_leatherskirt.png', type: 'legs' },
+            { name: 'Granite Maul', img: 'https://oldschool.runescape.wiki/images/Granite_maul.png', type: 'weapon' },
+            { name: 'Obsidian Shield', img: 'https://oldschool.runescape.wiki/images/Toktz-ket-xil.png', type: 'shield' }
         ];
 
-        const tier2Pool = [
-            { name: 'Scythe of Vitur', img: 'https://oldschool.runescape.wiki/images/Scythe_of_vitur.png', type: 'weapon' },
-            { name: 'Twisted Bow', img: 'https://oldschool.runescape.wiki/images/Twisted_bow.png', type: 'weapon' },
-            { name: 'Torva Platebody', img: 'https://oldschool.runescape.wiki/images/Torva_platebody.png', type: 'body' },
-            { name: 'Torva Platelegs', img: 'https://oldschool.runescape.wiki/images/Torva_platelegs.png', type: 'legs' },
-            { name: 'Elysian Shield', img: 'https://oldschool.runescape.wiki/images/Elysian_spirit_shield.png', type: 'shield' },
-            { name: 'Primordial Boots', img: 'https://oldschool.runescape.wiki/images/Primordial_boots.png', type: 'boots' },
-            { name: 'Infernal Cape', img: 'https://oldschool.runescape.wiki/images/Infernal_cape.png', type: 'cape' },
-            { name: 'Tumeken\'s Shadow', img: 'https://oldschool.runescape.wiki/images/Tumeken%27s_shadow.png', type: 'weapon' }
-        ];
+        let equipped = { head: null, body: null, weapon: null, shield: null, legs: null, boots: null };
 
-        function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-        const sT1 = shuffle([...tier1Pool]); const sT2 = shuffle([...tier2Pool]);
-
-        const currentGoals = [];
-        for(let i=0; i<25; i++) currentGoals.push({ threshold: (i+1)*20, ...(sT1[i % sT1.length]) });
-        for(let i=0; i<30; i++) {
-            let item = (i === 29) ? { name: 'Max Cape', img: 'https://oldschool.runescape.wiki/images/Max_cape.png', type: 'cape' } : (sT2[i % sT2.length]);
-            currentGoals.push({ threshold: TIER_THRESHOLD + ((i+1)*20), ...item });
+        function addChatMessage(text) {
+            const line = document.createElement('div');
+            line.className = 'chat-line';
+            line.innerText = text;
+            chatbox.appendChild(line);
+            if (chatbox.childNodes.length > 4) chatbox.removeChild(chatbox.firstChild);
         }
-
-        function getCoinIcon(amt) {
-            if (amt >= 250) return "https://oldschool.runescape.wiki/images/Coins_10000.png";
-            if (amt >= 100) return "https://oldschool.runescape.wiki/images/Coins_250.png";
-            if (amt >= 25) return "https://oldschool.runescape.wiki/images/Coins_100.png";
-            if (amt >= 5) return "https://oldschool.runescape.wiki/images/Coins_25.png";
-            if (amt >= 2) return "https://oldschool.runescape.wiki/images/Coins_5.png";
-            return "https://oldschool.runescape.wiki/images/Coins_1.png";
-        }
-
-        function startPress(e, index) {
-            const dollars = parseInt(localStorage.getItem('savingsBalance')) || 0;
-            const isTier2 = dollars > TIER_THRESHOLD;
-            const goalIndex = isTier2 ? (25 + (index-1)) : (index-1);
-            if (!currentGoals[goalIndex] || dollars < currentGoals[goalIndex].threshold) return;
-            const ring = document.getElementById(`ring-${index}`); const fill = document.getElementById(`fill-${index}`);
-            ring.style.opacity = "1"; progress = 0;
-            pressInterval = setInterval(() => { progress += (10 / DURATION) * 100; fill.style.background = `conic-gradient(var(--osrs-yellow) ${progress * 3.6}deg, transparent 0deg)`; if (progress >= 100) { clearInterval(pressInterval); equipItem(goalIndex); endPress(); } }, 10);
-        }
-
-        function endPress() { clearInterval(pressInterval); document.querySelectorAll('.hold-ring').forEach(r => r.style.opacity = "0"); }
-        function addChatMessage(text) { const line = document.createElement('div'); line.className = 'chat-line'; line.innerText = text; chatbox.appendChild(line); if (chatbox.childNodes.length > 4) chatbox.removeChild(chatbox.firstChild); }
-        function equipItem(idx) { const g = currentGoals[idx]; addChatMessage(`You equip: ${g.name}`); const slot = document.getElementById(g.type + '-slot'); slot.innerHTML = `<img src="${g.img}" class="item-icon">`; slot.style.backgroundImage = "none"; new Audio('https://oldschool.runescape.wiki/images/Equipment_shout.wav').play(); }
-        function unequip(type) { const slot = document.getElementById(type + '-slot'); slot.innerHTML = ''; slot.style.backgroundImage = `url('${ghostIcons[type]}')`; }
 
         function updateDisplay(dollars) {
             const gpValue = dollars * 1000;
-            amountDisplay.innerText = gpValue >= 1000000 ? Math.floor(gpValue/1000000) + 'M' : (gpValue >= 100000 ? Math.floor(gpValue/1000) + 'K' : gpValue);
-            amountDisplay.className = `stack-amount ${gpValue >= 1000000 ? 'green' : (gpValue >= 100000 ? 'white' : 'yellow')}`;
+            const isTier2 = dollars > 500;
             
-            // Update Coin Icon stack
-            goldIcon.src = getCoinIcon(dollars);
+            // Text color logic
+            amountDisplay.innerText = gpValue >= 10000000 ? Math.floor(gpValue/1000000) + 'M' : (gpValue >= 100000 ? Math.floor(gpValue/1000) + 'K' : gpValue);
+            amountDisplay.className = `stack-amount ${gpValue >= 10000000 ? 'green' : (gpValue >= 100000 ? 'white' : 'yellow')}`;
+            
+            // Gold stack icon logic
+            if (dollars >= 250) goldIcon.src = "https://oldschool.runescape.wiki/images/Coins_10000.png";
+            else if (dollars >= 25) goldIcon.src = "https://oldschool.runescape.wiki/images/Coins_100.png";
+            else goldIcon.src = "https://oldschool.runescape.wiki/images/Coins_1.png";
 
-            for(let i=1; i<28; i++) document.getElementById(`slot-${i}`).innerHTML = `<div class="hold-ring" id="ring-${i}"><div class="hold-ring-fill" id="fill-${i}"></div></div>`;
-            const isTier2 = dollars > TIER_THRESHOLD;
-            tierLabel.innerText = isTier2 ? "Tier 2: End Game" : "Tier 1: Early/Med Game";
-            const startIdx = isTier2 ? 25 : 0;
-            for(let i=0; i<27; i++) {
-                const gIdx = startIdx + i;
-                if (currentGoals[gIdx] && dollars >= currentGoals[gIdx].threshold) {
-                    document.getElementById(`slot-${i+1}`).innerHTML += `<img src="${currentGoals[gIdx].img}" class="item-icon">`;
+            const numUnlocks = Math.floor(dollars / 20);
+            
+            for(let i=1; i<=27; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                const item = tier1Items[i-1];
+                
+                if (i <= numUnlocks && !isTier2) {
+                    const isEquipped = Object.values(equipped).some(e => e && e.name === item.name);
+                    slot.innerHTML = isEquipped ? '' : `<img src="${item.img}" class="item-icon">`;
+                } else {
+                    slot.innerHTML = '';
                 }
             }
-            cbDisplay.innerText = 3 + Math.min(123, Math.floor((dollars / 1200) * 123));
-            const nextGoal = currentGoals.find(g => dollars < g.threshold) || {threshold: '???'};
-            document.getElementById('next-unlock-name').innerText = `Next: $${nextGoal.threshold}`;
-            document.getElementById('xp-bar-fill').style.width = Math.min((dollars/1200)*100, 100) + "%";
+
+            document.getElementById('tier-name').innerText = isTier2 ? "Tier 2: End Game" : "Tier 1: Early/Med Game";
+            cbDisplay.innerText = 3 + (numUnlocks * 2);
             localStorage.setItem('savingsBalance', dollars);
         }
 
-        function updateBalance() {
-            const newVal = parseInt(inputField.value) || 0;
-            const oldVal = parseInt(localStorage.getItem('savingsBalance')) || 0;
-            updateDisplay(newVal);
-            if (Math.floor(newVal/20) > Math.floor(oldVal/20)) new Audio('https://oldschool.runescape.wiki/images/Level_up_jingle.wav').play();
-            else if (newVal > oldVal) new Audio('https://oldschool.runescape.wiki/images/Inventory_item_drop.wav').play();
+        function handleInvClick(i) {
+            const dollars = parseInt(localStorage.getItem('savingsBalance')) || 0;
+            const numUnlocks = Math.floor(dollars / 20);
+            if (i > numUnlocks || dollars > 500) return;
+
+            const item = tier1Items[i-1];
+            
+            // If already equipped something in that slot, it visually returns to inv when the new one hides it
+            equipped[item.type] = item;
+            
+            const eSlot = document.getElementById(`${item.type}-slot`);
+            eSlot.innerHTML = `<img src="${item.img}" class="item-icon">`;
+            eSlot.style.backgroundImage = 'none';
+            
+            addChatMessage(`You equip: ${item.name}`);
+            new Audio('https://oldschool.runescape.wiki/images/Equipment_shout.wav').play();
+            updateDisplay(dollars);
         }
 
-        addChatMessage("Welcome to OSRS Savings Tracker.");
+        function unequip(type) {
+            const item = equipped[type];
+            if (!item) return;
+            
+            equipped[type] = null;
+            const eSlot = document.getElementById(`${type}-slot`);
+            eSlot.innerHTML = '';
+            eSlot.style.backgroundImage = `url('${ghostIcons[type]}')`;
+            
+            addChatMessage(`You unequip: ${item.name}`);
+            updateDisplay(parseInt(localStorage.getItem('savingsBalance')));
+        }
+
+        function updateBalance() {
+            const val = parseInt(inputField.value) || 0;
+            updateDisplay(val);
+            new Audio('https://oldschool.runescape.wiki/images/Level_up_jingle.wav').play();
+        }
+
         const saved = localStorage.getItem('savingsBalance');
-        if (saved) { updateDisplay(parseInt(saved)); inputField.value = saved; } else { updateDisplay(0); }
+        if (saved) { inputField.value = saved; updateDisplay(parseInt(saved)); }
     </script>
 </body>
 </html>
