@@ -14,75 +14,157 @@
             height: 100dvh; display: flex; overflow: hidden;
         }
 
-        /* SIDEBAR NAVIGATION */
+        /* SIDEBAR - Fixed Width for iPhone Air */
         nav { 
-            width: 80px; background: #111; 
-            border-right: 2px solid var(--o);
-            display: flex; flex-direction: column;
-            height: 100%; z-index: 999;
+            width: 70px; background: #111; border-right: 2px solid var(--o);
+            display: flex; flex-direction: column; height: 100%; z-index: 999;
         }
         nav button { 
             flex: 1; background: #3e3529; color: #fff; border: 1px solid #000; 
-            font-family: 'RuneScape UF'; font-size: 16px; cursor: pointer;
-            writing-mode: vertical-rl; transform: rotate(180deg); /* Vertical text for style */
-            text-align: center;
+            font-size: 14px; cursor: pointer; writing-mode: vertical-rl; 
+            transform: rotate(180deg); text-align: center; font-family: 'RuneScape UF';
         }
         nav button.active { background: var(--o); color: #000; font-weight: bold; }
 
-        /* MAIN CONTENT AREA */
-        main { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; background: var(--bg); }
+        /* MAIN AREA */
+        main { flex: 1; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; }
         
-        .input-box { display: flex; padding: 10px; gap: 5px; background: #222; border-bottom: 1px solid #444; }
+        .top-ui { background: #222; padding: 10px; border-bottom: 1px solid #444; }
+        .input-row { display: flex; gap: 5px; }
         input { flex: 1; padding: 12px; background: #000; color: #0f0; border: 1px solid #444; font-size: 16px; border-radius: 4px; }
-        .add-btn { background: #006400; color: #fff; border: none; padding: 0 15px; font-family: 'RuneScape UF'; border-radius: 4px; }
+        .add-btn { background: #006400; color: #fff; border: none; padding: 0 12px; font-family: 'RuneScape UF'; border-radius: 4px; }
 
-        .pane { display: none; padding: 10px; flex: 1; }
+        .pane { display: none; padding: 10px; height: 100%; overflow-y: auto; }
         .pane.active { display: block; }
 
+        /* INVENTORY */
         .inv { 
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
-            background: #4e4435; padding: 8px; border: 3px solid #3e3529; 
-            max-width: 260px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; 
+            background: #4e4435; padding: 10px; border: 3px solid #3e3529; 
+            width: 100%; max-width: 260px; margin: 0 auto;
         }
         .slot { aspect-ratio: 1; background: rgba(0,0,0,0.5); border: 1px solid #3e3529; display: flex; align-items: center; justify-content: center; }
         .item { width: 85%; height: 85%; object-fit: contain; }
 
-        .chat { background: #726451; padding: 8px; margin-top: 15px; font-size: 14px; border: 2px solid #3e3529; height: 120px; overflow-y: auto; color: #fff; }
+        .log { background: #000; padding: 8px; margin-top: 10px; font-size: 14px; border: 1px solid #3e3529; height: 100px; overflow-y: auto; color: #0f0; font-family: monospace; }
         
-        /* Stats Styling */
-        .stat-row { background: #2a241c; padding: 10px; border: 1px solid var(--o); margin-bottom: 10px; }
+        .stat-card { background: #2a241c; padding: 10px; border: 1px solid var(--o); margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
-<nav id="sidebar">
-    <button class="active" onclick="tab('c', this)">COMBAT</button>
-    <button onclick="tab('s', this)">SHOP</button>
-    <button onclick="tab('x', this)">STATS</button>
+<nav>
+    <button class="active" onclick="tab('c', this)">INVENTORY</button>
+    <button onclick="tab('x', this)">PROGRESS</button>
 </nav>
 
 <main>
-    <div class="input-box">
-        <input type="number" id="val" placeholder="Deposit $">
-        <button class="add-btn" onclick="add()">ADD</button>
+    <div class="top-ui">
+        <div class="input-row">
+            <input type="number" id="val" placeholder="Deposit $">
+            <button class="add-btn" onclick="add()">ADD</button>
+        </div>
+        <div style="font-size:12px; color:var(--y); margin-top:5px; display:flex; justify-content: space-between;">
+            <span>Next Arm: $<span id="next-a-cost">20</span></span>
+            <span>Next Wep: $25</span>
+        </div>
     </div>
 
     <div id="c" class="pane active">
         <div class="inv" id="g"></div>
-        <div class="chat" id="l">V51: Side-Nav Sidebar Active.</div>
-    </div>
-
-    <div id="s" class="pane">
-        <div class="stat-row" style="text-align:center">
-            <h2 style="color:var(--y); margin:0;">AUTO-SHOP</h2>
-            <p>Armor: $20 / $40 / $70</p>
-            <p>Weapons: $25 Flat</p>
-        </div>
+        <div class="log" id="l">V52: Expanded Reward Pool Active.</div>
     </div>
 
     <div id="x" class="pane">
-        <div class="stat-row">
-            <p>Armor Unlocks: <span id="ai">0</span></p>
-            <p>Weapon Unlocks: <span id="wi">0</span></p>
-            <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:10px; margin-top:10px;">WIPE SAVE</button>
+        <div class="stat-card">
+            <h3 style="color:var(--o); margin:0 0 5px 0;">TIER STATUS</h3>
+            <p>Unlocks: <span id="ai">0</span> Armor / <span id="wi">0</span> Weapons</p>
+            <p>Current Milestone: <span id="tier-name">$20 (Early)</span></p>
         </div>
+        <button onclick="localStorage.clear();location.reload();" style="color:red; background:none; border:1px solid red; width:100%; padding:10px;">RESET ALL DATA</button>
+    </div>
+</main>
+
+<script>
+    let s = { a:0, w:0, ai:0, wi:0, i:[] };
+
+    const ARMOR = [
+        /* $20 Tier (1-4) */
+        { n: 'Rune Helm', u: 'https://oldschool.runescape.wiki/images/Rune_full_helm.png' },
+        { n: 'Rune Platebody', u: 'https://oldschool.runescape.wiki/images/Rune_platebody.png' },
+        { n: 'Rune Kiteshield', u: 'https://oldschool.runescape.wiki/images/Rune_kiteshield.png' },
+        { n: 'Rune Platelegs', u: 'https://oldschool.runescape.wiki/images/Rune_platelegs.png' },
+        /* $40 Tier (5-8) */
+        { n: 'Dragon Platelegs', u: 'https://oldschool.runescape.wiki/images/Dragon_platelegs.png' },
+        { n: 'Dragon Platebody', u: 'https://oldschool.runescape.wiki/images/Dragon_platebody.png' },
+        { n: 'Dragon Full Helm', u: 'https://oldschool.runescape.wiki/images/Dragon_full_helm.png' },
+        { n: 'Dragonfire Shield', u: 'https://oldschool.runescape.wiki/images/Dragonfire_shield.png' },
+        /* $70 Tier (9+) */
+        { n: 'Bandos Chestplate', u: 'https://oldschool.runescape.wiki/images/Bandos_chestplate.png' },
+        { n: 'Bandos Tassets', u: 'https://oldschool.runescape.wiki/images/Bandos_tassets.png' },
+        { n: 'Torva Platebody', u: 'https://oldschool.runescape.wiki/images/Torva_platebody.png' }
+    ];
+
+    const WEPS = [
+        { n: 'Rune Scimitar', u: 'https://oldschool.runescape.wiki/images/Rune_scimitar.png' },
+        { n: 'Dragon Scimitar', u: 'https://oldschool.runescape.wiki/images/Dragon_scimitar.png' },
+        { n: 'Abyssal Whip', u: 'https://oldschool.runescape.wiki/images/Abyssal_whip.png' },
+        { n: 'Gharaun\'s Maul', u: 'https://oldschool.runescape.wiki/images/Granite_maul.png' }
+    ];
+
+    function getPrice() {
+        if (s.ai < 4) return 20;
+        if (s.ai < 8) return 40;
+        return 70;
+    }
+
+    function add() {
+        let v = parseInt(document.getElementById('val').value) || 0;
+        if (v <= 0) return;
+        s.a += v; s.w += v;
+
+        let ap = getPrice();
+        while (s.ai < ARMOR.length && s.a >= ap) {
+            s.i.push(ARMOR[s.ai]);
+            log("UNLOCKED: " + ARMOR[s.ai].n + " ($" + ap + ")");
+            s.a -= ap; s.ai++; ap = getPrice();
+        }
+        while (s.wi < WEPS.length && s.w >= 25) {
+            s.i.push(WEPS[s.wi]);
+            log("UNLOCKED: " + WEPS[s.wi].n + " ($25)");
+            s.w -= 25; s.wi++;
+        }
+        document.getElementById('val').value = '';
+        save(); draw();
+    }
+
+    function draw() {
+        document.getElementById('ai').innerText = s.ai;
+        document.getElementById('wi').innerText = s.wi;
+        let p = getPrice();
+        document.getElementById('next-a-cost').innerText = p;
+        document.getElementById('tier-name').innerText = "$" + p + (p==20?" (Early)":p==40?" (Mid)":" (High)");
+        
+        const g = document.getElementById('g'); g.innerHTML = '';
+        for(let j=0; j<28; j++) {
+            const slot = document.createElement('div'); slot.className = 'slot';
+            if(s.i[j]) slot.innerHTML = `<img src="${s.i[j].u}" class="item">`;
+            g.appendChild(slot);
+        }
+    }
+
+    function tab(id, btn) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function log(m) { 
+        const l = document.getElementById('l'); 
+        l.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${m}</div>` + l.innerHTML; 
+    }
+
+    function save() { localStorage.setItem('OSRS_V52', JSON.stringify(s)); }
+    function load() { 
+        const saved = localStorage.getItem('OSRS_V52');
